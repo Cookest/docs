@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600&display=swap');
+
 @import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
@@ -9,4 +11,36 @@ html {
 html > body[data-scroll-locked] {
   margin-right: 0px !important;
   --removed-body-scroll-bar-size: 0px !important;
+}
+
+:root {
+  --color-fd-background: #F8F8F6;
+  --color-fd-foreground: #1C3A2A;
+  --color-fd-primary: #7A9A65;
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-muted: #F0F0EE;
+  --color-fd-muted-foreground: #6B7280;
+  --color-fd-border: #E5E7EB;
+  --color-fd-card: #ffffff;
+  --color-fd-card-foreground: #1C3A2A;
+}
+
+.dark {
+  --color-fd-background: #0f1f16;
+  --color-fd-foreground: #e8f0e4;
+  --color-fd-primary: #7A9A65;
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-muted: #1a2e21;
+  --color-fd-muted-foreground: #9CA3AF;
+  --color-fd-border: #2a4033;
+  --color-fd-card: #152419;
+  --color-fd-card-foreground: #e8f0e4;
+}
+
+h1, h2, .fd-heading-1, .fd-heading-2 {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+body, p, li, td, th, code, pre, button, input {
+  font-family: 'Inter', system-ui, sans-serif;
 }
