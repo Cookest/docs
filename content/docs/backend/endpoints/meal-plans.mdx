@@ -1,0 +1,164 @@
+---
+title: Meal Plans
+description: Weekly meal plan generation, slot management, and nutrition summaries
+---
+
+# Meal Plans
+
+## GET /api/meal-plans
+
+List the user's meal plans.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/meal-plans` | JWT Bearer | Free |
+
+### Response `200 OK`
+
+```json
+[
+  {
+    "id": "uuid",
+    "week_start": "2024-01-15",
+    "created_at": "2024-01-14T10:00:00Z",
+    "slot_count": 21
+  }
+]
+```
+
+---
+
+## POST /api/meal-plans/generate
+
+Generate a new AI-scored weekly meal plan. **Pro or Family tier required.**
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/meal-plans/generate` | JWT Bearer | **Pro** |
+
+### Request body
+
+```json
+{
+  "week_start": "2024-01-15",
+  "preferences": {
+    "max_prep_time": 30,
+    "cuisines": ["italian", "mediterranean"],
+    "avoid_repeated": true
+  }
+}
+```
+
+### Response `201 Created`
+
+```json
+{
+  "id": "uuid",
+  "week_start": "2024-01-15",
+  "slots": [
+    {
+      "id": "uuid",
+      "day": 0,
+      "meal_type": "breakfast",
+      "recipe_id": "uuid",
+      "recipe_title": "Oat Porridge",
+      "servings": 2,
+      "is_flex": false,
+      "flex_type": null,
+      "is_completed": false
+    }
+  ]
+}
+```
+
+`day` values: `0` = Monday … `6` = Sunday  
+`meal_type` values: `breakfast` | `lunch` | `dinner` | `snack`  
+`flex_type` values: `leftover` | `takeaway` | `skip` | `null`
+
+---
+
+## GET /api/meal-plans/:id
+
+Get a meal plan with all slots.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/meal-plans/:id` | JWT Bearer | Free |
+
+Returns the same structure as the generate response.
+
+---
+
+## PUT /api/meal-plans/:id/slots/:slotId
+
+Update a meal plan slot (swap recipe, toggle completion, set flex).
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| PUT | `/api/meal-plans/:id/slots/:slotId` | JWT Bearer | Free |
+
+### Request body (all fields optional)
+
+```json
+{
+  "recipe_id": "uuid",
+  "servings": 3,
+  "is_flex": true,
+  "flex_type": "leftover",
+  "is_completed": true
+}
+```
+
+### Response `200 OK`
+
+Returns the updated slot object.
+
+---
+
+## DELETE /api/meal-plans/:id
+
+Delete a meal plan.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| DELETE | `/api/meal-plans/:id` | JWT Bearer | Free |
+
+### Response `204 No Content`
+
+---
+
+## GET /api/meal-plans/:id/nutrition
+
+Get a day-by-day nutrition summary for the meal plan.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/meal-plans/:id/nutrition` | JWT Bearer | Free |
+
+### Response `200 OK`
+
+```json
+{
+  "days": [
+    {
+      "day": 0,
+      "day_name": "Monday",
+      "total_calories": 1820,
+      "total_protein": 92,
+      "total_carbs": 210,
+      "total_fat": 58,
+      "meals": [
+        {
+          "meal_type": "breakfast",
+          "calories": 380,
+          "protein": 18
+        }
+      ]
+    }
+  ],
+  "week_totals": {
+    "avg_daily_calories": 1900,
+    "avg_daily_protein": 88
+  }
+}
+```

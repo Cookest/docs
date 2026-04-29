@@ -1,0 +1,250 @@
+---
+title: Profile & Preferences
+description: User profile, dietary preferences, favourites, and history
+---
+
+# Profile & Preferences
+
+## GET /api/me
+
+Get the authenticated user's profile.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/me` | JWT Bearer | Free |
+
+### Response `200 OK`
+
+```json
+{
+  "id": "uuid",
+  "email": "user@example.com",
+  "name": "Alice",
+  "household_size": 2,
+  "dietary_restrictions": ["vegetarian"],
+  "allergies": ["nuts"],
+  "health_goals": ["weight_loss"],
+  "cooking_skill": "intermediate",
+  "tier": "pro",
+  "created_at": "2024-01-15T10:00:00Z"
+}
+```
+
+---
+
+## PUT /api/me
+
+Update the authenticated user's profile.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| PUT | `/api/me` | JWT Bearer | Free |
+
+### Request body (all fields optional)
+
+```json
+{
+  "name": "Alice Smith",
+  "household_size": 3,
+  "dietary_restrictions": ["vegetarian", "gluten_free"],
+  "allergies": ["nuts", "shellfish"],
+  "health_goals": ["muscle_gain"],
+  "cooking_skill": "advanced"
+}
+```
+
+### Response `200 OK`
+
+Returns the updated user profile object.
+
+---
+
+## GET /api/me/preferences
+
+Get the user's learned taste preference vectors.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/me/preferences` | JWT Bearer | Free |
+
+### Response `200 OK`
+
+```json
+{
+  "cuisine_weights": {
+    "italian": 0.85,
+    "asian": 0.72,
+    "mediterranean": 0.91
+  },
+  "difficulty_weights": {
+    "easy": 0.60,
+    "medium": 0.80,
+    "hard": 0.30
+  },
+  "ingredient_weights": {
+    "chicken": 0.90,
+    "pasta": 0.75,
+    "broccoli": 0.65
+  }
+}
+```
+
+These weights are updated automatically by the online learning algorithm when users rate or complete recipes.
+
+---
+
+## DELETE /api/me/preferences
+
+Reset all preference weights to neutral (0.5).
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| DELETE | `/api/me/preferences` | JWT Bearer | Free |
+
+### Response `200 OK`
+
+```json
+{ "message": "Preferences reset successfully" }
+```
+
+---
+
+## GET /api/me/favourites
+
+List the user's saved/bookmarked recipes.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/me/favourites` | JWT Bearer | Free |
+
+### Query parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `limit` | integer | Max results (default: 20) |
+| `offset` | integer | Pagination offset |
+
+### Response `200 OK`
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "title": "Pasta Carbonara",
+      "cuisine": "italian",
+      "difficulty": "medium",
+      "prep_time": 10,
+      "cook_time": 20,
+      "calories": 520,
+      "image_url": "https://..."
+    }
+  ],
+  "total": 14,
+  "limit": 20,
+  "offset": 0
+}
+```
+
+---
+
+## GET /api/me/history
+
+Get the user's cooking history (recipes they have cooked).
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/me/history` | JWT Bearer | Free |
+
+### Query parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `limit` | integer | Max results (default: 20) |
+| `offset` | integer | Pagination offset |
+
+### Response `200 OK`
+
+```json
+{
+  "items": [
+    {
+      "recipe_id": "uuid",
+      "title": "Pasta Carbonara",
+      "cooked_at": "2024-01-20T18:30:00Z",
+      "servings": 2
+    }
+  ],
+  "total": 42
+}
+```
+
+---
+
+## GET /api/me/push-tokens
+
+List registered push notification tokens for the user.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/me/push-tokens` | JWT Bearer | Free |
+
+### Response `200 OK`
+
+```json
+[
+  {
+    "id": "uuid",
+    "token": "ExponentPushToken[...]",
+    "platform": "ios",
+    "created_at": "2024-01-15T10:00:00Z"
+  }
+]
+```
+
+---
+
+## POST /api/me/push-tokens
+
+Register a device push token.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/me/push-tokens` | JWT Bearer | Free |
+
+### Request body
+
+```json
+{
+  "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]",
+  "platform": "ios"
+}
+```
+
+`platform` values: `ios` | `android` | `web`
+
+### Response `201 Created`
+
+```json
+{
+  "id": "uuid",
+  "token": "ExponentPushToken[...]",
+  "platform": "ios"
+}
+```
+
+---
+
+## DELETE /api/me/push-tokens/:id
+
+Remove a push token (e.g., on logout).
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| DELETE | `/api/me/push-tokens/:id` | JWT Bearer | Free |
+
+### Response `204 No Content`
+
+| Status | Meaning |
+|--------|---------|
+| 404 | Token not found or belongs to another user |

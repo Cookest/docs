@@ -1,0 +1,105 @@
+---
+title: Subscription
+description: Stripe subscription management — checkout, webhook, and status
+---
+
+# Subscription
+
+## GET /api/subscription
+
+Get the user's current subscription status.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/subscription` | JWT Bearer | Free |
+
+### Response `200 OK`
+
+```json
+{
+  "tier": "pro",
+  "status": "active",
+  "stripe_subscription_id": "sub_...",
+  "valid_until": "2024-02-15T00:00:00Z",
+  "cancel_at_period_end": false
+}
+```
+
+`tier` values: `free` | `pro` | `family`  
+`status` values: `active` | `cancelled` | `past_due` | `trialing`
+
+---
+
+## POST /api/subscription/checkout
+
+Create a Stripe Checkout session to start or upgrade a subscription.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/subscription/checkout` | JWT Bearer | Free |
+
+### Request body
+
+```json
+{
+  "tier": "pro",
+  "success_url": "https://app.cookest.app/subscription/success",
+  "cancel_url": "https://app.cookest.app/subscription/cancel"
+}
+```
+
+### Response `200 OK`
+
+```json
+{
+  "checkout_url": "https://checkout.stripe.com/c/pay/cs_..."
+}
+```
+
+Redirect the user to `checkout_url`. After payment, Stripe calls the webhook and the user's tier is updated automatically.
+
+---
+
+## POST /api/subscription/portal
+
+Create a Stripe Customer Portal session for managing billing.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/subscription/portal` | JWT Bearer | **Pro** |
+
+### Request body
+
+```json
+{
+  "return_url": "https://app.cookest.app/settings"
+}
+```
+
+### Response `200 OK`
+
+```json
+{
+  "portal_url": "https://billing.stripe.com/session/..."
+}
+```
+
+---
+
+## POST /api/subscription/webhook
+
+Stripe webhook receiver. **Not called by the app — called by Stripe.**
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/subscription/webhook` | Stripe signature | — |
+
+<Callout type="info">
+This endpoint verifies the `Stripe-Signature` header using `STRIPE_WEBHOOK_SECRET`. All events are idempotent — re-delivery of the same event is handled safely.
+</Callout>
+
+Handled Stripe events:
+- `customer.subscription.created` — activates tier
+- `customer.subscription.updated` — updates tier and validity
+- `customer.subscription.deleted` — reverts to Free
+- `invoice.payment_failed` — marks subscription as `past_due`

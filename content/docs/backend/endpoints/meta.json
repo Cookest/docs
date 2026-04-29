@@ -1,0 +1,4 @@
+{
+  "title": "Endpoints",
+  "pages": ["index", "auth", "profile", "recipes", "meal-plans", "inventory", "shopping-list", "subscription", "stores", "ai-chat"]
+}

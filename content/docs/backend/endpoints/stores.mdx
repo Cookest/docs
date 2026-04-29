@@ -1,0 +1,152 @@
+---
+title: Stores & Promotions
+description: Store management and admin promotion upload endpoints
+---
+
+# Stores & Promotions
+
+## GET /api/stores
+
+List all stores with available promotions.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/stores` | None | Free |
+
+### Response `200 OK`
+
+```json
+[
+  {
+    "id": "uuid",
+    "name": "Continente",
+    "logo_url": "https://...",
+    "last_updated": "2024-01-20T12:00:00Z",
+    "promotion_count": 142
+  }
+]
+```
+
+---
+
+## GET /api/stores/:id/promotions
+
+List current promotions for a store.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/stores/:id/promotions` | None | Free |
+
+### Query parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `q` | string | Search by product name |
+| `limit` | integer | Max results (default: 50) |
+| `offset` | integer | Pagination offset |
+
+### Response `200 OK`
+
+```json
+{
+  "store_name": "Continente",
+  "items": [
+    {
+      "id": "uuid",
+      "product": "Frango do Campo",
+      "brand": "Casa Matias",
+      "original_price": 4.99,
+      "discounted_price": 3.49,
+      "unit": "kg",
+      "valid_until": "2024-01-28"
+    }
+  ],
+  "total": 142
+}
+```
+
+---
+
+## POST /api/admin/stores
+
+Create a new store. **Admin only.**
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/admin/stores` | JWT Bearer (admin) | Admin |
+
+### Request body
+
+```json
+{
+  "name": "Aldi",
+  "logo_url": "https://..."
+}
+```
+
+### Response `201 Created`
+
+Returns the created store object.
+
+---
+
+## POST /api/admin/stores/:id/promotions/upload
+
+Upload a weekly PDF promotional flyer for processing. **Admin only.**
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/admin/stores/:id/promotions/upload` | JWT Bearer (admin) | Admin |
+
+### Request
+
+Multipart form data with a `file` field containing the PDF.
+
+```bash
+curl -X POST http://localhost:8080/api/admin/stores/uuid/promotions/upload \
+  -H "Authorization: Bearer <admin_token>" \
+  -F "file=@promo_week_04.pdf"
+```
+
+### Response `202 Accepted`
+
+```json
+{
+  "job_id": "uuid",
+  "status": "pending",
+  "message": "PDF processing started in background"
+}
+```
+
+---
+
+## GET /api/admin/stores/:id/jobs
+
+Check the status of a PDF processing job. **Admin only.**
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/admin/stores/:id/jobs` | JWT Bearer (admin) | Admin |
+
+### Response `200 OK`
+
+```json
+{
+  "jobs": [
+    {
+      "id": "uuid",
+      "status": "completed",
+      "pages_processed": 12,
+      "candidates_extracted": 87,
+      "created_at": "2024-01-20T14:00:00Z",
+      "completed_at": "2024-01-20T14:03:22Z"
+    }
+  ]
+}
+```
+
+`status` values: `pending` | `processing` | `completed` | `failed`
+
+<Callout type="info">
+Extracted promotions are staged as candidates. An admin must explicitly promote them to live using the promote endpoint before they appear to users.
+</Callout>

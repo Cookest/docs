@@ -1,0 +1,190 @@
+---
+title: Shopping List
+description: Shopping list management and price comparison optimizer
+---
+
+# Shopping List
+
+## GET /api/shopping-list
+
+Get the user's current shopping list.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/shopping-list` | JWT Bearer | Free |
+
+### Response `200 OK`
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "ingredient_id": 1,
+      "name": "Chicken Breast",
+      "quantity": 600,
+      "unit": "g",
+      "is_checked": false,
+      "category": "meat",
+      "added_at": "2024-01-20T10:00:00Z"
+    }
+  ],
+  "total_items": 8,
+  "checked_items": 2
+}
+```
+
+---
+
+## POST /api/shopping-list
+
+Add an item to the shopping list.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/shopping-list` | JWT Bearer | Free |
+
+### Request body
+
+```json
+{
+  "ingredient_id": 1,
+  "quantity": 600,
+  "unit": "g"
+}
+```
+
+### Response `201 Created`
+
+Returns the created shopping list item.
+
+---
+
+## PUT /api/shopping-list/:id
+
+Update a shopping list item (quantity or check/uncheck).
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| PUT | `/api/shopping-list/:id` | JWT Bearer | Free |
+
+### Request body
+
+```json
+{
+  "quantity": 800,
+  "unit": "g",
+  "is_checked": true
+}
+```
+
+### Response `200 OK`
+
+Returns the updated item.
+
+---
+
+## DELETE /api/shopping-list/:id
+
+Remove an item from the shopping list.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| DELETE | `/api/shopping-list/:id` | JWT Bearer | Free |
+
+### Response `204 No Content`
+
+---
+
+## POST /api/shopping-list/generate
+
+Auto-generate a shopping list from a meal plan, accounting for what is already in the pantry.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/shopping-list/generate` | JWT Bearer | Free |
+
+### Request body
+
+```json
+{
+  "meal_plan_id": "uuid"
+}
+```
+
+### Response `200 OK`
+
+```json
+{
+  "added_items": 6,
+  "skipped_in_pantry": 3,
+  "items": [ ]
+}
+```
+
+---
+
+## GET /api/shopping-list/prices
+
+Get current store prices for all items in the shopping list. **Pro tier required.**
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/shopping-list/prices` | JWT Bearer | **Pro** |
+
+### Response `200 OK`
+
+```json
+{
+  "items": [
+    {
+      "ingredient_name": "Chicken Breast",
+      "prices": [
+        {
+          "store_name": "Continente",
+          "price": 3.49,
+          "unit": "kg",
+          "discounted_price": 2.99,
+          "valid_until": "2024-01-28"
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+## GET /api/shopping-list/optimize
+
+Calculate the cheapest single-store and cheapest multi-store split. **Pro tier required.**
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/shopping-list/optimize` | JWT Bearer | **Pro** |
+
+### Response `200 OK`
+
+```json
+{
+  "single_store_best": {
+    "store_name": "Continente",
+    "total_price": 24.50,
+    "coverage_percent": 85
+  },
+  "multi_store_split": [
+    {
+      "store_name": "Continente",
+      "items": ["Chicken Breast", "Pasta"],
+      "subtotal": 8.47
+    },
+    {
+      "store_name": "Pingo Doce",
+      "items": ["Olive Oil", "Tomatoes"],
+      "subtotal": 5.20
+    }
+  ],
+  "multi_store_total": 13.67,
+  "savings": 10.83
+}
+```

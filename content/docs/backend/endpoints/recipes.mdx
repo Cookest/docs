@@ -1,0 +1,244 @@
+---
+title: Recipes
+description: Recipe CRUD, search, favouriting, rating, and cook tracking
+---
+
+# Recipes
+
+## GET /api/recipes
+
+Search and browse the recipe catalog.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/recipes` | Optional JWT | Free |
+
+### Query parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `q` | string | Full-text search query |
+| `category` | string | Filter by cuisine (e.g. `italian`, `asian`) |
+| `difficulty` | string | `easy` \| `medium` \| `hard` |
+| `max_time` | integer | Max total time in minutes |
+| `dietary` | string | Dietary filter (e.g. `vegetarian`, `vegan`, `gluten_free`) |
+| `limit` | integer | Max results (default: 20) |
+| `offset` | integer | Pagination offset |
+
+### Response `200 OK`
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "title": "Pasta Carbonara",
+      "description": "Classic Roman pasta dish",
+      "cuisine": "italian",
+      "difficulty": "medium",
+      "prep_time": 10,
+      "cook_time": 20,
+      "servings": 4,
+      "calories": 520,
+      "is_favourite": false,
+      "rating_avg": 4.3,
+      "rating_count": 12,
+      "image_url": "https://..."
+    }
+  ],
+  "total": 150,
+  "limit": 20,
+  "offset": 0
+}
+```
+
+---
+
+## GET /api/recipes/:id
+
+Get full recipe details including ingredients and steps.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/recipes/:id` | Optional JWT | Free |
+
+### Response `200 OK`
+
+```json
+{
+  "id": "uuid",
+  "title": "Pasta Carbonara",
+  "description": "Classic Roman pasta dish",
+  "cuisine": "italian",
+  "difficulty": "medium",
+  "prep_time": 10,
+  "cook_time": 20,
+  "servings": 4,
+  "is_favourite": false,
+  "rating_avg": 4.3,
+  "rating_count": 12,
+  "ingredients": [
+    {
+      "ingredient_id": 1,
+      "name": "Spaghetti",
+      "quantity": 400,
+      "unit": "g"
+    }
+  ],
+  "steps": [
+    {
+      "step_number": 1,
+      "instruction": "Boil salted water and cook spaghetti until al dente."
+    }
+  ],
+  "nutrition": {
+    "calories": 520,
+    "protein": 22,
+    "carbs": 68,
+    "fat": 18,
+    "fiber": 3
+  },
+  "images": ["https://..."]
+}
+```
+
+---
+
+## POST /api/recipes
+
+Create a new recipe. **Pro or Family tier required.**
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/recipes` | JWT Bearer | **Pro** |
+
+### Request body
+
+```json
+{
+  "title": "My Special Pasta",
+  "description": "A family favourite",
+  "cuisine": "italian",
+  "difficulty": "easy",
+  "prep_time": 15,
+  "cook_time": 30,
+  "servings": 4,
+  "ingredients": [
+    { "ingredient_id": 1, "quantity": 400, "unit": "g" }
+  ],
+  "steps": [
+    { "step_number": 1, "instruction": "Cook pasta." }
+  ]
+}
+```
+
+### Response `201 Created`
+
+Returns the created recipe object with `id`.
+
+---
+
+## PUT /api/recipes/:id
+
+Update a recipe. Only the recipe's owner or an admin may update.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| PUT | `/api/recipes/:id` | JWT Bearer | **Pro** |
+
+Same body as POST. Returns the updated recipe.
+
+---
+
+## DELETE /api/recipes/:id
+
+Delete a recipe. Only the owner or admin may delete.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| DELETE | `/api/recipes/:id` | JWT Bearer | **Pro** |
+
+### Response `204 No Content`
+
+---
+
+## POST /api/recipes/:id/favourite
+
+Bookmark a recipe.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/recipes/:id/favourite` | JWT Bearer | Free |
+
+### Response `200 OK`
+
+```json
+{ "is_favourite": true }
+```
+
+---
+
+## DELETE /api/recipes/:id/favourite
+
+Remove a recipe bookmark.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| DELETE | `/api/recipes/:id/favourite` | JWT Bearer | Free |
+
+### Response `200 OK`
+
+```json
+{ "is_favourite": false }
+```
+
+---
+
+## POST /api/recipes/:id/rate
+
+Rate a recipe (1–5 stars).
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/recipes/:id/rate` | JWT Bearer | Free |
+
+### Request body
+
+```json
+{
+  "rating": 5,
+  "notes": "Absolutely delicious!"
+}
+```
+
+### Response `200 OK`
+
+Returns the updated aggregate rating.
+
+---
+
+## POST /api/recipes/:id/cook
+
+Record that the user cooked this recipe. Triggers inventory deduction.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/recipes/:id/cook` | JWT Bearer | Free |
+
+### Request body
+
+```json
+{
+  "servings": 2
+}
+```
+
+### Response `200 OK`
+
+```json
+{
+  "cooked_at": "2024-01-20T18:30:00Z",
+  "inventory_updated": true,
+  "ingredients_deducted": 4
+}
+```

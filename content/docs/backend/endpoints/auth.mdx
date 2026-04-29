@@ -1,0 +1,256 @@
+---
+title: Auth & Ingredients
+description: Authentication endpoints and ingredient search
+---
+
+# Auth & Ingredients
+
+## POST /api/auth/register
+
+Create a new user account.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/auth/register` | None | Free |
+
+### Request body
+
+```json
+{
+  "email": "user@example.com",
+  "password": "securepassword",
+  "name": "Alice"
+}
+```
+
+### Response `201 Created`
+
+```json
+{
+  "id": "uuid",
+  "email": "user@example.com",
+  "name": "Alice"
+}
+```
+
+---
+
+## POST /api/auth/login
+
+Authenticate and receive tokens.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/auth/login` | None | Free |
+
+### Request body
+
+```json
+{
+  "email": "user@example.com",
+  "password": "securepassword"
+}
+```
+
+### Response `200 OK`
+
+```json
+{
+  "access_token": "eyJ...",
+  "token_type": "Bearer",
+  "expires_in": 900
+}
+```
+
+The `refresh_token` is set as an httpOnly cookie (`Set-Cookie: refresh_token=...`).
+
+---
+
+## POST /api/auth/refresh
+
+Obtain a new access token using the refresh cookie.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/auth/refresh` | Cookie | Free |
+
+Sends no body. The browser/Dio cookie jar forwards the refresh cookie automatically.
+
+### Response `200 OK`
+
+```json
+{
+  "access_token": "eyJ...",
+  "token_type": "Bearer",
+  "expires_in": 900
+}
+```
+
+| Status | Meaning |
+|--------|---------|
+| 401 | Refresh token missing, expired, or revoked |
+
+---
+
+## POST /api/auth/logout
+
+Revoke the refresh token.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/auth/logout` | JWT Bearer | Free |
+
+No body required. Deletes the refresh token from the database. The httpOnly cookie is also cleared.
+
+### Response `200 OK`
+
+```json
+{ "message": "Logged out successfully" }
+```
+
+---
+
+## POST /api/auth/onboarding
+
+Complete the user profile after registration.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/auth/onboarding` | JWT Bearer | Free |
+
+### Request body
+
+```json
+{
+  "household_size": 2,
+  "dietary_restrictions": ["vegetarian"],
+  "allergies": ["nuts"],
+  "health_goals": ["weight_loss"],
+  "cooking_skill": "intermediate"
+}
+```
+
+`cooking_skill` values: `beginner` | `intermediate` | `advanced`
+
+### Response `200 OK`
+
+Returns the updated user object.
+
+---
+
+## POST /api/me/change-password
+
+Change the authenticated user's password.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/me/change-password` | JWT Bearer | Free |
+
+### Request body
+
+```json
+{
+  "current_password": "oldpassword",
+  "new_password": "newpassword"
+}
+```
+
+### Response `200 OK`
+
+```json
+{ "message": "Password changed successfully" }
+```
+
+| Status | Meaning |
+|--------|---------|
+| 400 | Current password incorrect |
+
+---
+
+## DELETE /api/me
+
+Permanently delete the authenticated user's account and all associated data.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| DELETE | `/api/me` | JWT Bearer | Free |
+
+<Callout type="warn">
+This action is irreversible. All user data including recipes, meal plans, inventory, and chat history is permanently deleted.
+</Callout>
+
+### Response `204 No Content`
+
+---
+
+## GET /api/ingredients
+
+Search the ingredient catalog.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/ingredients` | None | Free |
+
+### Query parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `q` | string | Search query (uses `pg_trgm` fuzzy matching) |
+| `limit` | integer | Max results (default: 20) |
+| `offset` | integer | Pagination offset |
+
+### Response `200 OK`
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Chicken Breast",
+    "category": "meat",
+    "calories_per_100g": 165,
+    "protein_per_100g": 31.0,
+    "carbs_per_100g": 0.0,
+    "fat_per_100g": 3.6
+  }
+]
+```
+
+---
+
+## GET /api/ingredients/:id
+
+Get full ingredient details including micronutrients and portion sizes.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/ingredients/:id` | None | Free |
+
+### Response `200 OK`
+
+```json
+{
+  "id": 1,
+  "name": "Chicken Breast",
+  "category": "meat",
+  "calories_per_100g": 165,
+  "protein_per_100g": 31.0,
+  "carbs_per_100g": 0.0,
+  "fat_per_100g": 3.6,
+  "nutrients": {
+    "fiber": 0,
+    "sugar": 0,
+    "sodium": 74,
+    "vitamin_c": 0,
+    "calcium": 11,
+    "iron": 0.9
+  },
+  "portion_sizes": [
+    { "name": "1 breast", "grams": 174 },
+    { "name": "100g", "grams": 100 }
+  ]
+}
+```
+
+| Status | Meaning |
+|--------|---------|
+| 404 | Ingredient not found |

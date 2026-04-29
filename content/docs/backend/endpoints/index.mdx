@@ -1,0 +1,53 @@
+---
+title: Endpoints Overview
+description: Complete Cookest API endpoint reference
+---
+
+# Endpoints Overview
+
+The Cookest API is a REST API running on Actix-Web 4. All endpoints return JSON.
+
+## Base URL
+
+```
+http://localhost:8080   (development)
+```
+
+## Authentication
+
+Protected endpoints require:
+```
+Authorization: Bearer <access_token>
+```
+
+Subscription-gated endpoints return **402** when accessed by a Free user:
+```json
+{ "error": "subscription_required", "feature": "user_recipes" }
+```
+
+## Endpoint groups
+
+| Group | Path prefix | Auth required |
+|-------|-------------|---------------|
+| [Auth & Account](./auth) | `/api/auth` | Varies |
+| [Profile & Preferences](./profile) | `/api/me` | JWT |
+| [Recipes](./recipes) | `/api/recipes` | Varies |
+| [Meal Plans](./meal-plans) | `/api/meal-plans` | JWT |
+| [Inventory](./inventory) | `/api/inventory` | JWT |
+| [Shopping List](./shopping-list) | `/api/shopping-list` | JWT |
+| [Subscription](./subscription) | `/api/subscription` | JWT |
+| [Stores & Promotions](./stores) | `/api/stores`, `/api/admin` | Varies |
+| [AI Chat](./ai-chat) | `/api/chat` | JWT |
+| [Ingredients](./auth) | `/api/ingredients` | No |
+
+## Subscription tiers
+
+| Feature | Free | Pro €9.99/mo | Family €14.99/mo |
+|---------|:----:|:------------:|:----------------:|
+| Inventory + basic meal plan | ✓ | ✓ | ✓ |
+| AI-scored meal plan generation | — | ✓ | ✓ |
+| AI Chat | 10/day | Unlimited | Unlimited |
+| Price comparison | — | ✓ | ✓ |
+| Create recipes | — | ✓ | ✓ |
+| Shopping list optimizer | — | ✓ | ✓ |
+| Multiple household profiles | — | — | ✓ |

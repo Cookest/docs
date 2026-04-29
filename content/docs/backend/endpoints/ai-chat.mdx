@@ -1,0 +1,127 @@
+---
+title: AI Chat
+description: Ollama-powered cooking assistant chat endpoint
+---
+
+# AI Chat
+
+## POST /api/chat
+
+Send a message to the AI cooking assistant.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/chat` | JWT Bearer | Free (10/day) / Pro (unlimited) |
+
+Free tier users are limited to **10 messages per day**. Pro and Family tier users have unlimited access.
+
+### Request body
+
+```json
+{
+  "session_id": "uuid",
+  "message": "What can I make with chicken breast and pasta?",
+  "context": {
+    "include_pantry": true,
+    "include_preferences": true
+  }
+}
+```
+
+- `session_id`: Optional. If omitted, a new session is created. Pass the same `session_id` to continue a conversation.
+- `context.include_pantry`: If `true`, the assistant is given the user's current inventory as context.
+- `context.include_preferences`: If `true`, the assistant is given the user's dietary restrictions and preferences.
+
+### Response `200 OK`
+
+```json
+{
+  "session_id": "uuid",
+  "message_id": "uuid",
+  "role": "assistant",
+  "content": "With chicken breast and pasta you can make a classic Pasta al Pollo...",
+  "created_at": "2024-01-20T15:30:00Z",
+  "usage": {
+    "messages_today": 3,
+    "daily_limit": 10
+  }
+}
+```
+
+---
+
+## GET /api/chat/sessions
+
+List the user's chat sessions.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/chat/sessions` | JWT Bearer | Free |
+
+### Response `200 OK`
+
+```json
+[
+  {
+    "id": "uuid",
+    "title": "Chicken and pasta ideas",
+    "message_count": 6,
+    "last_message_at": "2024-01-20T15:30:00Z",
+    "created_at": "2024-01-20T15:28:00Z"
+  }
+]
+```
+
+---
+
+## GET /api/chat/sessions/:id/messages
+
+Get all messages in a chat session.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/chat/sessions/:id/messages` | JWT Bearer | Free |
+
+### Response `200 OK`
+
+```json
+{
+  "session_id": "uuid",
+  "messages": [
+    {
+      "id": "uuid",
+      "role": "user",
+      "content": "What can I make with chicken breast and pasta?",
+      "created_at": "2024-01-20T15:28:00Z"
+    },
+    {
+      "id": "uuid",
+      "role": "assistant",
+      "content": "With chicken breast and pasta you can make...",
+      "created_at": "2024-01-20T15:28:05Z"
+    }
+  ]
+}
+```
+
+---
+
+## DELETE /api/chat/sessions/:id
+
+Delete a chat session and all its messages.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| DELETE | `/api/chat/sessions/:id` | JWT Bearer | Free |
+
+### Response `204 No Content`
+
+---
+
+## Model configuration
+
+The Ollama model used for chat is set via the `OLLAMA_MODEL` environment variable (default: `llava`). For general chat without image input, any Ollama model works. For PDF vision extraction, a multimodal model like `llava` is required.
+
+<Callout type="info">
+The assistant is given a system prompt that establishes it as "Cookest AI", a cooking and nutrition assistant. It is instructed to always provide practical, actionable cooking advice and to respect the user's dietary restrictions.
+</Callout>

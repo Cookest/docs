@@ -1,0 +1,137 @@
+---
+title: Inventory
+description: Pantry management — items, quantities, expiry dates, and deductions
+---
+
+# Inventory
+
+## GET /api/inventory
+
+List the user's pantry items.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| GET | `/api/inventory` | JWT Bearer | Free |
+
+### Query parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `expiring_soon` | boolean | Filter items expiring within 3 days |
+| `location` | string | Filter by storage location (`fridge`, `freezer`, `pantry`) |
+
+### Response `200 OK`
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "ingredient_id": 1,
+      "name": "Chicken Breast",
+      "quantity": 500,
+      "unit": "g",
+      "location": "fridge",
+      "expiry_date": "2024-01-22",
+      "is_expiring_soon": true,
+      "added_at": "2024-01-18T09:00:00Z"
+    }
+  ],
+  "expiring_count": 2
+}
+```
+
+---
+
+## POST /api/inventory
+
+Add an item to the pantry.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/inventory` | JWT Bearer | Free |
+
+### Request body
+
+```json
+{
+  "ingredient_id": 1,
+  "quantity": 500,
+  "unit": "g",
+  "location": "fridge",
+  "expiry_date": "2024-01-22"
+}
+```
+
+`location` values: `fridge` | `freezer` | `pantry` | `other`
+
+### Response `201 Created`
+
+Returns the created inventory item.
+
+---
+
+## PUT /api/inventory/:id
+
+Update an inventory item (quantity, expiry date, location).
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| PUT | `/api/inventory/:id` | JWT Bearer | Free |
+
+### Request body (all fields optional)
+
+```json
+{
+  "quantity": 300,
+  "unit": "g",
+  "location": "freezer",
+  "expiry_date": "2024-02-15"
+}
+```
+
+### Response `200 OK`
+
+Returns the updated inventory item.
+
+---
+
+## DELETE /api/inventory/:id
+
+Remove an item from the pantry.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| DELETE | `/api/inventory/:id` | JWT Bearer | Free |
+
+### Response `204 No Content`
+
+---
+
+## POST /api/inventory/sync
+
+Sync the inventory after cooking — deducts ingredient quantities based on a recipe's ingredient list.
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/inventory/sync` | JWT Bearer | Free |
+
+### Request body
+
+```json
+{
+  "recipe_id": "uuid",
+  "servings": 2
+}
+```
+
+### Response `200 OK`
+
+```json
+{
+  "updated_items": 4,
+  "depleted_items": ["Olive Oil", "Garlic"]
+}
+```
+
+`depleted_items` contains the names of ingredients that reached zero quantity and were automatically removed.
