@@ -1,0 +1,53 @@
+---
+title: ETL Pipeline Overview
+description: Python data pipeline for seeding the Cookest recipe and ingredient database
+---
+
+# ETL Pipeline
+
+The ETL (Extract-Transform-Load) pipeline is a Python-based data processing system that seeds and maintains the PostgreSQL database used by the Cookest API.
+
+## Purpose
+
+The pipeline handles:
+- Ingesting recipe and ingredient data from external sources
+- Normalizing and cleaning nutritional metadata
+- Transforming raw data into the schema expected by the API database
+- Loading processed records into PostgreSQL
+
+## Location
+
+```
+PAP/
+  etl/
+    .env.example    # Environment variable template
+    requirements.txt
+    ...
+```
+
+## Setup
+
+```bash
+cd etl
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate   # Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure environment
+cp .env.example .env
+# Edit .env with DATABASE_URL and any API keys
+```
+
+## Environment variables
+
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | PostgreSQL connection string (same DB as the API) |
+
+<Callout type="info">
+The ETL pipeline writes directly to the same PostgreSQL database used by the API. Run it before starting the API for the first time to populate the ingredient and recipe catalogs.
+</Callout>

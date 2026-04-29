@@ -1,0 +1,183 @@
+---
+title: Documentation Guide
+description: How to write, structure, and maintain Cookest documentation
+---
+
+# Documentation Guide
+
+This guide establishes the standards for all Cookest documentation. Follow it strictly so that any contributor — human or AI — can produce documentation that is consistent, accurate, and useful.
+
+## Principles
+
+1. **Accuracy first.** Documentation that is wrong is worse than no documentation. If you are unsure about a detail, mark it with `<Callout type="warn">Verify this</Callout>` rather than guessing.
+2. **Minimal prose, maximum signal.** Every sentence must earn its place. Prefer tables and code blocks over paragraphs where structure adds clarity.
+3. **Examples over descriptions.** For API endpoints and code patterns, a working example is worth more than three paragraphs of explanation.
+4. **Bilingual parity.** Every page in `content/docs/` must have a Portuguese counterpart in `content/docs/pt/`. Translations must be complete — no stubs, no machine-translated sentences left unchecked.
+
+## File structure
+
+```
+content/docs/
+  <section>/
+    meta.json        ← Navigation title and page order for this section
+    <page>.mdx       ← One concept per page
+  pt/
+    <section>/       ← Mirror of the English structure
+      meta.json
+      <page>.mdx
+```
+
+### Naming rules
+
+- File names: `kebab-case.mdx` (e.g., `getting-started.mdx`)
+- Keep file names identical between `docs/` and `docs/pt/` — only the content changes
+- Section folders match the navigation group (e.g., `backend/`, `mobile/`, `etl/`)
+
+## Frontmatter
+
+Every `.mdx` file must have:
+
+```mdx
+---
+title: Page Title
+description: One sentence that accurately describes what the reader will learn
+---
+```
+
+- `title`: Title-case, matches the H1 on the page
+- `description`: Shown in search results and SEO meta — keep it under 160 characters
+- Optional: `full: true` for full-width pages (no right sidebar)
+
+## Page structure
+
+```mdx
+---
+title: Feature Name
+description: What this page covers
+---
+
+# Feature Name          ← Matches frontmatter title exactly
+
+Brief overview paragraph — 1–3 sentences maximum.
+
+## Section Heading       ← H2 for main topics
+...
+
+### Subsection           ← H3 for details within a topic
+...
+```
+
+Rules:
+- H1 (`#`) appears exactly once per page, matching the frontmatter `title`
+- H2 (`##`) for top-level sections
+- H3 (`###`) for subsections only — never go deeper than H3
+- Do not skip heading levels
+
+## Code blocks
+
+Always specify the language:
+
+    ```bash
+    cargo run
+    ```
+
+    ```json
+    { "key": "value" }
+    ```
+
+    ```dart
+    final result = await repo.getRecipes();
+    ```
+
+For file paths, use `bash` with a comment:
+```bash
+# api/src/handlers/recipe.rs
+```
+
+## Tables
+
+Use tables for:
+- Environment variables
+- API endpoint listings
+- Feature comparison (tiers)
+- Field/property descriptions
+
+## Callouts
+
+Use Fumadocs `<Callout>` components for important notices:
+
+```mdx
+<Callout type="info">
+General information that adds context.
+</Callout>
+
+<Callout type="warn">
+Something the reader must not miss — a common mistake or security note.
+</Callout>
+
+<Callout type="error">
+Something that will break if not done correctly.
+</Callout>
+```
+
+Types: `info` (blue), `warn` (yellow), `error` (red).
+
+## Diagrams
+
+Use Mermaid for all diagrams. Fumadocs renders Mermaid natively in code blocks.
+
+Diagram types used in this project:
+- `graph TD` — component/architecture diagrams
+- `sequenceDiagram` — auth flows, request/response flows
+- `erDiagram` — database schema
+
+Keep diagrams focused — one concept per diagram.
+
+## API endpoint documentation
+
+Every endpoint page follows this structure — Method, Path, Auth, Tier table followed by request/response examples.
+
+## Writing in Portuguese
+
+The `content/docs/pt/` folder contains Portuguese translations. Rules:
+
+- Use European Portuguese (PT-PT), not Brazilian Portuguese
+- "autenticação" not "autentificação"
+- "palavra-passe" not "senha"
+- "subscrição" not "assinatura" (for subscription context)
+- Keep all code blocks, JSON examples, and endpoint paths in English — do not translate these
+- Translate all prose, headings, table headers, and callout content
+- Keep frontmatter `title` and `description` translated
+- Technical terms (JWT, Bearer, webhook, payload) remain in English
+
+## meta.json
+
+Each folder requires a `meta.json`:
+
+```json
+{
+  "title": "Section Title",
+  "pages": ["page-one", "page-two", "subfolder"]
+}
+```
+
+## Commit conventions for docs
+
+```
+docs: add authentication flow page
+docs: translate backend section to PT
+docs: fix incorrect endpoint path in meal-plans
+docs(pt): update getting-started translation
+```
+
+## AI contributor notes
+
+If you are an AI assistant continuing work on this documentation:
+
+1. **Read this guide first** before writing any new pages
+2. **Read existing pages** in both languages before writing new ones — maintain consistency of voice and terminology
+3. **Check the API README** at `../api/README.md` and Flutter app at `../UI/` for ground truth
+4. **Never invent endpoint paths or field names** — verify against source code
+5. **Maintain bilingual parity** — every English page you create or update must have a corresponding Portuguese update
+6. **Use the established vocabulary**: say "sage green" not "green", "recipe card" not "recipe tile", "Playfair Display" not "serif font"
+7. The docs site lives at `/Users/exxo/Documents/code/PAP/docs` — it is a standalone Fumadocs project with its own git repo
