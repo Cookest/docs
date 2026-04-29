@@ -1,0 +1,51 @@
+---
+title: Gestão da Despensa
+description: Controlar os seus ingredientes, quantidades e datas de validade
+---
+
+# Gestão da Despensa
+
+## O ecrã da Despensa
+
+Toque em **"Despensa"** na barra de navegação inferior. Os seus ingredientes estão agrupados em secções colapsáveis por localização de armazenamento: **Frigorífico**, **Congelador**, **Despensa** e **Outros**.
+
+Toque em qualquer cabeçalho de secção para colapsar ou expandir — útil quando só precisa de verificar uma secção de cada vez.
+
+## Adicionar um artigo
+
+Toque no botão **+** verde-sálvia (canto inferior direito) para abrir a folha inferior "Adicionar artigo".
+
+Preencha:
+- **Nome do ingrediente** — escreva para pesquisar no catálogo de ingredientes e, em seguida, selecione a partir das sugestões
+- **Quantidade** — valor numérico
+- **Unidade** — g, kg, ml, L, unidades, etc.
+- **Localização de armazenamento** — Frigorífico / Congelador / Despensa / Outros
+- **Data de validade** — opcional mas fortemente recomendada; usada para alertas e a faixa do ecrã inicial
+
+Toque em **"Adicionar"** para guardar.
+
+## Alertas de validade
+
+Os artigos a expirar nos próximos **3 dias** aparecem com a data de validade em âmbar. Os artigos a expirar hoje ou amanhã têm um fundo âmbar ligeiro na linha.
+
+O **ecrã Inicial** mostra uma faixa de alerta ("2 artigos a expirar em breve") quando há artigos nesta janela. Toque na faixa para ir diretamente para os artigos a expirar.
+
+## Editar um artigo
+
+Deslize qualquer linha de artigo para a **direita** para revelar a ação de edição (ícone de lápis, verde-sálvia). Toque nela para abrir a folha de edição com todos os campos pré-preenchidos.
+
+## Eliminar um artigo
+
+Deslize qualquer linha de artigo para a **esquerda** para revelar a ação de eliminação (ícone de lixo, vermelho). O fundo revela-se progressivamente ao deslizar — a eliminação só ocorre quando o deslize é completo.
+
+<Callout type="warn">
+A eliminação é imediata e não pode ser desfeita. Se cometeu um erro, adicione o artigo novamente de forma manual.
+</Callout>
+
+## Dedução de inventário ao cozinhar
+
+Quando marca uma receita como "cozinhada" (no ecrã de Detalhes da Receita ou no Modo de Cozinha), a aplicação deduz automaticamente as quantidades de ingredientes da receita da sua despensa — escaladas pelo tamanho do seu agregado familiar. Se um ingrediente não estiver na sua despensa, é ignorado silenciosamente.
+
+## Corresponder despensa a receitas
+
+No ecrã de Receitas, pode filtrar por **"Na minha despensa"** — esta opção chama a API com `match_inventory=true` e mostra uma percentagem de correspondência em cada cartão de receita (ex.: "7/10 ingredientes disponíveis").

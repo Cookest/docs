@@ -1,0 +1,51 @@
+---
+title: Lista de Compras
+description: Criar a sua lista de supermercado e encontrar os melhores preços
+---
+
+# Lista de Compras
+
+## O ecrã de Compras
+
+Toque em **"Compras"** na barra de navegação inferior. Os artigos estão agrupados por categoria de alimentos (Carne, Lacticínios, Produtos Frescos, Despensa, etc.) com cabeçalhos de secção colapsáveis.
+
+## Geração automática a partir do plano de refeições
+
+No topo do ecrã de Compras, toque em **"Sincronizar a partir do plano de refeições"**. O Cookest calcula quais os ingredientes do seu plano de refeições atual que não tem na despensa e adiciona-os automaticamente à lista.
+
+Esta ação usa o endpoint `POST /api/shopping-list/sync` que:
+1. Lê os requisitos de ingredientes do seu plano de refeições ativo
+2. Subtrai as quantidades que já tem no inventário
+3. Produz uma lista do que ainda precisa de comprar
+
+## Adicionar artigos manualmente
+
+Toque no ícone **+** na barra de aplicação para adicionar um único artigo:
+- Nome do artigo (pesquisa no catálogo de ingredientes)
+- Quantidade e unidade
+
+## Marcar artigos ao fazer compras
+
+Toque na caixa de verificação em qualquer linha para a marcar como comprada. O nome do artigo fica riscado e a caixa de verificação preenche-se com verde-sálvia. Os artigos verificados permanecem visíveis (para que possa ver o seu progresso) mas recuam visualmente.
+
+Toque em **"Limpar todos os verificados"** no menu de opções da barra de aplicação para remover todos os artigos concluídos de uma vez.
+
+## Comparação de preços (Pro)
+
+<Callout type="info">
+A comparação de preços e a otimização da lista de compras requerem uma subscrição **Pro ou Family**.
+</Callout>
+
+Se o administrador da loja carregou um folheto promocional recente, os utilizadores Pro veem um crachá de preço junto a cada artigo com o melhor preço disponível.
+
+### Encontrar a melhor loja
+
+Toque em **"Otimizar preços"** para ver:
+- **Loja única mais barata** — comprar tudo num único lugar, minimizando deslocações
+- **Divisão mais barata** — comprar em duas ou mais lojas para maximizar a poupança
+
+O otimizador indica-lhe exatamente quais os artigos a comprar em cada lugar e o custo total de cada estratégia.
+
+## Remover um artigo
+
+Deslize qualquer artigo para a esquerda para o eliminar da lista.

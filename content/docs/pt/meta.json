@@ -1,4 +1,4 @@
 {
   "title": "Português",
-  "pages": ["index", "architecture", "backend", "mobile", "etl", "contributing"]
+  "pages": ["index", "user-guide", "architecture", "backend", "mobile", "etl", "contributing"]
 }

@@ -1,0 +1,82 @@
+---
+title: Modo de Cozinha
+description: Guia de cozinha passo a passo com assistência de IA
+---
+
+# Modo de Cozinha
+
+O Modo de Cozinha é uma experiência sem distrações concebida para a cozinha ativa. Quando o entra, toda a interface muda — a barra de navegação inferior desaparece e o ecrã fica inteiramente dedicado a guiá-lo pela receita.
+
+## Entrar no modo de cozinha
+
+A partir de qualquer ecrã de **Detalhes da Receita**, toque no botão de ação flutuante **"Começar a cozinhar"** (verde-sálvia, canto inferior direito).
+
+## O ecrã do modo de cozinha
+
+### Barra de progresso
+
+Uma linha verde-sálvia de 2px percorre o topo do ecrã. Preenche-se da esquerda para a direita à medida que avança pelos passos — no Passo 3 de 8, está aproximadamente 37,5% preenchida. A barra anima suavemente a cada passo.
+
+### Cabeçalho
+
+O título da receita é apresentado em **Playfair Display 20px** centrado no cabeçalho. À esquerda, um botão de saída **×**. Só isso — sem outros elementos. O ecrã é limpo.
+
+### Contador de passos
+
+Abaixo do cabeçalho, um pequeno rótulo **"Passo 3 de 8"** em Inter Regular 12px cinzento mostra a sua posição na receita.
+
+### Instrução do passo
+
+A instrução do passo atual é apresentada em **Inter Regular 16px** com **altura de linha 1.7** — maior e mais legível do que em qualquer outro lugar da aplicação. Este tamanho é intencional: pode estar a ler a braço estendido enquanto as suas mãos estão ocupadas.
+
+### Destaques de ingredientes
+
+Qualquer ingrediente mencionado na instrução do passo é sublinhado em **verde-sálvia**. Toque num ingrediente sublinhado para ver um pequeno popover que mostra:
+- O nome do ingrediente
+- A quantidade escalada para o **tamanho do seu agregado familiar** (ex.: se a receita serve 4 e o seu agregado é 2, as quantidades são reduzidas a metade)
+
+Isto significa que nunca precisa de recalcular quantidades mentalmente enquanto cozinha.
+
+### Botões de navegação
+
+Na parte inferior do ecrã:
+- **Anterior** — um botão de texto simples em cinzento (deliberadamente de baixo peso para evitar toques acidentais para trás)
+- **Próximo** — um botão píula verde-sálvia preenchido (a ação primária)
+
+Esta assimetria é intencional: torna natural avançar enquanto torna retroceder uma escolha consciente.
+
+### Perguntar à IA
+
+Um chip persistente **"Perguntar à IA ✦"** encontra-se sempre no canto inferior esquerdo. Está sempre visível, mesmo ao fazer scroll por um passo longo.
+
+#### Usar o assistente de IA
+
+Toque em **"Perguntar à IA"** para abrir a folha inferior de chat com IA:
+- A folha sobe até **70% da altura do ecrã** com um puxador no topo
+- Está pré-contextualizada para a receita e passo atuais — não precisa de explicar o que está a cozinhar
+- Pergunte qualquer coisa: "O que posso usar em vez de natas?", "Como sei quando as cebolas estão caramelizadas?", "Só tenho 150g de frango — como ajusto as quantidades?"
+
+**Aparência do chat:**
+- Mensagens da IA: balões brancos com sombra suave, Inter 14px
+- As suas mensagens: balões verde-sálvia, Inter 14px
+- Arraste a folha para baixo para dispensar e voltar ao passo da receita
+
+<Callout type="info">
+Os utilizadores Free podem enviar **10 mensagens de IA por dia** em todas as sessões de chat. Os utilizadores Pro e Family têm chat de IA ilimitado.
+</Callout>
+
+## Concluir um passo
+
+Toque em **"Próximo"** para avançar. Quando chegar ao último passo, o botão Próximo muda para **"Concluído"**. Ao tocar nele:
+1. Marca a receita como cozinhada no seu histórico de cozedura
+2. Deduz os ingredientes utilizados da sua despensa (escalados pelo tamanho do agregado familiar)
+3. Mostra uma breve animação de conclusão
+4. Regressa ao ecrã de Detalhes da Receita
+
+## Sair cedo
+
+Toque no **×** no cabeçalho para sair do modo de cozinha em qualquer altura. O progresso não é guardado — se voltar a entrar na receita mais tarde, começa no Passo 1.
+
+## Ecrã permanece ativo
+
+O Modo de Cozinha mantém o ecrã ativo automaticamente. Não precisará de desbloquear o telemóvel a meio da receita.
