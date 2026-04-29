@@ -1,4 +1,4 @@
 {
   "title": "Aplicação Móvel",
-  "pages": ["overview"]
+  "pages": ["overview", "architecture", "screens", "theme", "state-management", "api-integration"]
 }

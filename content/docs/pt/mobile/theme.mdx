@@ -1,0 +1,141 @@
+---
+title: Sistema de Tema
+description: Tokens de design da marca Cookest e como são aplicados no Flutter
+---
+
+# Sistema de Tema
+
+Toda a linguagem visual do Cookest é definida em `lib/src/shared/theme/shadcn_theme.dart`.
+
+## Tokens de cor
+
+| Token | Hex | Utilização |
+|-------|-----|------------|
+| `sage` | `#7A9A65` | Ações primárias, navegação ativa, estados selecionados, marcas de verificação |
+| `darkGreen` | `#1C3A2A` | Cabeçalhos, títulos de ecrãs, texto primário |
+| `background` | `#F8F8F6` | Fundo de todos os ecrãs |
+| `surface` | `#FFFFFF` | Cartões, folhas inferiores, diálogos |
+| `textMuted` | `#6B7280` | Texto secundário, metadados (tempos, avaliações) |
+| `textCaption` | `#9CA3AF` | Legendas, etiquetas de navegação (inativo), marcadores de posição |
+| `amber` | `#D97706` | Avisos de prazo, alertas de despensa |
+| `amberLight` | `#FFF8E7` | Fundo da faixa de alerta |
+| `border` | `#E5E7EB` | Bordas de campos de entrada, divisores |
+| `divider` | `#F0F0EE` | Separador da navegação inferior, divisores de secção |
+
+## Tipografia
+
+| Estilo | Fonte | Tamanho | Peso | Utilização |
+|--------|-------|---------|------|------------|
+| Exibição / Boas-vindas | Playfair Display | 26px | Regular | Boas-vindas no ecrã inicial |
+| Cabeçalho de secção | Playfair Display | 18px | Regular | "O que está a cozinhar agora?" |
+| Título da barra de aplicação | Playfair Display | 22px | Bold | Títulos dos ecrãs |
+| Título da receita (cartão) | Playfair Display | 16–18px | Regular | Nomes de receitas nos cartões |
+| Corpo / Itens de lista | Inter | 14px | Regular | Ingredientes, artigos da despensa |
+| Metadados | Inter | 13px | Regular | Tempos de cozedura, avaliações, categorias |
+| Legenda | Inter | 12px | Regular | Estados vazios, texto de ajuda, etiquetas de navegação |
+| Etiqueta de botão | Inter | 14px | Medium | Todos os botões |
+| Cabeçalho de secção | Inter | 15px | SemiBold | "Pequeno-almoço", "Lacticínios", etc. |
+
+**Regra:** O Playfair Display aparece *apenas* nos contextos listados acima. Todo o restante texto usa Inter.
+
+## Token de sombra
+
+```dart
+BoxShadow(
+  color: Color(0x09000000),  // rgba(0,0,0,0.035)
+  blurRadius: 12,
+  offset: Offset(0, 2),
+)
+```
+
+Aplicado a: cartões de receitas, cartão em destaque do ecrã inicial, folhas inferiores modais. Mais nada.
+
+## Configuração do ThemeData
+
+```dart
+ThemeData(
+  colorScheme: ColorScheme.light(
+    primary: Color(0xFF7A9A65),     // sage
+    surface: Color(0xFFFFFFFF),
+    background: Color(0xFFF8F8F6),
+    onSurface: Color(0xFF1C3A2A),
+  ),
+  cardTheme: CardTheme(
+    elevation: 0,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+    ),
+  ),
+  appBarTheme: AppBarTheme(
+    elevation: 0,
+    backgroundColor: Color(0xFFF8F8F6),
+  ),
+)
+```
+
+## Microinterações
+
+| Interação | Implementação | Duração |
+|-----------|--------------|---------|
+| Pressão em cartão | `ScaleTransition` para 0.97 | 80ms |
+| Alternar favorito | Animação de escala + preenchimento | 150ms |
+| Troca de ícone de navegação | `AnimatedSwitcher` crossfade | 150ms |
+| Cor da etiqueta de navegação | `AnimatedDefaultTextStyle` | 150ms |
+| Deslize para eliminar | Revelação progressiva de opacidade | Proporcional ao arrasto |
+| Geração do plano de refeições | Fade-in escalonado por slot | 80ms entre slots |
+| Confirmações por snackbar | `ScaffoldMessenger` | Padrão |
+
+---
+
+## Especificações da barra de navegação inferior
+
+| Propriedade | Valor |
+|-------------|-------|
+| Altura da barra | 64px + inserção da área segura do dispositivo |
+| Tamanho do ícone | 22px (Lucide) |
+| Fonte da etiqueta | Inter 10px, abaixo do ícone |
+| Estado ativo | Ícone verde-sálvia preenchido + etiqueta verde-sálvia (`#7A9A65`) |
+| Estado inativo | `#9CA3AF` para ícone e etiqueta |
+| Separador superior | Linha de 1px `#F0F0EE` |
+| Sombra da barra | Nenhuma |
+| Transição do ícone | `AnimatedSwitcher` crossfade 150ms |
+| Transição da etiqueta | `AnimatedDefaultTextStyle` 150ms |
+
+---
+
+## Sistema de espaçamento
+
+| Contexto | Valor |
+|----------|-------|
+| Padding horizontal do ecrã | 20px (padrão), 16px (itens de lista) |
+| Padding do cartão | 12–16px |
+| Espaçamento superior do cabeçalho de secção | 16px |
+| Espaçamento inferior do cabeçalho de secção | 8px |
+| Raio de borda — chips píula | 20px |
+| Raio de borda — cartões | 16px |
+| Raio de borda — contentores menores | 12px |
+| Raio de borda — miniaturas de itens de lista | 10px |
+| Borda do campo de entrada | 1px `#E5E7EB`, raio 10px |
+| Contorno de foco do campo de entrada | 1.5px verde-sálvia |
+
+---
+
+## Indicadores de seleção (influência ShadCN)
+
+| Estado | Aparência |
+|--------|-----------|
+| Separador ativo / seletor de dia | Sublinhado verde-sálvia de 2px — sem fundo preenchido |
+| Chip de categoria ativo | Preenchimento verde-sálvia + texto branco |
+| Chip de categoria inativo | Fundo branco + borda de 1px `#E5E7EB` + texto `#6B7280` |
+
+---
+
+## Estados interativos
+
+| Interação | Implementação | Duração |
+|-----------|--------------|---------|
+| Pressão em botão | `ScaleTransition` para 0.97 | 80ms |
+| Deslize para eliminar | Opacidade do fundo de eliminação cresce proporcionalmente à distância de deslize; atinge cor completa no limiar de confirmação | Proporcional ao arrasto |
+| Alternar coração/favorito | Animação de escala + transição de preenchimento | 150ms |
+| Geração de slot do plano de refeições | Fade-in escalonado, atraso de 80ms entre cada slot | Por slot |
+| Transição de passo no modo de cozinha | Deslize + fade | — |

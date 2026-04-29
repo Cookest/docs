@@ -1,0 +1,90 @@
+---
+title: Integração com a API
+description: Como a aplicação Flutter comunica com o backend em Rust
+---
+
+# Integração com a API
+
+## Cliente HTTP Dio
+
+A aplicação usa [Dio](https://pub.dev/packages/dio) com um URL base e um interceptor de Autorização.
+
+```dart
+final dio = Dio(BaseOptions(
+  baseUrl: 'http://10.0.2.2:8080',   // 10.0.2.2 = localhost no emulador Android
+  connectTimeout: Duration(seconds: 10),
+  receiveTimeout: Duration(seconds: 30),
+));
+
+// Interceptor de autenticação — adiciona token Bearer
+dio.interceptors.add(InterceptorsWrapper(
+  onRequest: (options, handler) {
+    final token = ref.read(tokenProvider);
+    if (token != null) {
+      options.headers['Authorization'] = 'Bearer $token';
+    }
+    handler.next(options);
+  },
+));
+```
+
+## Configuração do URL base
+
+| Ambiente | URL |
+|----------|-----|
+| Emulador Android | `http://10.0.2.2:8080` |
+| Simulador iOS | `http://localhost:8080` |
+| Dispositivo físico (mesma rede) | `http://<IP-da-máquina>:8080` |
+| Produção | `https://api.cookest.app` |
+
+<Callout type="warn">
+Os emuladores Android não conseguem aceder a `localhost` ou `127.0.0.1`. Use `10.0.2.2`, que a rede virtual Android mapeia para a máquina anfitriã.
+</Callout>
+
+## Tratamento da forma de resposta
+
+A API pode devolver um array simples ou um objeto encapsulado consoante o endpoint. Todos os repositórios tratam ambos os casos:
+
+```dart
+final raw = response.data;
+final list = raw is List ? raw : (raw['items'] as List? ?? []);
+```
+
+## Requisito de Content-Type
+
+Todos os pedidos POST requerem `Content-Type: application/json`. O Dio omite este cabeçalho quando `data` é nulo. Passe sempre `data: {}` para POSTs sem corpo:
+
+```dart
+// ✓ Correto — envia Content-Type: application/json
+await dio.post('/api/shopping-list/sync', data: {});
+
+// ✗ Errado — o Dio omitirá o Content-Type, a API devolve 400
+await dio.post('/api/shopping-list/sync');
+```
+
+## Armazenamento de token
+
+```dart
+// Token de acesso — armazenado em memória (Riverpod StateProvider)
+// Nunca escrito em SharedPreferences
+
+// Token de atualização — cookie httpOnly, gerido pelo browser/WebView/Dio cookie jar
+// No móvel: usar dio_cookie_manager + cookie_jar
+```
+
+## Tratamento de erros
+
+```dart
+try {
+  final res = await dio.get('/api/recipes');
+  return (res.data['items'] as List)
+    .map((j) => Recipe.fromJson(j)).toList();
+} on DioException catch (e) {
+  if (e.response?.statusCode == 401) {
+    // Token expirado — acionar atualização
+  } else if (e.response?.statusCode == 402) {
+    // Subscrição necessária — mostrar pedido de atualização
+  }
+  rethrow;
+}
+```

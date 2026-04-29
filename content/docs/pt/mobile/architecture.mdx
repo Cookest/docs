@@ -1,0 +1,84 @@
+---
+title: Arquitetura da Aplicação
+description: Navegação, padrões de gestão de estado e camada de repositório
+---
+
+# Arquitetura da Aplicação
+
+## Navegação — GoRouter
+
+Todas as rotas estão declaradas em `lib/src/core/router.dart`. A aplicação usa um `ShellRoute` para a navegação de 5 separadores na barra inferior, com sub-rotas empilhadas por cima.
+
+```
+ShellRoute (navegação de 5 separadores)
+├── /           → HomeScreen
+├── /meals      → MealPlanScreen
+├── /recipes    → RecipesScreen
+│   └── /recipes/:id → RecipeDetailScreen
+├── /pantry     → InventoryScreen
+└── /groceries  → ShoppingListScreen
+
+/login          → LoginScreen (fora da shell)
+```
+
+Regras de navegação:
+- `context.go('/path')` — trocar de separador (substitui o histórico da shell)
+- `context.push('/path')` — empilhar por cima do separador atual (sub-rotas)
+- Redireccionamento de login: utilizadores não autenticados são enviados para `/login` via redireccionamento do GoRouter
+
+## Gestão de estado — Riverpod
+
+Todos os ecrãs usam `ConsumerWidget` ou `ConsumerStatefulWidget`. Os dados são expostos como `FutureProvider` / `StateProvider` / `StateNotifierProvider`:
+
+```dart
+// Exemplo: provider de lista de receitas
+final recipesProvider = FutureProvider.autoDispose<List<Recipe>>((ref) async {
+  final repo = ref.read(recipeRepositoryProvider);
+  return repo.getRecipes();
+});
+
+// No ecrã:
+class RecipesScreen extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final recipes = ref.watch(recipesProvider);
+    return recipes.when(
+      data: (data) => RecipeList(data),
+      loading: () => const CircularProgressIndicator(),
+      error: (e, _) => ErrorWidget(e.toString()),
+    );
+  }
+}
+```
+
+## Camada de repositório
+
+Cada funcionalidade tem uma classe de repositório que:
+1. Faz pedidos HTTP com Dio à API
+2. Analisa as respostas usando construtores factory `fromJson`
+3. Trata ambas as formas de resposta `{ "items": [...] }` e `[...]`
+
+```dart
+class RecipeRepository {
+  final Dio _dio;
+  RecipeRepository(this._dio);
+
+  Future<List<Recipe>> getRecipes({String? query, String? category}) async {
+    final res = await _dio.get('/api/recipes', queryParameters: {
+      if (query != null) 'q': query,
+      if (category != null) 'category': category,
+    });
+    final raw = res.data;
+    final list = raw is List ? raw : (raw['items'] as List);
+    return list.map((j) => Recipe.fromJson(j as Map<String, dynamic>)).toList();
+  }
+}
+```
+
+## Padrões de tratamento de erros
+
+Todos os métodos `fromJson` dos modelos usam análise com segurança nula:
+- IDs inteiros da base de dados são convertidos para `String` via `?.toString() ?? ''`
+- Campos opcionais recorrem a valores predefinidos: `json['field'] as String? ?? ''`
+- Campos de lista usam conversão segura: `(json['list'] as List? ?? []).map(...)`
+- Aliases de nomes de colunas: `json['location'] ?? json['storage_location']`

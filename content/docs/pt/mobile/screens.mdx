@@ -1,0 +1,135 @@
+---
+title: Ecrãs
+description: Descrição detalhada de todos os ecrãs da aplicação Cookest
+---
+
+# Ecrãs
+
+## Ecrã Inicial
+
+O ecrã inicial cumprimenta o utilizador pelo nome e apresenta o conteúdo mais relevante.
+
+**Estrutura:**
+- **Cabeçalho de boas-vindas** — "Bom dia, Alice" em Playfair Display 26px
+- **Faixa de alerta da despensa** — fundo âmbar (`#FFF8E7`) com ícone de aviso, mostrando a contagem de artigos a expirar nos próximos 3 dias. Toque para navegar para o ecrã da Despensa filtrado por artigos a expirar.
+- **Secção "O que está a cozinhar agora?"** — cartões de receitas em destaque com scroll horizontal. Cada cartão mostra a imagem, título (Playfair Display), etiqueta de cozinha, tempo de cozedura e um botão de coração.
+- **Secção "O seu plano de refeições de hoje"** — mostra os 2–3 slots de refeição do dia a partir do plano ativo. Cada slot tem uma etiqueta de tipo de refeição e nome da receita.
+- **CTA de convite** — faixa "Vai ter convidados?" na parte inferior. Navega para o ecrã de Receitas filtrado por receitas "para 4+ pessoas".
+
+---
+
+## Ecrã de Refeições
+
+Vista semanal do plano de refeições com navegação dia a dia.
+
+**Estrutura:**
+- **Seletor de dia** — faixa horizontal de 7 marcadores de dia (Seg–Dom). O dia ativo é destacado em verde-sálvia. Tocar num dia faz scroll no conteúdo abaixo.
+- **Secções de período de refeição** — "Pequeno-almoço", "Almoço", "Jantar", "Lanche". Cada secção pode estar vazia (mostra um marcador "Adicionar refeição") ou preenchida com um cartão de receita.
+- **Chip de receita** — cartão compacto com título da receita, tempo de cozedura e ícone de troca. Pressão longa abre uma folha inferior para substituir a receita.
+- **Botão Gerar** — FAB (apenas Pro) para regenerar o plano semanal completo usando pontuação por IA.
+- **Estado vazio** — se não existir plano para a semana, uma ilustração centrada com CTA "Sem plano ainda — gerar um?".
+
+---
+
+## Ecrã de Receitas
+
+Biblioteca de receitas com pesquisa e filtros.
+
+**Estrutura:**
+- **Barra de pesquisa** — campo de entrada de largura total no topo com ícone de lupa. Aciona pesquisa com atraso (300ms) na API.
+- **Chips de categoria** — chips com scroll horizontal abaixo da barra de pesquisa: "Todas", "Italiana", "Asiática", "Mediterrânica", "Rápidas (< 30 min)", "Vegetariana". O chip ativo tem fundo verde-sálvia.
+- **Lista de cartões de receitas** — lista vertical de cartões. Cada cartão contém:
+  - Imagem da receita (proporção 16:9, arredondamento 16)
+  - Título em Playfair Display 16px
+  - Linha de metadados: etiqueta de cozinha · tempo de preparação+cozedura · calorias
+  - Ícone de coração (favorito alternável)
+  - Avaliação com ícone de estrela e contagem
+- **Estado vazio** — "Nenhuma receita encontrada para \<pesquisa\>" com botão para limpar a pesquisa.
+
+---
+
+## Ecrã de Detalhes da Receita
+
+Vista completa da receita com todos os ingredientes, passos e modo de cozinha.
+
+**Estrutura:**
+- **SliverAppBar** — imagem em destaque que colapsa ao fazer scroll. O título aparece gradualmente ao fazer scroll.
+- **Linha de marcadores informativos** — linha horizontal de marcadores compactos: grau de dificuldade, tempo de preparação, tempo de cozedura, seletor de porções (tocável +/−), contagem de calorias.
+- **Lista de ingredientes** — agrupada por categoria. Cada item mostra o nome do ingrediente, quantidade escalada pelo seletor de porções e indicador de disponibilidade na despensa (ponto verde = disponível, cinzento = em falta).
+- **Lista de passos** — passos de cozedura numerados. Cada passo pode ser tocado para marcar como concluído (estado assinalado com riscado verde-sálvia).
+- **FAB do modo de cozinha** — botão flutuante "Começar a cozinhar". Entra numa vista simplificada passo a passo com texto maior e temporizador.
+- **Secção de avaliação** — no fundo: widget de toque de 5 estrelas e um campo de texto de notas opcional.
+- **Botão de favorito** — na barra de aplicação, ícone de coração que alterna o estado de favorito com animação de escala.
+
+---
+
+## Ecrã da Despensa
+
+Gestão de inventário agrupada por localização de armazenamento.
+
+**Estrutura:**
+- **Faixa de alerta de prazo** — mesma faixa âmbar do ecrã inicial, mostrada apenas quando existem artigos a expirar.
+- **Secções de acordeão por localização** — "Frigorífico", "Congelador", "Despensa", "Outros". Cada secção é colapsável. O crachá de contagem de artigos atualiza em tempo real.
+- **Linhas de artigos** — cada linha mostra:
+  - Nome do ingrediente e quantidade com unidade
+  - Data de validade (texto âmbar se a expirar em 3 dias, vermelho se expirado)
+  - Ícone de localização de armazenamento
+- **Ações de deslize** — deslize para a esquerda para eliminar (ícone de lixo vermelho revelado), deslize para a direita para editar (ícone de lápis revelado).
+- **FAB Adicionar** — abre uma folha inferior com pesquisa de ingrediente, campo de quantidade/unidade, seletor de localização e seletor de data de validade.
+
+---
+
+## Ecrã de Compras
+
+Lista de compras com agrupamento e comparação de preços.
+
+**Estrutura:**
+- **Lista agrupada** — artigos agrupados por categoria (Carne, Lacticínios, Produtos Frescos, etc.). Os cabeçalhos de categoria usam Inter 15px SemiBold.
+- **Linhas de artigos** — nome do ingrediente, quantidade, unidade e uma caixa de verificação. Tocar na caixa marca o artigo como verificado (texto riscado + caixa verde-sálvia).
+- **Crachá de preço** — se utilizador Pro e dados de preços da loja disponíveis, aparece um pequeno crachá de preço junto a cada artigo com o melhor preço disponível.
+- **Botão Gerar a partir do plano de refeições** — faixa no topo que oferece preencher automaticamente a lista a partir do plano de refeições atual.
+- **Botão Otimizar** (Pro) — botão "Encontrar melhores preços" que chama o endpoint de otimização e mostra uma folha inferior com comparação de loja única vs múltiplas lojas.
+- **Limpar verificados** — deslizar para dispensar artigos verificados, ou um botão "Limpar todos os verificados" no menu de opções da barra de aplicação.
+
+---
+
+## Modo de Cozinha
+
+Uma experiência a ecrã inteiro, sem distrações, passo a passo para cozinhar. Consulte o [guia do utilizador do Modo de Cozinha](/docs/pt/user-guide/cooking-mode) para a explicação completa.
+
+**Características principais da interface:**
+- **Navegação inferior oculta** — a barra de navegação inferior fica completamente oculta quando o modo de cozinha está ativo
+- **Cabeçalho** — título da receita em Playfair Display 20px (centrado) + botão de saída **×** à esquerda; sem outros elementos
+- **Barra de progresso** — linha verde-sálvia de 2px ao longo do topo do ecrã; preenche da esquerda para a direita proporcionalmente à conclusão dos passos
+- **Contador de passos** — "Passo N de M" em Inter Regular 12px cinzento, abaixo do cabeçalho
+- **Instrução do passo** — Inter Regular 16px, altura de linha 1.7 — o maior texto de corpo da aplicação, dimensionado intencionalmente para leitura a braço estendido
+- **Destaques de ingredientes** — qualquer nome de ingrediente no texto do passo é sublinhado em verde-sálvia; tocar mostra um popover com a quantidade escalada para o tamanho do agregado familiar do utilizador
+- **Botões de navegação** — Anterior (botão de texto cinzento, peso visual reduzido) e Próximo (botão píula verde-sálvia preenchido); a assimetria evita navegação acidental para trás; no último passo, Próximo torna-se "Concluído"
+- **Chip Perguntar à IA** — chip persistente "Perguntar à IA ✦" no canto inferior esquerdo; abre uma folha inferior a 70% da altura do ecrã, pré-contextualizada para a receita e passo atuais; balões da IA em branco com sombra suave, balões do utilizador em verde-sálvia, Inter 14px
+- **Bloqueio de ecrã ativo** — o modo de cozinha impede que o ecrã adormeça
+
+---
+
+## Barra de Navegação Inferior
+
+A barra de navegação persistente de 5 separadores na parte inferior de todos os ecrãs, exceto do Modo de Cozinha.
+
+**Separadores (da esquerda para a direita):**
+
+| Separador | Ícone | Rota |
+|-----------|-------|------|
+| Início | Casa | `/` |
+| Refeições | Calendário | `/meals` |
+| Receitas | Livro aberto | `/recipes` |
+| Despensa | Arquivo | `/pantry` |
+| Compras | Carrinho | `/groceries` |
+
+**Especificações:**
+- Biblioteca de ícones: Lucide, 22px
+- Etiqueta: Inter 10px, exibida abaixo do ícone
+- Altura da barra: 64px + inserção da área segura do dispositivo (padding inferior)
+- Separador superior: linha de 1px `#F0F0EE` — sem sombra na própria barra
+- **Separador ativo:** ícone verde-sálvia preenchido + etiqueta verde-sálvia (`#7A9A65`)
+- **Separadores inativos:** `#9CA3AF` tanto para ícone como para etiqueta
+- **Transições:** `AnimatedSwitcher` crossfade 150ms para mudanças de estado do ícone; `AnimatedDefaultTextStyle` para transições de cor da etiqueta
+- **FAB:** Sem botão de ação flutuante na própria barra — cada ecrã que necessita de uma ação primária (Despensa: Adicionar artigo, Refeições: Gerar plano) tem o seu próprio FAB posicionado dentro do conteúdo do ecrã
