@@ -1,0 +1,51 @@
+---
+title: Shopping List
+description: Building your grocery list and finding the best prices
+---
+
+# Shopping List
+
+## The Groceries screen
+
+Tap **"Groceries"** in the bottom navigation bar. Items are grouped by food category (Meat, Dairy, Produce, Pantry, etc.) with collapsible section headers.
+
+## Auto-generating from your meal plan
+
+At the top of the Groceries screen, tap **"Sync from meal plan"**. Cookest calculates which ingredients from your current meal plan you don't already have in your pantry and adds them to the list automatically.
+
+This uses the endpoint `POST /api/shopping-list/sync` which:
+1. Reads your active meal plan's ingredient requirements
+2. Subtracts quantities you already have in inventory
+3. Produces a list of what you still need to buy
+
+## Adding items manually
+
+Tap the **+** icon in the app bar to add a single item:
+- Item name (ingredient catalog search)
+- Quantity and unit
+
+## Checking off items as you shop
+
+Tap the checkbox on any row to mark it as purchased. The item name gets a strikethrough and the checkbox fills with sage green. Checked items stay visible (so you can see your progress) but visually recede.
+
+Tap **"Clear all checked"** in the app bar overflow menu to remove all completed items at once.
+
+## Price comparison (Pro)
+
+<Callout type="info">
+Price comparison and shopping list optimization require a **Pro or Family** subscription.
+</Callout>
+
+If your store admin has uploaded a recent promotional flyer, Pro users see a price badge next to each item with the best available price.
+
+### Finding the best store
+
+Tap **"Optimize prices"** to see:
+- **Cheapest single store** — buy everything at one place, minimizing trips
+- **Cheapest split** — buy from two or more stores for maximum savings
+
+The optimizer tells you exactly which items to buy where and the total cost for each strategy.
+
+## Removing an item
+
+Swipe any item left to delete it from the list.

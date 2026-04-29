@@ -1,0 +1,51 @@
+---
+title: Pantry Management
+description: Tracking your ingredients, quantities, and expiry dates
+---
+
+# Pantry Management
+
+## The Pantry screen
+
+Tap **"Pantry"** in the bottom navigation bar. Your ingredients are grouped into collapsible sections by storage location: **Fridge**, **Freezer**, **Pantry**, and **Other**.
+
+Tap any section header to collapse or expand it — useful when you only need to check one section at a time.
+
+## Adding an item
+
+Tap the sage green **+** button (bottom-right corner) to open the "Add item" bottom sheet.
+
+Fill in:
+- **Ingredient name** — type to search the ingredient catalog, then select from the suggestions
+- **Quantity** — numeric amount
+- **Unit** — g, kg, ml, L, pieces, etc.
+- **Storage location** — Fridge / Freezer / Pantry / Other
+- **Expiry date** — optional but strongly recommended; used for alerts and the home screen strip
+
+Tap **"Add"** to save.
+
+## Expiry alerts
+
+Items expiring within **3 days** appear with the expiry date in amber. Items expiring today or tomorrow have a faint amber background tint on the row.
+
+The **Home screen** shows an alert strip ("2 items expiring soon") when there are items within this window. Tap the strip to jump directly to the expiring items.
+
+## Editing an item
+
+Swipe any item row **right** to reveal the edit action (pencil icon, sage green). Tap it to open the edit sheet with all fields pre-filled.
+
+## Deleting an item
+
+Swipe any item row **left** to reveal the delete action (trash icon, red). The background reveals progressively as you swipe — the delete triggers only when the swipe is full.
+
+<Callout type="warn">
+Deletion is immediate and cannot be undone. If you made a mistake, add the item again manually.
+</Callout>
+
+## Inventory deduction when cooking
+
+When you mark a recipe as "cooked" (from the Recipe Detail screen or Cooking Mode), the app automatically deducts the recipe's ingredient quantities from your pantry — scaled by your household size. If an ingredient is not in your pantry, it is skipped silently.
+
+## Matching pantry to recipes
+
+On the Recipes screen, you can filter by **"In my pantry"** — this calls the API with `match_inventory=true` and shows a match percentage on each recipe card (e.g., "7/10 ingredients available").

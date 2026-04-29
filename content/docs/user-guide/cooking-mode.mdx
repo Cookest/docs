@@ -1,0 +1,82 @@
+---
+title: Cooking Mode
+description: Step-by-step cooking guide with AI assistance
+---
+
+# Cooking Mode
+
+Cooking Mode is a distraction-free experience designed for active cooking. When you enter it, the entire UI shifts — the bottom navigation disappears, and the screen is devoted entirely to guiding you through the recipe.
+
+## Entering cooking mode
+
+From any **Recipe Detail** screen, tap the **"Start Cooking"** floating action button (sage green, bottom-right corner).
+
+## The cooking mode screen
+
+### Progress bar
+
+A 2px sage green line runs across the very top of the screen. It fills from left to right as you advance through the steps — at Step 3 of 8, it is approximately 37.5% filled. The bar animates smoothly with each step.
+
+### Header
+
+The recipe title is displayed in **Playfair Display 20px** centered in the header. On the left, an **×** exit button. That's all — no other chrome. The screen is clean.
+
+### Step counter
+
+Below the header, a small **"Step 3 of 8"** label in Inter Regular 12px grey shows your position in the recipe.
+
+### Step instruction
+
+The current step instruction is displayed in **Inter Regular 16px** with **1.7 line height** — larger and more readable than anywhere else in the app. This size is intentional: you may be reading at arm's length while your hands are occupied.
+
+### Ingredient highlights
+
+Any ingredient mentioned in the step instruction is underlined in **sage green**. Tap an underlined ingredient to see a small popover showing:
+- The ingredient name
+- The quantity scaled to your **household size** (e.g., if the recipe serves 4 and your household is 2, quantities are halved)
+
+This means you never need to mentally recalculate quantities while cooking.
+
+### Navigation buttons
+
+At the bottom of the screen:
+- **Previous** — a plain text button in grey (deliberately low-weight to prevent accidental backward taps)
+- **Next** — a filled sage green pill button (the primary action)
+
+This asymmetry is intentional: it makes advancing forward feel natural while making going back a conscious choice.
+
+### Ask AI
+
+A persistent **"Ask AI ✦"** chip sits in the bottom-left corner at all times. It is always visible, even while scrolling through a long step.
+
+#### Using the AI assistant
+
+Tap **"Ask AI"** to open the AI chat bottom sheet:
+- The sheet rises to **70% of the screen height** with a drag handle at the top
+- It is pre-contextualised to the current recipe and step — you don't need to explain what you're cooking
+- Ask anything: "What can I substitute for heavy cream?", "How do I know when the onions are caramelised?", "I only have 150g of chicken — how do I adjust the quantities?"
+
+**Chat appearance:**
+- AI messages: white bubbles with a soft shadow, Inter 14px
+- Your messages: sage green bubbles, Inter 14px
+- Drag the sheet down to dismiss and return to the recipe step
+
+<Callout type="info">
+Free users can send **10 AI messages per day** across all chat sessions. Pro and Family users have unlimited AI chat.
+</Callout>
+
+## Completing a step
+
+Tap **"Next"** to advance. When you reach the final step, the Next button changes to **"Done"**. Tapping it:
+1. Marks the recipe as cooked in your cooking history
+2. Deducts used ingredients from your pantry (scaled by household size)
+3. Shows a brief completion animation
+4. Returns you to the Recipe Detail screen
+
+## Exiting early
+
+Tap the **×** in the header to exit cooking mode at any point. Progress is not saved — if you re-enter the recipe later, it starts from Step 1.
+
+## Screen stays awake
+
+Cooking Mode keeps the screen awake automatically. You won't need to unlock your phone mid-recipe.
