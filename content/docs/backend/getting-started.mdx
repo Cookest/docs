@@ -1,0 +1,72 @@
+---
+title: Getting Started
+description: Running the Cookest Rust API locally
+---
+
+# Getting Started
+
+## Prerequisites
+
+| Tool | Minimum version | Install |
+|------|----------------|---------|
+| Rust | 1.78+ | `rustup update stable` |
+| PostgreSQL | 15+ | [postgresql.org](https://www.postgresql.org) |
+| Ollama | latest | [ollama.ai](https://ollama.ai) (optional — for AI features) |
+| poppler | latest | `brew install poppler` / `apt install poppler-utils` (optional — for PDF pipeline) |
+
+PostgreSQL extensions required:
+```sql
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+```
+
+## Setup
+
+```bash
+# 1. Enter the api directory
+cd api
+
+# 2. Copy environment template
+cp .env.example .env
+# Edit .env — at minimum set DATABASE_URL and JWT_SECRET
+
+# 3. Create the database
+createdb cookest
+
+# 4. Start the server (runs migrations automatically)
+cargo run
+# Server starts on http://0.0.0.0:8080
+```
+
+## Build for production
+
+```bash
+cargo build --release
+./target/release/cookest-api
+```
+
+## Docker (optional)
+
+```dockerfile
+FROM rust:1.78-slim as builder
+WORKDIR /app
+COPY . .
+RUN cargo build --release
+
+FROM debian:bookworm-slim
+COPY --from=builder /app/target/release/cookest-api /usr/local/bin/
+CMD ["cookest-api"]
+```
+
+## Verifying the server
+
+```bash
+curl http://localhost:8080/api/ingredients?q=chicken
+# Returns a JSON array of matching ingredients
+```
+
+## Development tips
+
+- **Hot reload:** Install `cargo-watch` (`cargo install cargo-watch`) and run `cargo watch -x run`
+- **Logs:** Set `RUST_LOG=debug` in your `.env` for verbose output
+- **Migrations:** Run on every `cargo run` — safe to restart freely
