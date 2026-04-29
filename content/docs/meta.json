@@ -1,0 +1,4 @@
+{
+  "title": "Cookest Docs",
+  "pages": ["index", "architecture", "backend", "mobile", "etl", "contributing", "pt"]
+}

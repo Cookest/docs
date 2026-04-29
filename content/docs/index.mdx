@@ -1,13 +1,26 @@
 ---
-title: Hello World
-description: Your first document
+title: Introduction
+description: Cookest — AI-assisted meal planning and kitchen management platform
 ---
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
+# Welcome to Cookest
 
-## What is Next?
+Cookest is a full-stack AI-assisted meal planning and kitchen management platform built as a school project (PAP). It helps users plan weekly meals, manage their pantry, generate shopping lists, and get AI-powered cooking advice.
+
+## Project components
+
+| Component | Technology | Purpose |
+|-----------|-----------|---------|
+| **API** | Rust · Actix-Web 4 · SeaORM · PostgreSQL | REST backend |
+| **Mobile App** | Flutter · Dart · Riverpod | iOS & Android client |
+| **ETL Pipeline** | Python | Data ingestion & processing |
+
+## Quick navigation
 
 <Cards>
-  <Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />
+  <Card title="Architecture Overview" href="/docs/architecture/overview" description="How the three components fit together" />
+  <Card title="Backend API" href="/docs/backend/getting-started" description="Rust API setup and endpoints" />
+  <Card title="Mobile App" href="/docs/mobile/overview" description="Flutter app structure and design system" />
+  <Card title="ETL Pipeline" href="/docs/etl/overview" description="Python data pipeline" />
+  <Card title="Português" href="/docs/pt" description="Documentação em português" />
 </Cards>
