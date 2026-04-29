@@ -15,7 +15,7 @@ import { gitConfig } from '@/lib/shared';
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params;
-  const page = source.getPage(params.slug);
+  const page = source.getPage(params.slug, 'en');
   if (!page) notFound();
 
   const MDX = page.data.body;
@@ -45,12 +45,12 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 }
 
 export async function generateStaticParams() {
-  return source.generateParams();
+  return source.getPages('en').map((p) => ({ slug: p.slugs }));
 }
 
 export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): Promise<Metadata> {
   const params = await props.params;
-  const page = source.getPage(params.slug);
+  const page = source.getPage(params.slug, 'en');
   if (!page) notFound();
 
   return {

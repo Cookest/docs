@@ -1,5 +1,6 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import { BookOpen, Code2, Smartphone, Repeat2 } from 'lucide-react';
+import { BookOpen, Code2, Smartphone } from 'lucide-react';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
 export function baseOptions(): BaseLayoutProps {
   return {
@@ -30,10 +31,9 @@ export function baseOptions(): BaseLayoutProps {
         active: 'nested-url',
       },
       {
-        icon: <Repeat2 size={16} />,
-        text: 'Português',
-        url: '/docs/pt',
-        active: 'nested-url',
+        type: 'custom',
+        secondary: true,
+        children: <LanguageSwitcher />,
       },
     ],
   };
