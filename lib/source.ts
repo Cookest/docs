@@ -8,6 +8,21 @@ export const source = loader({
   baseUrl: docsRoute,
   source: docs.toFumadocsSource(),
   plugins: [lucideIconsPlugin()],
+  i18n: {
+    defaultLanguage: 'en',
+    languages: ['en', 'pt'],
+    // 'dir' parser: files under content/docs/pt/... are assigned locale='pt',
+    // all other files are assigned the default locale 'en'.
+    parser: 'dir',
+    // No silent fallback — if a PT page is missing, show 404 rather than EN.
+    fallbackLanguage: null,
+  },
+  // Keep PT pages at /docs/pt/... (not /pt/docs/...) to preserve existing URLs.
+  url(slugs, locale) {
+    const base = docsRoute; // '/docs'
+    if (locale === 'pt') return `${base}/pt/${slugs.join('/')}`;
+    return `${base}/${slugs.join('/')}`;
+  },
 });
 
 export function getPageImage(page: (typeof source)['$inferPage']) {
