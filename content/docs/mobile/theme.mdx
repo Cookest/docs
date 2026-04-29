@@ -84,3 +84,58 @@ ThemeData(
 | Delete swipe | Progressive opacity reveal | Drag-proportional |
 | Meal plan generation | Staggered fade-in per slot | 80ms between slots |
 | Snackbar confirmations | `ScaffoldMessenger` | Standard |
+
+---
+
+## Bottom Navigation specifications
+
+| Property | Value |
+|----------|-------|
+| Bar height | 64px + device safe area inset |
+| Icon size | 22px (Lucide) |
+| Label font | Inter 10px, below icon |
+| Active state | Sage green filled icon + sage green label (`#7A9A65`) |
+| Inactive state | `#9CA3AF` for both icon and label |
+| Top separator | 1px `#F0F0EE` line |
+| Bar shadow | None |
+| Icon transition | `AnimatedSwitcher` crossfade 150ms |
+| Label transition | `AnimatedDefaultTextStyle` 150ms |
+
+---
+
+## Spacing system
+
+| Context | Value |
+|---------|-------|
+| Horizontal screen padding | 20px (standard), 16px (list items) |
+| Card padding | 12–16px |
+| Section header top spacing | 16px |
+| Section header bottom spacing | 8px |
+| Border radius — pill chips | 20px |
+| Border radius — cards | 16px |
+| Border radius — smaller containers | 12px |
+| Border radius — list item thumbnails | 10px |
+| Input field border | 1px `#E5E7EB`, 10px radius |
+| Input field focus outline | 1.5px sage green |
+
+---
+
+## Selection indicators (ShadCN influence)
+
+| State | Appearance |
+|-------|------------|
+| Active tab / day selector | 2px sage green underline — no filled background |
+| Active category chip | Sage green fill + white text |
+| Inactive category chip | White background + 1px `#E5E7EB` border + `#6B7280` text |
+
+---
+
+## Interactive states
+
+| Interaction | Implementation | Duration |
+|-------------|---------------|---------|
+| Button press | `ScaleTransition` to 0.97 | 80ms |
+| Swipe-to-delete | Delete background opacity grows proportionally to swipe distance; reaches full colour at commit threshold | Drag-proportional |
+| Heart / favourite toggle | Scale animation + fill transition | 150ms |
+| Meal plan slot generation | Staggered fade-in, 80ms delay between each slot | Per slot |
+| Cooking mode step transition | Slide + fade | — |

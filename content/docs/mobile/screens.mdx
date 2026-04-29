@@ -90,3 +90,46 @@ Shopping list with grouping and price comparison.
 - **Generate from meal plan button** — banner at the top offering to auto-populate the list from the current meal plan.
 - **Optimize button** (Pro) — "Find best prices" button that calls the optimize endpoint and shows a bottom sheet with single-store vs multi-store breakdown.
 - **Clear checked** — swipe-to-dismiss on checked items, or a "Clear all checked" button in the app bar overflow menu.
+
+---
+
+## Cooking Mode
+
+A full-screen, distraction-free step-by-step cooking experience. See the [Cooking Mode user guide](/docs/user-guide/cooking-mode) for the complete walkthrough.
+
+**Key UI characteristics:**
+- **Bottom nav hidden** — the bottom navigation bar is completely hidden when cooking mode is active
+- **Header** — recipe title in Playfair Display 20px (centred) + an **×** exit button on the left; no other chrome
+- **Progress bar** — 2px sage green line across the very top of the screen; fills left to right proportionally to step completion
+- **Step counter** — "Step N of M" in Inter Regular 12px grey, below the header
+- **Step instruction** — Inter Regular 16px, line height 1.7 — the largest body text in the app, intentionally sized for arm's-length reading
+- **Ingredient highlights** — any ingredient name within the step text is underlined in sage green; tapping shows a popover with the quantity scaled to the user's household size
+- **Navigation buttons** — Previous (grey text button, low visual weight) and Next (sage green filled pill button); asymmetry prevents accidental backward navigation; on the final step, Next becomes "Done"
+- **Ask AI chip** — persistent "Ask AI ✦" chip in the bottom-left corner; opens a bottom sheet at 70% screen height, pre-contextualised to the current recipe and step; AI bubbles in white with soft shadow, user bubbles in sage green, Inter 14px
+- **Screen wake lock** — cooking mode prevents the screen from sleeping
+
+---
+
+## Bottom Navigation Bar
+
+The persistent 5-tab navigation bar at the bottom of every screen except Cooking Mode.
+
+**Tabs (left to right):**
+
+| Tab | Icon | Route |
+|-----|------|-------|
+| Home | House | `/` |
+| Meals | Calendar | `/meals` |
+| Recipes | Book-open | `/recipes` |
+| Pantry | Archive | `/pantry` |
+| Groceries | Shopping-cart | `/groceries` |
+
+**Specifications:**
+- Icon library: Lucide, 22px
+- Label: Inter 10px, displayed below the icon
+- Bar height: 64px + device safe area inset (bottom padding)
+- Top separator: 1px `#F0F0EE` line — no shadow on the bar itself
+- **Active tab:** sage green filled icon + sage green label (`#7A9A65`)
+- **Inactive tabs:** `#9CA3AF` for both icon and label
+- **Transitions:** `AnimatedSwitcher` crossfade 150ms for icon state changes; `AnimatedDefaultTextStyle` for label colour transitions
+- **FAB:** No floating action button on the bar itself — each screen that needs a primary action (Pantry: Add item, Meals: Generate plan) has its own FAB positioned within the screen content
