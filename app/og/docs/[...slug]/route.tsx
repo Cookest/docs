@@ -8,7 +8,11 @@ export const revalidate = false;
 
 export async function GET(_req: Request, { params }: RouteContext<'/og/docs/[...slug]'>) {
   const { slug } = await params;
-  const page = source.getPage(slug.slice(0, -1));
+  // Last segment is always 'image.png'; before it may be a locale prefix.
+  const rawSlug = slug.slice(0, -1);
+  const locale = rawSlug[0] === 'pt' ? 'pt' : 'en';
+  const cleanSlug = locale === 'pt' ? rawSlug.slice(1) : rawSlug;
+  const page = source.getPage(cleanSlug, locale);
   if (!page) notFound();
 
   return new ImageResponse(

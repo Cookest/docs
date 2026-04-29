@@ -26,7 +26,9 @@ export const source = loader({
 });
 
 export function getPageImage(page: (typeof source)['$inferPage']) {
-  const segments = [...page.slugs, 'image.png'];
+  // Include locale prefix in the path so EN and PT images have distinct URLs.
+  const localePart = page.locale && page.locale !== 'en' ? [page.locale] : [];
+  const segments = [...localePart, ...page.slugs, 'image.png'];
 
   return {
     segments,
@@ -35,7 +37,8 @@ export function getPageImage(page: (typeof source)['$inferPage']) {
 }
 
 export function getPageMarkdownUrl(page: (typeof source)['$inferPage']) {
-  const segments = [...page.slugs, 'content.md'];
+  const localePart = page.locale && page.locale !== 'en' ? [page.locale] : [];
+  const segments = [...localePart, ...page.slugs, 'content.md'];
 
   return {
     segments,
