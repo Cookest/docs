@@ -1,0 +1,43 @@
+---
+title: Variáveis de Ambiente
+description: Todas as variáveis de configuração para a API do Cookest
+---
+
+# Variáveis de Ambiente
+
+Copie `.env.example` para `.env` e preencha os valores necessários.
+
+```bash
+cp .env.example .env
+```
+
+## Variáveis obrigatórias
+
+| Variável | Descrição | Exemplo |
+|----------|-------------|---------|
+| `DATABASE_URL` | String de ligação ao PostgreSQL | `postgres://user:pass@localhost/cookest` |
+| `JWT_SECRET` | Chave de assinatura JWT — mínimo 32 caracteres | `super-secret-key-at-least-32-chars` |
+
+## Variáveis opcionais
+
+| Variável | Valor padrão | Descrição |
+|----------|---------|-------------|
+| `HOST` | `0.0.0.0` | Endereço de ligação do servidor |
+| `PORT` | `8080` | Porta do servidor |
+| `CORS_ORIGIN` | `http://localhost:3000` | Origem CORS permitida |
+| `JWT_ACCESS_EXPIRY_SECONDS` | `900` | TTL do token de acesso (15 minutos) |
+| `JWT_REFRESH_EXPIRY_SECONDS` | `2592000` | TTL do token de atualização (30 dias) |
+| `OLLAMA_URL` | `http://localhost:11434` | URL base da API do Ollama |
+| `OLLAMA_MODEL` | `llava` | Modelo de visão para extração de preços em PDF |
+| `PDF_UPLOAD_DIR` | `/var/cookest/pdfs` | Diretório com permissão de escrita para PDFs enviados |
+| `STRIPE_WEBHOOK_SECRET` | — | Segredo de assinatura do webhook Stripe (`whsec_...`) |
+
+## Notas de segurança
+
+<Callout type="warn">
+Nunca faça commit do ficheiro `.env`. O `.gitignore` já o exclui. Em produção, injete os segredos através de variáveis de ambiente ou de um gestor de segredos — nunca através de um ficheiro com commit.
+</Callout>
+
+- `JWT_SECRET` deve ter pelo menos 32 caracteres de dados aleatórios (`openssl rand -hex 32`)
+- `STRIPE_WEBHOOK_SECRET` começa com `whsec_` — obtenha no painel do Stripe
+- Em produção, `DATABASE_URL` deve utilizar um utilizador de base de dados dedicado com permissões mínimas

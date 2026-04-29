@@ -1,0 +1,53 @@
+---
+title: Visão Geral do Pipeline ETL
+description: Pipeline de dados Python para alimentar a base de dados de receitas e ingredientes do Cookest
+---
+
+# Pipeline ETL
+
+O pipeline ETL (Extração-Transformação-Carregamento) é um sistema de processamento de dados em Python que alimenta e mantém a base de dados PostgreSQL utilizada pela API do Cookest.
+
+## Finalidade
+
+O pipeline trata de:
+- Ingerir dados de receitas e ingredientes de fontes externas
+- Normalizar e limpar metadados nutricionais
+- Transformar dados brutos no esquema esperado pela base de dados da API
+- Carregar registos processados para o PostgreSQL
+
+## Localização
+
+```
+PAP/
+  etl/
+    .env.example    # Modelo de variáveis de ambiente
+    requirements.txt
+    ...
+```
+
+## Configuração
+
+```bash
+cd etl
+
+# Criar ambiente virtual
+python -m venv venv
+source venv/bin/activate   # Windows: venv\Scripts\activate
+
+# Instalar dependências
+pip install -r requirements.txt
+
+# Configurar o ambiente
+cp .env.example .env
+# Editar .env com DATABASE_URL e quaisquer chaves de API
+```
+
+## Variáveis de ambiente
+
+| Variável | Descrição |
+|----------|-------------|
+| `DATABASE_URL` | String de ligação ao PostgreSQL (mesma BD que a API) |
+
+<Callout type="info">
+O pipeline ETL escreve diretamente na mesma base de dados PostgreSQL utilizada pela API. Execute-o antes de iniciar a API pela primeira vez para popular os catálogos de ingredientes e receitas.
+</Callout>

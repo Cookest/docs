@@ -1,0 +1,183 @@
+---
+title: Guia de Documentação
+description: Como escrever, estruturar e manter a documentação do Cookest
+---
+
+# Guia de Documentação
+
+Este guia estabelece os padrões para toda a documentação do Cookest. Siga-o rigorosamente para que qualquer contribuidor — humano ou IA — possa produzir documentação consistente, precisa e útil.
+
+## Princípios
+
+1. **Precisão em primeiro lugar.** Documentação incorreta é pior do que nenhuma documentação. Se não tiver a certeza de um detalhe, marque-o com `<Callout type="warn">Verificar isto</Callout>` em vez de adivinhar.
+2. **Prosa mínima, máximo sinal.** Cada frase deve justificar a sua presença. Prefira tabelas e blocos de código em vez de parágrafos quando a estrutura adiciona clareza.
+3. **Exemplos em vez de descrições.** Para endpoints da API e padrões de código, um exemplo funcional vale mais do que três parágrafos de explicação.
+4. **Paridade bilingue.** Cada página em `content/docs/` deve ter um correspondente em português em `content/docs/pt/`. As traduções devem ser completas — sem rascunhos, sem frases de tradução automática não revistas.
+
+## Estrutura de ficheiros
+
+```
+content/docs/
+  <section>/
+    meta.json        ← Título de navegação e ordem das páginas para esta secção
+    <page>.mdx       ← Um conceito por página
+  pt/
+    <section>/       ← Espelho da estrutura em inglês
+      meta.json
+      <page>.mdx
+```
+
+### Regras de nomenclatura
+
+- Nomes de ficheiros: `kebab-case.mdx` (ex.: `getting-started.mdx`)
+- Manter os nomes de ficheiros idênticos entre `docs/` e `docs/pt/` — apenas o conteúdo muda
+- As pastas de secção correspondem ao grupo de navegação (ex.: `backend/`, `mobile/`, `etl/`)
+
+## Frontmatter
+
+Cada ficheiro `.mdx` deve ter:
+
+```mdx
+---
+title: Título da Página
+description: Uma frase que descreve com precisão o que o leitor irá aprender
+---
+```
+
+- `title`: Título em maiúsculas, corresponde ao H1 na página
+- `description`: Apresentado nos resultados de pesquisa e meta SEO — manter abaixo de 160 caracteres
+- Opcional: `full: true` para páginas de largura total (sem barra lateral direita)
+
+## Estrutura das páginas
+
+```mdx
+---
+title: Nome da Funcionalidade
+description: O que esta página cobre
+---
+
+# Nome da Funcionalidade     ← Corresponde exatamente ao título do frontmatter
+
+Parágrafo de visão geral breve — máximo 1–3 frases.
+
+## Título de Secção           ← H2 para tópicos principais
+...
+
+### Subsecção                 ← H3 para detalhes dentro de um tópico
+...
+```
+
+Regras:
+- H1 (`#`) aparece exatamente uma vez por página, correspondendo ao `title` do frontmatter
+- H2 (`##`) para secções de nível superior
+- H3 (`###`) apenas para subsecções — nunca desça abaixo de H3
+- Não saltar níveis de cabeçalho
+
+## Blocos de código
+
+Especifique sempre a linguagem:
+
+    ```bash
+    cargo run
+    ```
+
+    ```json
+    { "key": "value" }
+    ```
+
+    ```dart
+    final result = await repo.getRecipes();
+    ```
+
+Para caminhos de ficheiros, use `bash` com um comentário:
+```bash
+# api/src/handlers/recipe.rs
+```
+
+## Tabelas
+
+Use tabelas para:
+- Variáveis de ambiente
+- Listagens de endpoints da API
+- Comparação de funcionalidades (níveis)
+- Descrições de campos/propriedades
+
+## Avisos
+
+Use os componentes `<Callout>` do Fumadocs para avisos importantes:
+
+```mdx
+<Callout type="info">
+Informação geral que acrescenta contexto.
+</Callout>
+
+<Callout type="warn">
+Algo que o leitor não pode ignorar — um erro comum ou nota de segurança.
+</Callout>
+
+<Callout type="error">
+Algo que irá falhar se não for feito corretamente.
+</Callout>
+```
+
+Tipos: `info` (azul), `warn` (amarelo), `error` (vermelho).
+
+## Diagramas
+
+Use Mermaid para todos os diagramas. O Fumadocs renderiza Mermaid nativamente em blocos de código.
+
+Tipos de diagrama usados neste projeto:
+- `graph TD` — diagramas de componentes/arquitetura
+- `sequenceDiagram` — fluxos de autenticação, fluxos de pedido/resposta
+- `erDiagram` — esquema da base de dados
+
+Mantenha os diagramas focados — um conceito por diagrama.
+
+## Documentação de endpoints da API
+
+Cada página de endpoint segue esta estrutura — tabela de Método, Caminho, Autenticação, Nível seguida de exemplos de pedido/resposta.
+
+## Escrever em português
+
+A pasta `content/docs/pt/` contém traduções em português. Regras:
+
+- Usar Português Europeu (PT-PT), não Português do Brasil
+- "autenticação" e não "autentificação"
+- "palavra-passe" e não "senha"
+- "subscrição" e não "assinatura" (no contexto de subscription)
+- Manter todos os blocos de código, exemplos JSON e caminhos de endpoints em inglês — não traduzir estes elementos
+- Traduzir toda a prosa, cabeçalhos, cabeçalhos de tabelas e conteúdo de callouts
+- Manter `title` e `description` do frontmatter traduzidos
+- Termos técnicos (JWT, Bearer, webhook, payload) permanecem em inglês
+
+## meta.json
+
+Cada pasta requer um `meta.json`:
+
+```json
+{
+  "title": "Título da Secção",
+  "pages": ["pagina-um", "pagina-dois", "subpasta"]
+}
+```
+
+## Convenções de commit para documentação
+
+```
+docs: add authentication flow page
+docs: translate backend section to PT
+docs: fix incorrect endpoint path in meal-plans
+docs(pt): update getting-started translation
+```
+
+## Notas para contribuidores IA
+
+Se for um assistente de IA a continuar o trabalho nesta documentação:
+
+1. **Leia este guia primeiro** antes de escrever novas páginas
+2. **Leia as páginas existentes** em ambas as línguas antes de escrever novas — mantenha consistência de voz e terminologia
+3. **Verifique o README da API** em `../api/README.md` e a aplicação Flutter em `../UI/` como fonte de verdade
+4. **Nunca invente caminhos de endpoints ou nomes de campos** — verifique no código fonte
+5. **Mantenha a paridade bilingue** — cada página em inglês que criar ou atualizar deve ter uma atualização correspondente em português
+6. **Use o vocabulário estabelecido**: diga "verde-sálvia" e não "verde", "recipe card" e não "recipe tile", "Playfair Display" e não "fonte serif"
+7. O site de documentação está em `/Users/exxo/Documents/code/PAP/docs` — é um projeto Fumadocs independente com o seu próprio repositório git
