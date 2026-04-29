@@ -1,45 +1,72 @@
-# .
+# Cookest Docs
 
-This is a Next.js application generated with
-[Create Fumadocs](https://github.com/fuma-nama/fumadocs).
+Full project documentation for **Cookest** — an AI-assisted meal planning and kitchen management platform. Built with [Fumadocs](https://fumadocs.dev) on Next.js.
 
-Run development server:
+Available in **English** and **Portuguese (PT)**. Use the language toggle in the top navigation to switch.
+
+---
+
+## Running locally
 
 ```bash
-npm run dev
-# or
-pnpm dev
-# or
-yarn dev
+bun run dev
+# Open http://localhost:3000/docs
 ```
 
-Open http://localhost:3000 with your browser to see the result.
+> **macOS 26 Tahoe (arm64) note:** `bun i` is configured to skip esbuild's postinstall script (see `bunfig.toml`). If you need to regenerate `.source/` type files after adding MDX content, run `bun run generate` manually.
 
-## Explore
+---
 
-In the project, you can see:
+## Documentation structure
 
-- `lib/source.ts`: Code for content source adapter, [`loader()`](https://fumadocs.dev/docs/headless/source-api) provides the interface to access your content.
-- `lib/layout.shared.tsx`: Shared options for layouts, optional but preferred to keep.
+| Section | Description |
+|---|---|
+| **Architecture** | System overview, data flow, tech stack |
+| **Backend** | Rust/Actix-Web API — auth, endpoints, data models |
+| **Mobile** | Flutter app — theming, screens, navigation |
+| **User guide** | How to use Cookest as an end user |
+| **ETL pipeline** | PDF scraping pipeline for supermarket promotions |
 
-| Route                     | Description                                            |
-| ------------------------- | ------------------------------------------------------ |
-| `app/(home)`              | The route group for your landing page and other pages. |
-| `app/docs`                | The documentation layout and pages.                    |
-| `app/api/search/route.ts` | The Route Handler for search.                          |
+---
 
-### Fumadocs MDX
+## Content layout
 
-A `source.config.ts` config file has been included, you can customise different options like frontmatter schema.
+```
+content/docs/               — English content
+  meta.json                 — sidebar order and titles
+  architecture/
+  backend/
+  mobile/
+  user-guide/
+  etl-pipeline/
 
-Read the [Introduction](https://fumadocs.dev/docs/mdx) for further details.
+content/docs/pt/            — Portuguese content (mirrors EN structure)
+  meta.json
+  architecture/
+  backend/
+  mobile/
+  user-guide/
+  etl-pipeline/
+```
 
-## Learn More
+---
 
-To learn more about Next.js and Fumadocs, take a look at the following
-resources:
+## Adding or editing documentation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js
-  features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [Fumadocs](https://fumadocs.dev) - learn about Fumadocs
+1. Edit or create `.mdx` files under `content/docs/` (EN) or `content/docs/pt/` (PT).
+2. Update the relevant `meta.json` to add the page to the sidebar.
+3. If you added new files, run `bun run generate` to update `.source/` types.
+4. Run `bun run dev` to preview.
+
+See [`lib/source.ts`](lib/source.ts) for i18n loader configuration and [`lib/layout.shared.tsx`](lib/layout.shared.tsx) for shared nav options.
+
+---
+
+## Related repositories
+
+| Folder | Description |
+|---|---|
+| `../api/` | Rust + Actix-Web backend API |
+| `../UI/` | Flutter mobile app |
+| `../etl/` | Python ETL pipeline for price scraping |
+
