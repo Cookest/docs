@@ -1,0 +1,5 @@
+[install]
+# esbuild's arm64 binary is SIGKILL'd on macOS 26 Tahoe beta (arm64 incompatibility).
+# The binary works fine at runtime — only install-time validation checks fail.
+# fumadocs-mdx was moved from postinstall to `bun run generate` to avoid this.
+ignoreScripts = ["esbuild"]
