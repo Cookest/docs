@@ -1,0 +1,190 @@
+---
+title: Lista de Compras
+description: Gestão da lista de compras e otimizador de comparação de preços
+---
+
+# Lista de Compras
+
+## GET /api/shopping-list
+
+Obter a lista de compras atual do utilizador.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| GET | `/api/shopping-list` | JWT Bearer | Free |
+
+### Resposta `200 OK`
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "ingredient_id": 1,
+      "name": "Chicken Breast",
+      "quantity": 600,
+      "unit": "g",
+      "is_checked": false,
+      "category": "meat",
+      "added_at": "2024-01-20T10:00:00Z"
+    }
+  ],
+  "total_items": 8,
+  "checked_items": 2
+}
+```
+
+---
+
+## POST /api/shopping-list
+
+Adicionar um artigo à lista de compras.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| POST | `/api/shopping-list` | JWT Bearer | Free |
+
+### Corpo do pedido
+
+```json
+{
+  "ingredient_id": 1,
+  "quantity": 600,
+  "unit": "g"
+}
+```
+
+### Resposta `201 Created`
+
+Devolve o artigo da lista de compras criado.
+
+---
+
+## PUT /api/shopping-list/:id
+
+Atualizar um artigo da lista de compras (quantidade ou marcar/desmarcar).
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| PUT | `/api/shopping-list/:id` | JWT Bearer | Free |
+
+### Corpo do pedido
+
+```json
+{
+  "quantity": 800,
+  "unit": "g",
+  "is_checked": true
+}
+```
+
+### Resposta `200 OK`
+
+Devolve o artigo atualizado.
+
+---
+
+## DELETE /api/shopping-list/:id
+
+Remover um artigo da lista de compras.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| DELETE | `/api/shopping-list/:id` | JWT Bearer | Free |
+
+### Resposta `204 No Content`
+
+---
+
+## POST /api/shopping-list/generate
+
+Gerar automaticamente uma lista de compras a partir de um plano de refeições, tendo em conta o que já está na despensa.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| POST | `/api/shopping-list/generate` | JWT Bearer | Free |
+
+### Corpo do pedido
+
+```json
+{
+  "meal_plan_id": "uuid"
+}
+```
+
+### Resposta `200 OK`
+
+```json
+{
+  "added_items": 6,
+  "skipped_in_pantry": 3,
+  "items": [ ]
+}
+```
+
+---
+
+## GET /api/shopping-list/prices
+
+Obter os preços atuais das lojas para todos os artigos da lista de compras. **Requer nível Pro.**
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| GET | `/api/shopping-list/prices` | JWT Bearer | **Pro** |
+
+### Resposta `200 OK`
+
+```json
+{
+  "items": [
+    {
+      "ingredient_name": "Chicken Breast",
+      "prices": [
+        {
+          "store_name": "Continente",
+          "price": 3.49,
+          "unit": "kg",
+          "discounted_price": 2.99,
+          "valid_until": "2024-01-28"
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+## GET /api/shopping-list/optimize
+
+Calcular a loja única mais barata e a divisão mais barata por múltiplas lojas. **Requer nível Pro.**
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| GET | `/api/shopping-list/optimize` | JWT Bearer | **Pro** |
+
+### Resposta `200 OK`
+
+```json
+{
+  "single_store_best": {
+    "store_name": "Continente",
+    "total_price": 24.50,
+    "coverage_percent": 85
+  },
+  "multi_store_split": [
+    {
+      "store_name": "Continente",
+      "items": ["Chicken Breast", "Pasta"],
+      "subtotal": 8.47
+    },
+    {
+      "store_name": "Pingo Doce",
+      "items": ["Olive Oil", "Tomatoes"],
+      "subtotal": 5.20
+    }
+  ],
+  "multi_store_total": 13.67,
+  "savings": 10.83
+}
+```

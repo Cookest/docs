@@ -1,0 +1,244 @@
+---
+title: Receitas
+description: CRUD de receitas, pesquisa, favoritos, avaliação e registo de cozedura
+---
+
+# Receitas
+
+## GET /api/recipes
+
+Pesquisar e navegar no catálogo de receitas.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| GET | `/api/recipes` | JWT Opcional | Free |
+
+### Parâmetros de consulta
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `q` | string | Consulta de pesquisa de texto completo |
+| `category` | string | Filtrar por cozinha (ex.: `italian`, `asian`) |
+| `difficulty` | string | `easy` \| `medium` \| `hard` |
+| `max_time` | integer | Tempo total máximo em minutos |
+| `dietary` | string | Filtro alimentar (ex.: `vegetarian`, `vegan`, `gluten_free`) |
+| `limit` | integer | Máximo de resultados (padrão: 20) |
+| `offset` | integer | Deslocamento de paginação |
+
+### Resposta `200 OK`
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "title": "Pasta Carbonara",
+      "description": "Classic Roman pasta dish",
+      "cuisine": "italian",
+      "difficulty": "medium",
+      "prep_time": 10,
+      "cook_time": 20,
+      "servings": 4,
+      "calories": 520,
+      "is_favourite": false,
+      "rating_avg": 4.3,
+      "rating_count": 12,
+      "image_url": "https://..."
+    }
+  ],
+  "total": 150,
+  "limit": 20,
+  "offset": 0
+}
+```
+
+---
+
+## GET /api/recipes/:id
+
+Obter detalhes completos da receita, incluindo ingredientes e passos.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| GET | `/api/recipes/:id` | JWT Opcional | Free |
+
+### Resposta `200 OK`
+
+```json
+{
+  "id": "uuid",
+  "title": "Pasta Carbonara",
+  "description": "Classic Roman pasta dish",
+  "cuisine": "italian",
+  "difficulty": "medium",
+  "prep_time": 10,
+  "cook_time": 20,
+  "servings": 4,
+  "is_favourite": false,
+  "rating_avg": 4.3,
+  "rating_count": 12,
+  "ingredients": [
+    {
+      "ingredient_id": 1,
+      "name": "Spaghetti",
+      "quantity": 400,
+      "unit": "g"
+    }
+  ],
+  "steps": [
+    {
+      "step_number": 1,
+      "instruction": "Boil salted water and cook spaghetti until al dente."
+    }
+  ],
+  "nutrition": {
+    "calories": 520,
+    "protein": 22,
+    "carbs": 68,
+    "fat": 18,
+    "fiber": 3
+  },
+  "images": ["https://..."]
+}
+```
+
+---
+
+## POST /api/recipes
+
+Criar uma nova receita. **Requer nível Pro ou Family.**
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| POST | `/api/recipes` | JWT Bearer | **Pro** |
+
+### Corpo do pedido
+
+```json
+{
+  "title": "My Special Pasta",
+  "description": "A family favourite",
+  "cuisine": "italian",
+  "difficulty": "easy",
+  "prep_time": 15,
+  "cook_time": 30,
+  "servings": 4,
+  "ingredients": [
+    { "ingredient_id": 1, "quantity": 400, "unit": "g" }
+  ],
+  "steps": [
+    { "step_number": 1, "instruction": "Cook pasta." }
+  ]
+}
+```
+
+### Resposta `201 Created`
+
+Devolve o objeto de receita criado com `id`.
+
+---
+
+## PUT /api/recipes/:id
+
+Atualizar uma receita. Apenas o proprietário da receita ou um administrador pode atualizar.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| PUT | `/api/recipes/:id` | JWT Bearer | **Pro** |
+
+Mesmo corpo que o POST. Devolve a receita atualizada.
+
+---
+
+## DELETE /api/recipes/:id
+
+Eliminar uma receita. Apenas o proprietário ou administrador pode eliminar.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| DELETE | `/api/recipes/:id` | JWT Bearer | **Pro** |
+
+### Resposta `204 No Content`
+
+---
+
+## POST /api/recipes/:id/favourite
+
+Marcar uma receita como favorita.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| POST | `/api/recipes/:id/favourite` | JWT Bearer | Free |
+
+### Resposta `200 OK`
+
+```json
+{ "is_favourite": true }
+```
+
+---
+
+## DELETE /api/recipes/:id/favourite
+
+Remover uma receita dos favoritos.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| DELETE | `/api/recipes/:id/favourite` | JWT Bearer | Free |
+
+### Resposta `200 OK`
+
+```json
+{ "is_favourite": false }
+```
+
+---
+
+## POST /api/recipes/:id/rate
+
+Avaliar uma receita (1–5 estrelas).
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| POST | `/api/recipes/:id/rate` | JWT Bearer | Free |
+
+### Corpo do pedido
+
+```json
+{
+  "rating": 5,
+  "notes": "Absolutely delicious!"
+}
+```
+
+### Resposta `200 OK`
+
+Devolve a avaliação agregada atualizada.
+
+---
+
+## POST /api/recipes/:id/cook
+
+Registar que o utilizador cozinhou esta receita. Aciona a dedução do inventário.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| POST | `/api/recipes/:id/cook` | JWT Bearer | Free |
+
+### Corpo do pedido
+
+```json
+{
+  "servings": 2
+}
+```
+
+### Resposta `200 OK`
+
+```json
+{
+  "cooked_at": "2024-01-20T18:30:00Z",
+  "inventory_updated": true,
+  "ingredients_deducted": 4
+}
+```

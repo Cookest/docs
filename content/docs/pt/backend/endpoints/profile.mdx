@@ -1,0 +1,250 @@
+---
+title: Perfil e Preferências
+description: Perfil do utilizador, preferências alimentares, favoritos e histórico
+---
+
+# Perfil e Preferências
+
+## GET /api/me
+
+Obter o perfil do utilizador autenticado.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| GET | `/api/me` | JWT Bearer | Free |
+
+### Resposta `200 OK`
+
+```json
+{
+  "id": "uuid",
+  "email": "user@example.com",
+  "name": "Alice",
+  "household_size": 2,
+  "dietary_restrictions": ["vegetarian"],
+  "allergies": ["nuts"],
+  "health_goals": ["weight_loss"],
+  "cooking_skill": "intermediate",
+  "tier": "pro",
+  "created_at": "2024-01-15T10:00:00Z"
+}
+```
+
+---
+
+## PUT /api/me
+
+Atualizar o perfil do utilizador autenticado.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| PUT | `/api/me` | JWT Bearer | Free |
+
+### Corpo do pedido (todos os campos opcionais)
+
+```json
+{
+  "name": "Alice Smith",
+  "household_size": 3,
+  "dietary_restrictions": ["vegetarian", "gluten_free"],
+  "allergies": ["nuts", "shellfish"],
+  "health_goals": ["muscle_gain"],
+  "cooking_skill": "advanced"
+}
+```
+
+### Resposta `200 OK`
+
+Devolve o objeto de perfil do utilizador atualizado.
+
+---
+
+## GET /api/me/preferences
+
+Obter os vetores de preferências de sabor aprendidos do utilizador.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| GET | `/api/me/preferences` | JWT Bearer | Free |
+
+### Resposta `200 OK`
+
+```json
+{
+  "cuisine_weights": {
+    "italian": 0.85,
+    "asian": 0.72,
+    "mediterranean": 0.91
+  },
+  "difficulty_weights": {
+    "easy": 0.60,
+    "medium": 0.80,
+    "hard": 0.30
+  },
+  "ingredient_weights": {
+    "chicken": 0.90,
+    "pasta": 0.75,
+    "broccoli": 0.65
+  }
+}
+```
+
+Estes pesos são atualizados automaticamente pelo algoritmo de aprendizagem online quando os utilizadores avaliam ou concluem receitas.
+
+---
+
+## DELETE /api/me/preferences
+
+Repor todos os pesos de preferências para neutro (0.5).
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| DELETE | `/api/me/preferences` | JWT Bearer | Free |
+
+### Resposta `200 OK`
+
+```json
+{ "message": "Preferences reset successfully" }
+```
+
+---
+
+## GET /api/me/favourites
+
+Listar as receitas guardadas/marcadas como favoritas pelo utilizador.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| GET | `/api/me/favourites` | JWT Bearer | Free |
+
+### Parâmetros de consulta
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `limit` | integer | Máximo de resultados (padrão: 20) |
+| `offset` | integer | Deslocamento de paginação |
+
+### Resposta `200 OK`
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "title": "Pasta Carbonara",
+      "cuisine": "italian",
+      "difficulty": "medium",
+      "prep_time": 10,
+      "cook_time": 20,
+      "calories": 520,
+      "image_url": "https://..."
+    }
+  ],
+  "total": 14,
+  "limit": 20,
+  "offset": 0
+}
+```
+
+---
+
+## GET /api/me/history
+
+Obter o histórico de cozedura do utilizador (receitas que cozinhou).
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| GET | `/api/me/history` | JWT Bearer | Free |
+
+### Parâmetros de consulta
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `limit` | integer | Máximo de resultados (padrão: 20) |
+| `offset` | integer | Deslocamento de paginação |
+
+### Resposta `200 OK`
+
+```json
+{
+  "items": [
+    {
+      "recipe_id": "uuid",
+      "title": "Pasta Carbonara",
+      "cooked_at": "2024-01-20T18:30:00Z",
+      "servings": 2
+    }
+  ],
+  "total": 42
+}
+```
+
+---
+
+## GET /api/me/push-tokens
+
+Listar os tokens de notificações push registados para o utilizador.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| GET | `/api/me/push-tokens` | JWT Bearer | Free |
+
+### Resposta `200 OK`
+
+```json
+[
+  {
+    "id": "uuid",
+    "token": "ExponentPushToken[...]",
+    "platform": "ios",
+    "created_at": "2024-01-15T10:00:00Z"
+  }
+]
+```
+
+---
+
+## POST /api/me/push-tokens
+
+Registar um token de notificações push do dispositivo.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| POST | `/api/me/push-tokens` | JWT Bearer | Free |
+
+### Corpo do pedido
+
+```json
+{
+  "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]",
+  "platform": "ios"
+}
+```
+
+Valores de `platform`: `ios` | `android` | `web`
+
+### Resposta `201 Created`
+
+```json
+{
+  "id": "uuid",
+  "token": "ExponentPushToken[...]",
+  "platform": "ios"
+}
+```
+
+---
+
+## DELETE /api/me/push-tokens/:id
+
+Remover um token de notificações push (por exemplo, ao terminar sessão).
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| DELETE | `/api/me/push-tokens/:id` | JWT Bearer | Free |
+
+### Resposta `204 No Content`
+
+| Estado | Significado |
+|--------|-------------|
+| 404 | Token não encontrado ou pertence a outro utilizador |

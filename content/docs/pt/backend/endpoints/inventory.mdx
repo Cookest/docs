@@ -1,0 +1,137 @@
+---
+title: Inventário
+description: Gestão da despensa — artigos, quantidades, datas de validade e deduções
+---
+
+# Inventário
+
+## GET /api/inventory
+
+Listar os artigos da despensa do utilizador.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| GET | `/api/inventory` | JWT Bearer | Free |
+
+### Parâmetros de consulta
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `expiring_soon` | boolean | Filtrar artigos a expirar nos próximos 3 dias |
+| `location` | string | Filtrar por localização de armazenamento (`fridge`, `freezer`, `pantry`) |
+
+### Resposta `200 OK`
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "ingredient_id": 1,
+      "name": "Chicken Breast",
+      "quantity": 500,
+      "unit": "g",
+      "location": "fridge",
+      "expiry_date": "2024-01-22",
+      "is_expiring_soon": true,
+      "added_at": "2024-01-18T09:00:00Z"
+    }
+  ],
+  "expiring_count": 2
+}
+```
+
+---
+
+## POST /api/inventory
+
+Adicionar um artigo à despensa.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| POST | `/api/inventory` | JWT Bearer | Free |
+
+### Corpo do pedido
+
+```json
+{
+  "ingredient_id": 1,
+  "quantity": 500,
+  "unit": "g",
+  "location": "fridge",
+  "expiry_date": "2024-01-22"
+}
+```
+
+Valores de `location`: `fridge` | `freezer` | `pantry` | `other`
+
+### Resposta `201 Created`
+
+Devolve o artigo de inventário criado.
+
+---
+
+## PUT /api/inventory/:id
+
+Atualizar um artigo do inventário (quantidade, data de validade, localização).
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| PUT | `/api/inventory/:id` | JWT Bearer | Free |
+
+### Corpo do pedido (todos os campos opcionais)
+
+```json
+{
+  "quantity": 300,
+  "unit": "g",
+  "location": "freezer",
+  "expiry_date": "2024-02-15"
+}
+```
+
+### Resposta `200 OK`
+
+Devolve o artigo de inventário atualizado.
+
+---
+
+## DELETE /api/inventory/:id
+
+Remover um artigo da despensa.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| DELETE | `/api/inventory/:id` | JWT Bearer | Free |
+
+### Resposta `204 No Content`
+
+---
+
+## POST /api/inventory/sync
+
+Sincronizar o inventário após cozinhar — deduz quantidades de ingredientes com base na lista de ingredientes de uma receita.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| POST | `/api/inventory/sync` | JWT Bearer | Free |
+
+### Corpo do pedido
+
+```json
+{
+  "recipe_id": "uuid",
+  "servings": 2
+}
+```
+
+### Resposta `200 OK`
+
+```json
+{
+  "updated_items": 4,
+  "depleted_items": ["Olive Oil", "Garlic"]
+}
+```
+
+`depleted_items` contém os nomes dos ingredientes que atingiram quantidade zero e foram removidos automaticamente.

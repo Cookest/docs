@@ -1,0 +1,256 @@
+---
+title: Autenticação e Ingredientes
+description: Endpoints de autenticação e pesquisa de ingredientes
+---
+
+# Autenticação e Ingredientes
+
+## POST /api/auth/register
+
+Criar uma nova conta de utilizador.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| POST | `/api/auth/register` | Nenhuma | Free |
+
+### Corpo do pedido
+
+```json
+{
+  "email": "user@example.com",
+  "password": "securepassword",
+  "name": "Alice"
+}
+```
+
+### Resposta `201 Created`
+
+```json
+{
+  "id": "uuid",
+  "email": "user@example.com",
+  "name": "Alice"
+}
+```
+
+---
+
+## POST /api/auth/login
+
+Autenticar e receber tokens.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| POST | `/api/auth/login` | Nenhuma | Free |
+
+### Corpo do pedido
+
+```json
+{
+  "email": "user@example.com",
+  "password": "securepassword"
+}
+```
+
+### Resposta `200 OK`
+
+```json
+{
+  "access_token": "eyJ...",
+  "token_type": "Bearer",
+  "expires_in": 900
+}
+```
+
+O `refresh_token` é definido como cookie httpOnly (`Set-Cookie: refresh_token=...`).
+
+---
+
+## POST /api/auth/refresh
+
+Obter um novo token de acesso usando o cookie de atualização.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| POST | `/api/auth/refresh` | Cookie | Free |
+
+Não envia corpo. O browser/Dio cookie jar reencaminha o cookie de atualização automaticamente.
+
+### Resposta `200 OK`
+
+```json
+{
+  "access_token": "eyJ...",
+  "token_type": "Bearer",
+  "expires_in": 900
+}
+```
+
+| Estado | Significado |
+|--------|-------------|
+| 401 | Token de atualização em falta, expirado ou revogado |
+
+---
+
+## POST /api/auth/logout
+
+Revogar o token de atualização.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| POST | `/api/auth/logout` | JWT Bearer | Free |
+
+Nenhum corpo necessário. Elimina o token de atualização da base de dados. O cookie httpOnly também é limpo.
+
+### Resposta `200 OK`
+
+```json
+{ "message": "Logged out successfully" }
+```
+
+---
+
+## POST /api/auth/onboarding
+
+Completar o perfil do utilizador após o registo.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| POST | `/api/auth/onboarding` | JWT Bearer | Free |
+
+### Corpo do pedido
+
+```json
+{
+  "household_size": 2,
+  "dietary_restrictions": ["vegetarian"],
+  "allergies": ["nuts"],
+  "health_goals": ["weight_loss"],
+  "cooking_skill": "intermediate"
+}
+```
+
+Valores de `cooking_skill`: `beginner` | `intermediate` | `advanced`
+
+### Resposta `200 OK`
+
+Devolve o objeto de utilizador atualizado.
+
+---
+
+## POST /api/me/change-password
+
+Alterar a palavra-passe do utilizador autenticado.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| POST | `/api/me/change-password` | JWT Bearer | Free |
+
+### Corpo do pedido
+
+```json
+{
+  "current_password": "oldpassword",
+  "new_password": "newpassword"
+}
+```
+
+### Resposta `200 OK`
+
+```json
+{ "message": "Password changed successfully" }
+```
+
+| Estado | Significado |
+|--------|-------------|
+| 400 | Palavra-passe atual incorreta |
+
+---
+
+## DELETE /api/me
+
+Eliminar permanentemente a conta do utilizador autenticado e todos os dados associados.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| DELETE | `/api/me` | JWT Bearer | Free |
+
+<Callout type="warn">
+Esta ação é irreversível. Todos os dados do utilizador, incluindo receitas, planos de refeições, inventário e histórico de conversas, são eliminados permanentemente.
+</Callout>
+
+### Resposta `204 No Content`
+
+---
+
+## GET /api/ingredients
+
+Pesquisar o catálogo de ingredientes.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| GET | `/api/ingredients` | Nenhuma | Free |
+
+### Parâmetros de consulta
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `q` | string | Consulta de pesquisa (usa correspondência difusa `pg_trgm`) |
+| `limit` | integer | Máximo de resultados (padrão: 20) |
+| `offset` | integer | Deslocamento de paginação |
+
+### Resposta `200 OK`
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Chicken Breast",
+    "category": "meat",
+    "calories_per_100g": 165,
+    "protein_per_100g": 31.0,
+    "carbs_per_100g": 0.0,
+    "fat_per_100g": 3.6
+  }
+]
+```
+
+---
+
+## GET /api/ingredients/:id
+
+Obter detalhes completos do ingrediente, incluindo micronutrientes e tamanhos de porção.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| GET | `/api/ingredients/:id` | Nenhuma | Free |
+
+### Resposta `200 OK`
+
+```json
+{
+  "id": 1,
+  "name": "Chicken Breast",
+  "category": "meat",
+  "calories_per_100g": 165,
+  "protein_per_100g": 31.0,
+  "carbs_per_100g": 0.0,
+  "fat_per_100g": 3.6,
+  "nutrients": {
+    "fiber": 0,
+    "sugar": 0,
+    "sodium": 74,
+    "vitamin_c": 0,
+    "calcium": 11,
+    "iron": 0.9
+  },
+  "portion_sizes": [
+    { "name": "1 breast", "grams": 174 },
+    { "name": "100g", "grams": 100 }
+  ]
+}
+```
+
+| Estado | Significado |
+|--------|-------------|
+| 404 | Ingrediente não encontrado |

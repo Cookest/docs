@@ -1,0 +1,164 @@
+---
+title: Planos de Refeições
+description: Geração de planos de refeições semanais, gestão de slots e resumos nutricionais
+---
+
+# Planos de Refeições
+
+## GET /api/meal-plans
+
+Listar os planos de refeições do utilizador.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| GET | `/api/meal-plans` | JWT Bearer | Free |
+
+### Resposta `200 OK`
+
+```json
+[
+  {
+    "id": "uuid",
+    "week_start": "2024-01-15",
+    "created_at": "2024-01-14T10:00:00Z",
+    "slot_count": 21
+  }
+]
+```
+
+---
+
+## POST /api/meal-plans/generate
+
+Gerar um novo plano de refeições semanal com pontuação por IA. **Requer nível Pro ou Family.**
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| POST | `/api/meal-plans/generate` | JWT Bearer | **Pro** |
+
+### Corpo do pedido
+
+```json
+{
+  "week_start": "2024-01-15",
+  "preferences": {
+    "max_prep_time": 30,
+    "cuisines": ["italian", "mediterranean"],
+    "avoid_repeated": true
+  }
+}
+```
+
+### Resposta `201 Created`
+
+```json
+{
+  "id": "uuid",
+  "week_start": "2024-01-15",
+  "slots": [
+    {
+      "id": "uuid",
+      "day": 0,
+      "meal_type": "breakfast",
+      "recipe_id": "uuid",
+      "recipe_title": "Oat Porridge",
+      "servings": 2,
+      "is_flex": false,
+      "flex_type": null,
+      "is_completed": false
+    }
+  ]
+}
+```
+
+Valores de `day`: `0` = Segunda-feira … `6` = Domingo  
+Valores de `meal_type`: `breakfast` | `lunch` | `dinner` | `snack`  
+Valores de `flex_type`: `leftover` | `takeaway` | `skip` | `null`
+
+---
+
+## GET /api/meal-plans/:id
+
+Obter um plano de refeições com todos os slots.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| GET | `/api/meal-plans/:id` | JWT Bearer | Free |
+
+Devolve a mesma estrutura que a resposta de geração.
+
+---
+
+## PUT /api/meal-plans/:id/slots/:slotId
+
+Atualizar um slot do plano de refeições (trocar receita, alternar conclusão, definir flex).
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| PUT | `/api/meal-plans/:id/slots/:slotId` | JWT Bearer | Free |
+
+### Corpo do pedido (todos os campos opcionais)
+
+```json
+{
+  "recipe_id": "uuid",
+  "servings": 3,
+  "is_flex": true,
+  "flex_type": "leftover",
+  "is_completed": true
+}
+```
+
+### Resposta `200 OK`
+
+Devolve o objeto de slot atualizado.
+
+---
+
+## DELETE /api/meal-plans/:id
+
+Eliminar um plano de refeições.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| DELETE | `/api/meal-plans/:id` | JWT Bearer | Free |
+
+### Resposta `204 No Content`
+
+---
+
+## GET /api/meal-plans/:id/nutrition
+
+Obter um resumo nutricional dia a dia para o plano de refeições.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| GET | `/api/meal-plans/:id/nutrition` | JWT Bearer | Free |
+
+### Resposta `200 OK`
+
+```json
+{
+  "days": [
+    {
+      "day": 0,
+      "day_name": "Monday",
+      "total_calories": 1820,
+      "total_protein": 92,
+      "total_carbs": 210,
+      "total_fat": 58,
+      "meals": [
+        {
+          "meal_type": "breakfast",
+          "calories": 380,
+          "protein": 18
+        }
+      ]
+    }
+  ],
+  "week_totals": {
+    "avg_daily_calories": 1900,
+    "avg_daily_protein": 88
+  }
+}
+```

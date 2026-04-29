@@ -1,0 +1,105 @@
+---
+title: Subscrição
+description: Gestão de subscrições Stripe — checkout, webhook e estado
+---
+
+# Subscrição
+
+## GET /api/subscription
+
+Obter o estado atual da subscrição do utilizador.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| GET | `/api/subscription` | JWT Bearer | Free |
+
+### Resposta `200 OK`
+
+```json
+{
+  "tier": "pro",
+  "status": "active",
+  "stripe_subscription_id": "sub_...",
+  "valid_until": "2024-02-15T00:00:00Z",
+  "cancel_at_period_end": false
+}
+```
+
+Valores de `tier`: `free` | `pro` | `family`  
+Valores de `status`: `active` | `cancelled` | `past_due` | `trialing`
+
+---
+
+## POST /api/subscription/checkout
+
+Criar uma sessão de Checkout do Stripe para iniciar ou atualizar uma subscrição.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| POST | `/api/subscription/checkout` | JWT Bearer | Free |
+
+### Corpo do pedido
+
+```json
+{
+  "tier": "pro",
+  "success_url": "https://app.cookest.app/subscription/success",
+  "cancel_url": "https://app.cookest.app/subscription/cancel"
+}
+```
+
+### Resposta `200 OK`
+
+```json
+{
+  "checkout_url": "https://checkout.stripe.com/c/pay/cs_..."
+}
+```
+
+Redirecione o utilizador para `checkout_url`. Após o pagamento, o Stripe chama o webhook e o nível do utilizador é atualizado automaticamente.
+
+---
+
+## POST /api/subscription/portal
+
+Criar uma sessão do Portal de Clientes do Stripe para gerir a faturação.
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| POST | `/api/subscription/portal` | JWT Bearer | **Pro** |
+
+### Corpo do pedido
+
+```json
+{
+  "return_url": "https://app.cookest.app/settings"
+}
+```
+
+### Resposta `200 OK`
+
+```json
+{
+  "portal_url": "https://billing.stripe.com/session/..."
+}
+```
+
+---
+
+## POST /api/subscription/webhook
+
+Recetor de webhook do Stripe. **Não é chamado pela aplicação — é chamado pelo Stripe.**
+
+| Método | Caminho | Autenticação | Nível |
+|--------|---------|--------------|-------|
+| POST | `/api/subscription/webhook` | Assinatura Stripe | — |
+
+<Callout type="info">
+Este endpoint verifica o cabeçalho `Stripe-Signature` usando `STRIPE_WEBHOOK_SECRET`. Todos os eventos são idempotentes — a re-entrega do mesmo evento é tratada de forma segura.
+</Callout>
+
+Eventos Stripe tratados:
+- `customer.subscription.created` — ativa o nível
+- `customer.subscription.updated` — atualiza o nível e a validade
+- `customer.subscription.deleted` — reverte para Free
+- `invoice.payment_failed` — marca a subscrição como `past_due`
