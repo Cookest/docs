@@ -1,0 +1,92 @@
+---
+title: Screens
+description: Detailed description of all Cookest app screens
+---
+
+# Screens
+
+## Home Screen
+
+The Home screen greets the user by name and surfaces the most relevant content.
+
+**Structure:**
+- **Greeting header** — "Good morning, Alice" in Playfair Display 26px
+- **Pantry alert strip** — amber background (`#FFF8E7`) with a warning icon, showing the count of items expiring within 3 days. Tappable — navigates to the Pantry screen filtered by expiring items.
+- **"What's cooking right now?" section** — horizontally scrollable featured recipe cards. Each card shows a recipe image, title (Playfair Display), cuisine tag, cook time, and a heart button.
+- **"Your meal plan today" section** — shows the 2–3 meal slots for today from the active meal plan. Each slot has a meal type label and recipe name.
+- **Hosting CTA** — "Having guests?" banner at the bottom. Taps through to the Recipes screen pre-filtered for "serving 4+" recipes.
+
+---
+
+## Meals Screen
+
+Weekly meal plan view with day-by-day navigation.
+
+**Structure:**
+- **Day selector** — a horizontal strip of 7 day pills (Mon–Sun). The active day is highlighted in sage green. Tapping a day scrolls the content below.
+- **Meal period sections** — "Breakfast", "Lunch", "Dinner", "Snack". Each section can be empty (shows an "Add a meal" placeholder) or filled with a recipe card chip.
+- **Recipe chip** — compact card with recipe title, cook time, and a swap icon. Long-pressing opens a bottom sheet to replace the recipe.
+- **Generate button** — FAB (Pro only) to regenerate the full week's plan using AI scoring.
+- **Empty state** — if no meal plan exists for the week, a centered illustration with "No plan yet — generate one?" CTA.
+
+---
+
+## Recipes Screen
+
+Searchable and filterable recipe library.
+
+**Structure:**
+- **Search bar** — full-width input at the top with a magnifier icon. Triggers debounced search (300ms) against the API.
+- **Category chips** — horizontally scrollable chips below the search bar: "All", "Italian", "Asian", "Mediterranean", "Quick (< 30 min)", "Vegetarian". Active chip has sage green background.
+- **Recipe card list** — vertical list of recipe cards. Each card contains:
+  - A recipe image (aspect ratio 16:9, rounded-16)
+  - Title in Playfair Display 16px
+  - Metadata row: cuisine tag · prep+cook time · calorie count
+  - Heart icon (toggleable favourite)
+  - Rating with star icon and count
+- **Empty state** — "No recipes found for \<query\>" with a clear search button.
+
+---
+
+## Recipe Detail Screen
+
+Full recipe view with all ingredients, steps, and cook mode.
+
+**Structure:**
+- **SliverAppBar** — hero image that collapses as the user scrolls. Title fades in on scroll.
+- **Info pills row** — horizontal row of compact pills: difficulty badge, prep time, cook time, servings selector (tappable +/−), calorie count.
+- **Ingredient list** — grouped by category. Each item shows ingredient name, quantity scaled by the servings selector, and a pantry availability indicator (green dot = in pantry, grey = missing).
+- **Steps list** — numbered cooking steps. Each step can be tapped to mark as done (checked state with sage green strike-through).
+- **Cook mode FAB** — "Start Cooking" floating button. Enters a simplified step-by-step view with larger text and a timer.
+- **Rating section** — at the bottom: 5-star tap widget and an optional notes text field.
+- **Favourite button** — in the app bar, heart icon that toggles the favourite state with a scale animation.
+
+---
+
+## Pantry Screen
+
+Inventory management grouped by storage location.
+
+**Structure:**
+- **Expiry alert banner** — same amber strip as the Home screen, shown only when there are expiring items.
+- **Location accordion sections** — "Fridge", "Freezer", "Pantry", "Other". Each section is collapsible. The item count badge next to each label updates live.
+- **Item rows** — each row shows:
+  - Ingredient name and quantity with unit
+  - Expiry date (amber text if expiring within 3 days, red if expired)
+  - Storage location icon
+- **Swipe actions** — swipe left to delete (red trash icon reveals), swipe right to edit (pencil icon reveals).
+- **Add FAB** — opens a bottom sheet with ingredient search, quantity/unit input, storage location picker, and expiry date picker.
+
+---
+
+## Groceries Screen
+
+Shopping list with grouping and price comparison.
+
+**Structure:**
+- **Grouped list** — items grouped by category (Meat, Dairy, Produce, etc.). Category headers use Inter 15px SemiBold.
+- **Item rows** — ingredient name, quantity, unit, and a checkbox. Tapping the checkbox marks the item as checked (strikethrough text + sage green checkbox).
+- **Price badge** — if a Pro user and store price data is available, a small price badge appears next to each item showing the best available price.
+- **Generate from meal plan button** — banner at the top offering to auto-populate the list from the current meal plan.
+- **Optimize button** (Pro) — "Find best prices" button that calls the optimize endpoint and shows a bottom sheet with single-store vs multi-store breakdown.
+- **Clear checked** — swipe-to-dismiss on checked items, or a "Clear all checked" button in the app bar overflow menu.

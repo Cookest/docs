@@ -1,0 +1,86 @@
+---
+title: Theme System
+description: Cookest brand design tokens and how they are applied in Flutter
+---
+
+# Theme System
+
+The entire Cookest visual language is defined in `lib/src/shared/theme/shadcn_theme.dart`.
+
+## Color tokens
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `sage` | `#7A9A65` | Primary actions, active nav, selected states, checkmarks |
+| `darkGreen` | `#1C3A2A` | Headings, screen titles, primary text |
+| `background` | `#F8F8F6` | Every screen background |
+| `surface` | `#FFFFFF` | Cards, bottom sheets, dialogs |
+| `textMuted` | `#6B7280` | Secondary text, metadata (times, ratings) |
+| `textCaption` | `#9CA3AF` | Captions, nav labels (inactive), placeholders |
+| `amber` | `#D97706` | Expiry warnings, pantry alerts |
+| `amberLight` | `#FFF8E7` | Alert strip background |
+| `border` | `#E5E7EB` | Input borders, dividers |
+| `divider` | `#F0F0EE` | Bottom nav separator, section dividers |
+
+## Typography
+
+| Style | Font | Size | Weight | Usage |
+|-------|------|------|--------|-------|
+| Display / Greeting | Playfair Display | 26px | Regular | Home screen greeting |
+| Section header | Playfair Display | 18px | Regular | "What's cooking right now?" |
+| App bar title | Playfair Display | 22px | Bold | Screen titles |
+| Recipe title (card) | Playfair Display | 16–18px | Regular | Recipe names on cards |
+| Body / List items | Inter | 14px | Regular | Ingredients, pantry items |
+| Metadata | Inter | 13px | Regular | Cook times, ratings, categories |
+| Caption | Inter | 12px | Regular | Empty states, helper text, nav labels |
+| Button label | Inter | 14px | Medium | All buttons |
+| Section header | Inter | 15px | SemiBold | "Breakfast", "Dairy", etc. |
+
+**Rule:** Playfair Display appears *only* in the contexts listed above. All other text uses Inter.
+
+## Shadow token
+
+```dart
+BoxShadow(
+  color: Color(0x09000000),  // rgba(0,0,0,0.035)
+  blurRadius: 12,
+  offset: Offset(0, 2),
+)
+```
+
+Applied to: recipe cards, home screen feature card, modal bottom sheets. Nothing else.
+
+## ThemeData configuration
+
+```dart
+ThemeData(
+  colorScheme: ColorScheme.light(
+    primary: Color(0xFF7A9A65),     // sage
+    surface: Color(0xFFFFFFFF),
+    background: Color(0xFFF8F8F6),
+    onSurface: Color(0xFF1C3A2A),
+  ),
+  cardTheme: CardTheme(
+    elevation: 0,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+    ),
+  ),
+  appBarTheme: AppBarTheme(
+    elevation: 0,
+    backgroundColor: Color(0xFFF8F8F6),
+  ),
+)
+```
+
+## Microinteractions
+
+| Interaction | Implementation | Duration |
+|-------------|---------------|---------|
+| Card press | `ScaleTransition` to 0.97 | 80ms |
+| Heart toggle | Scale animation + fill | 150ms |
+| Nav icon switch | `AnimatedSwitcher` crossfade | 150ms |
+| Nav label color | `AnimatedDefaultTextStyle` | 150ms |
+| Delete swipe | Progressive opacity reveal | Drag-proportional |
+| Meal plan generation | Staggered fade-in per slot | 80ms between slots |
+| Snackbar confirmations | `ScaffoldMessenger` | Standard |

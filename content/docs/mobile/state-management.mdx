@@ -1,0 +1,114 @@
+---
+title: State Management
+description: Riverpod patterns used throughout the Cookest Flutter app
+---
+
+# State Management
+
+The Cookest app uses [Riverpod 2](https://riverpod.dev) exclusively for all state management. There is no `setState` (except for purely local ephemeral UI state like animation controllers), no `ChangeNotifier`, and no `BLoC`.
+
+## Provider types used
+
+| Provider | Use case |
+|----------|---------|
+| `FutureProvider.autoDispose` | Single async data fetch (recipe list, inventory) |
+| `StateProvider` | Simple mutable values (search query, selected tab) |
+| `StateNotifierProvider` | Complex state with business logic (auth, meal plan editing) |
+| `Provider` | Synchronous derived values (filtered/sorted lists) |
+
+## FutureProvider.autoDispose
+
+Used for all data-fetching that maps to a single API call. The `autoDispose` modifier ensures the provider is disposed when no longer watched, cancelling in-flight requests and freeing memory.
+
+```dart
+final inventoryProvider = FutureProvider.autoDispose<List<InventoryItem>>((ref) async {
+  final repo = ref.read(inventoryRepositoryProvider);
+  return repo.getItems();
+});
+```
+
+In the screen:
+
+```dart
+final items = ref.watch(inventoryProvider);
+return items.when(
+  data: (data) => InventoryList(items: data),
+  loading: () => const Center(child: CircularProgressIndicator()),
+  error: (e, stack) => ErrorView(message: e.toString()),
+);
+```
+
+## ref.watch vs ref.read
+
+| | Use case |
+|---|---------|
+| `ref.watch(provider)` | Inside `build()` — subscribes and rebuilds on change |
+| `ref.read(provider)` | Inside callbacks/event handlers — reads once, no subscription |
+
+```dart
+// ✓ Correct
+@override
+Widget build(BuildContext context, WidgetRef ref) {
+  final recipes = ref.watch(recipesProvider);  // rebuilds when data changes
+  return ElevatedButton(
+    onPressed: () => ref.read(recipeRepositoryProvider).refresh(),  // one-shot read
+    ...
+  );
+}
+```
+
+## StateNotifier for complex state
+
+Used for the auth flow and meal plan editing, where multiple state transitions are needed:
+
+```dart
+class AuthNotifier extends StateNotifier<AuthState> {
+  AuthNotifier(this._repo) : super(const AuthState.initial());
+
+  final AuthRepository _repo;
+
+  Future<void> login(String email, String password) async {
+    state = const AuthState.loading();
+    try {
+      final token = await _repo.login(email, password);
+      state = AuthState.authenticated(token);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
+  }
+
+  Future<void> logout() async {
+    await _repo.logout();
+    state = const AuthState.unauthenticated();
+  }
+}
+
+final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
+  return AuthNotifier(ref.read(authRepositoryProvider));
+});
+```
+
+## Invalidation and refresh
+
+To force a provider to refetch (e.g., after adding a pantry item):
+
+```dart
+// After successfully adding an inventory item:
+ref.invalidate(inventoryProvider);
+// inventoryProvider will refetch on next watch
+```
+
+## Provider overrides (testing)
+
+In widget tests, providers can be overridden to inject mock repositories:
+
+```dart
+await tester.pumpWidget(
+  ProviderScope(
+    overrides: [
+      recipeRepositoryProvider.overrideWithValue(MockRecipeRepository()),
+    ],
+    child: const MyApp(),
+  ),
+);
+```

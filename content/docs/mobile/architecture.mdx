@@ -1,0 +1,84 @@
+---
+title: App Architecture
+description: Navigation, state management patterns, and repository layer
+---
+
+# App Architecture
+
+## Navigation — GoRouter
+
+All routes are declared in `lib/src/core/router.dart`. The app uses a `ShellRoute` for the 5-tab bottom navigation, with sub-routes pushed on top.
+
+```
+ShellRoute (5-tab nav)
+├── /           → HomeScreen
+├── /meals      → MealPlanScreen
+├── /recipes    → RecipesScreen
+│   └── /recipes/:id → RecipeDetailScreen
+├── /pantry     → InventoryScreen
+└── /groceries  → ShoppingListScreen
+
+/login          → LoginScreen (outside shell)
+```
+
+Navigation rules:
+- `context.go('/path')` — switch tabs (replaces shell history)
+- `context.push('/path')` — push on top of current tab (sub-routes)
+- Login redirect: unauthenticated users are sent to `/login` via GoRouter redirect
+
+## State management — Riverpod
+
+Every screen uses `ConsumerWidget` or `ConsumerStatefulWidget`. Data is exposed as `FutureProvider` / `StateProvider` / `StateNotifierProvider`:
+
+```dart
+// Example: recipe list provider
+final recipesProvider = FutureProvider.autoDispose<List<Recipe>>((ref) async {
+  final repo = ref.read(recipeRepositoryProvider);
+  return repo.getRecipes();
+});
+
+// In screen:
+class RecipesScreen extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final recipes = ref.watch(recipesProvider);
+    return recipes.when(
+      data: (data) => RecipeList(data),
+      loading: () => const CircularProgressIndicator(),
+      error: (e, _) => ErrorWidget(e.toString()),
+    );
+  }
+}
+```
+
+## Repository layer
+
+Each feature has a repository class that:
+1. Makes Dio HTTP requests to the API
+2. Parses responses using `fromJson` factory constructors
+3. Handles both `{ "items": [...] }` and `[...]` response shapes
+
+```dart
+class RecipeRepository {
+  final Dio _dio;
+  RecipeRepository(this._dio);
+
+  Future<List<Recipe>> getRecipes({String? query, String? category}) async {
+    final res = await _dio.get('/api/recipes', queryParameters: {
+      if (query != null) 'q': query,
+      if (category != null) 'category': category,
+    });
+    final raw = res.data;
+    final list = raw is List ? raw : (raw['items'] as List);
+    return list.map((j) => Recipe.fromJson(j as Map<String, dynamic>)).toList();
+  }
+}
+```
+
+## Error handling patterns
+
+All model `fromJson` methods use null-safe parsing:
+- Integer DB IDs are converted to `String` via `?.toString() ?? ''`
+- Optional fields fall back to defaults: `json['field'] as String? ?? ''`
+- List fields use safe cast: `(json['list'] as List? ?? []).map(...)`
+- Column name aliases: `json['location'] ?? json['storage_location']`

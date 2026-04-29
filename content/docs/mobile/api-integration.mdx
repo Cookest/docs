@@ -1,0 +1,90 @@
+---
+title: API Integration
+description: How the Flutter app communicates with the Rust backend
+---
+
+# API Integration
+
+## Dio HTTP client
+
+The app uses [Dio](https://pub.dev/packages/dio) with a base URL and Authorization interceptor.
+
+```dart
+final dio = Dio(BaseOptions(
+  baseUrl: 'http://10.0.2.2:8080',   // 10.0.2.2 = localhost on Android emulator
+  connectTimeout: Duration(seconds: 10),
+  receiveTimeout: Duration(seconds: 30),
+));
+
+// Auth interceptor — adds Bearer token
+dio.interceptors.add(InterceptorsWrapper(
+  onRequest: (options, handler) {
+    final token = ref.read(tokenProvider);
+    if (token != null) {
+      options.headers['Authorization'] = 'Bearer $token';
+    }
+    handler.next(options);
+  },
+));
+```
+
+## Base URL configuration
+
+| Environment | URL |
+|-------------|-----|
+| Android emulator | `http://10.0.2.2:8080` |
+| iOS simulator | `http://localhost:8080` |
+| Physical device (same network) | `http://<your-machine-IP>:8080` |
+| Production | `https://api.cookest.app` |
+
+<Callout type="warn">
+Android emulators cannot reach `localhost` or `127.0.0.1`. Use `10.0.2.2` which the Android virtual network maps to the host machine.
+</Callout>
+
+## Response shape handling
+
+The API may return either a plain array or a wrapped object depending on the endpoint. All repositories handle both:
+
+```dart
+final raw = response.data;
+final list = raw is List ? raw : (raw['items'] as List? ?? []);
+```
+
+## Content-Type requirement
+
+All POST requests require `Content-Type: application/json`. Dio omits this header when `data` is null. Always pass `data: {}` for bodyless POSTs:
+
+```dart
+// ✓ Correct — sends Content-Type: application/json
+await dio.post('/api/shopping-list/sync', data: {});
+
+// ✗ Wrong — Dio will omit Content-Type, API returns 400
+await dio.post('/api/shopping-list/sync');
+```
+
+## Token storage
+
+```dart
+// Access token — stored in memory (Riverpod StateProvider)
+// Never written to SharedPreferences
+
+// Refresh token — httpOnly cookie, managed by browser/WebView/Dio cookie jar
+// On mobile: use dio_cookie_manager + cookie_jar
+```
+
+## Error handling
+
+```dart
+try {
+  final res = await dio.get('/api/recipes');
+  return (res.data['items'] as List)
+    .map((j) => Recipe.fromJson(j)).toList();
+} on DioException catch (e) {
+  if (e.response?.statusCode == 401) {
+    // Token expired — trigger refresh
+  } else if (e.response?.statusCode == 402) {
+    // Subscription required — show upgrade prompt
+  }
+  rethrow;
+}
+```

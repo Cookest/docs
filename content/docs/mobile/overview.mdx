@@ -1,0 +1,84 @@
+---
+title: Mobile App Overview
+description: The Cookest Flutter app — features, screens, and technology choices
+---
+
+# Mobile App Overview
+
+The Cookest Flutter app is the primary user interface — a cross-platform iOS and Android client built with a custom brand design system.
+
+## Technology stack
+
+| Library | Version | Purpose |
+|---------|---------|---------|
+| Flutter | 3.x | Cross-platform UI framework |
+| Dart | 3.x | Programming language |
+| flutter_riverpod | ^2.6.1 | State management |
+| go_router | ^14.8.1 | Declarative navigation |
+| dio | ^5.7.0 | HTTP client |
+| google_fonts | ^6.2.1 | Playfair Display + Inter |
+| lucide_icons | ^1.0.4 | Icon library |
+| flutter_secure_storage | ^9.2.2 | Secure token storage |
+
+## Screens
+
+| Screen | Route | Description |
+|--------|-------|-------------|
+| Login | `/login` | Authentication entry point |
+| Home | `/` | Featured recipe, pantry alerts, hosting CTA |
+| Meals | `/meals` | Weekly meal plan view and editing |
+| Recipes | `/recipes` | Searchable recipe library |
+| Recipe Detail | `/recipes/:id` | Full recipe with cook mode entry |
+| Pantry | `/pantry` | Inventory management |
+| Groceries | `/groceries` | Shopping list |
+
+## Running the app
+
+```bash
+cd UI
+
+# Install dependencies
+flutter pub get
+
+# Run on connected device or emulator
+flutter run
+
+# Android emulator — use 10.0.2.2 instead of localhost
+# In lib/src/core/constants.dart set baseUrl to http://10.0.2.2:8080
+```
+
+## Project structure
+
+```
+UI/lib/
+  main.dart                    # App entry point
+  src/
+    core/
+      router.dart              # GoRouter config — all routes
+    shared/
+      theme/
+        shadcn_theme.dart      # Brand tokens (colors, typography, shadow)
+    features/
+      auth/
+        screens/login_screen.dart
+        repositories/auth_repository.dart
+      home/
+        screens/home_screen.dart
+      meal_plan/
+        screens/meal_plan_screen.dart
+        models/meal_plan.dart
+        repositories/meal_plan_repository.dart
+      recipes/
+        screens/recipes_screen.dart
+        screens/recipe_detail_screen.dart
+        models/recipe.dart
+        repositories/recipe_repository.dart
+      pantry/
+        screens/inventory_screen.dart
+        models/inventory_item.dart
+        repositories/inventory_repository.dart
+      shopping_list/
+        screens/shopping_list_screen.dart
+        models/shopping_item.dart
+        repositories/shopping_repository.dart
+```
