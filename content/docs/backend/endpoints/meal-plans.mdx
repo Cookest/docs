@@ -73,7 +73,7 @@ Generate a new AI-scored weekly meal plan. **Pro or Family tier required.**
 
 `day` values: `0` = Monday … `6` = Sunday  
 `meal_type` values: `breakfast` | `lunch` | `dinner` | `snack`  
-`flex_type` values: `leftover` | `takeaway` | `skip` | `null`
+`flex_type` values: `effort` | `nutrition` | `mental` | `social` | `null`
 
 ---
 
@@ -104,7 +104,7 @@ Update a meal plan slot (swap recipe, toggle completion, set flex).
   "recipe_id": "uuid",
   "servings": 3,
   "is_flex": true,
-  "flex_type": "leftover",
+  "flex_type": "effort",
   "is_completed": true
 }
 ```

@@ -73,7 +73,7 @@ Gerar um novo plano de refeições semanal com pontuação por IA. **Requer nív
 
 Valores de `day`: `0` = Segunda-feira … `6` = Domingo  
 Valores de `meal_type`: `breakfast` | `lunch` | `dinner` | `snack`  
-Valores de `flex_type`: `leftover` | `takeaway` | `skip` | `null`
+Valores de `flex_type`: `effort` | `nutrition` | `mental` | `social` | `null`
 
 ---
 
@@ -104,7 +104,7 @@ Atualizar um slot do plano de refeições (trocar receita, alternar conclusão, 
   "recipe_id": "uuid",
   "servings": 3,
   "is_flex": true,
-  "flex_type": "leftover",
+  "flex_type": "effort",
   "is_completed": true
 }
 ```
