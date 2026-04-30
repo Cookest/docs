@@ -1,0 +1,62 @@
+name: Translation Coverage
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'content/docs/**'
+      - 'messages/**'
+  pull_request:
+    paths:
+      - 'content/docs/**'
+      - 'messages/**'
+  workflow_dispatch:
+
+jobs:
+  check-translations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check translation coverage
+        run: node scripts/check-translations.mjs
+
+      - name: Check coverage (JSON for CI)
+        id: coverage
+        run: |
+          OUTPUT=$(node scripts/check-translations.mjs --json)
+          echo "coverage=$OUTPUT" >> $GITHUB_OUTPUT
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const coverage = JSON.parse('${{ steps.coverage.outputs.coverage }}');
+            let body = '## 🌐 Translation Coverage Report\n\n';
+            body += '| Locale | Tier | Pages | UI Strings |\n';
+            body += '|--------|------|-------|------------|\n';
+            for (const r of coverage) {
+              const tierBadge = r.tier === 1 ? '🟢 T1' : '🟡 T2';
+              body += `| ${r.locale.toUpperCase()} | ${tierBadge} | ${r.content.translated}/${r.content.total} (${r.content.percentage}%) | ${r.uiStrings.translated}/${r.uiStrings.total} (${r.uiStrings.percentage}%) |\n`;
+            }
+            
+            const tier1Issues = coverage.filter(r => r.tier === 1 && r.content.percentage < 100);
+            if (tier1Issues.length > 0) {
+              body += '\n⚠️ **Tier 1 locales below 100% parity:**\n';
+              for (const r of tier1Issues) {
+                body += `- **${r.locale.toUpperCase()}**: Missing ${r.content.missing.length} pages\n`;
+              }
+            }
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });
