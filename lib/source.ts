@@ -2,6 +2,7 @@ import { docs } from 'collections/server';
 import { loader } from 'fumadocs-core/source';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { docsContentRoute, docsImageRoute, docsRoute } from './shared';
+import { defaultLocale, localeList } from './i18n';
 
 // See https://fumadocs.dev/docs/headless/source-api for more info
 export const source = loader({
@@ -9,18 +10,18 @@ export const source = loader({
   source: docs.toFumadocsSource(),
   plugins: [lucideIconsPlugin()],
   i18n: {
-    defaultLanguage: 'en',
-    languages: ['en', 'pt'],
-    // 'dir' parser: files under content/docs/pt/... are assigned locale='pt',
-    // all other files are assigned the default locale 'en'.
+    defaultLanguage: defaultLocale,
+    languages: localeList,
+    // 'dir' parser: files under content/docs/<locale>/... are assigned that locale,
+    // all other files are assigned the default locale.
     parser: 'dir',
-    // No silent fallback — if a PT page is missing, show 404 rather than EN.
+    // No silent fallback — if a translated page is missing, show 404 rather than EN.
     fallbackLanguage: null,
   },
-  // Keep PT pages at /docs/pt/... (not /pt/docs/...) to preserve existing URLs.
+  // Keep translated pages at /docs/<locale>/... (not /<locale>/docs/...).
   url(slugs, locale) {
     const base = docsRoute; // '/docs'
-    if (locale === 'pt') return `${base}/pt/${slugs.join('/')}`;
+    if (locale && locale !== defaultLocale) return `${base}/${locale}/${slugs.join('/')}`;
     return `${base}/${slugs.join('/')}`;
   },
 });
