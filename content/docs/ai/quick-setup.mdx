@@ -1,0 +1,140 @@
+---
+title: Quick Setup
+description: One-click setup for Cookest AI tools — MCP server, VS Code, and Claude Desktop
+---
+
+# Quick Setup
+
+Get the Cookest AI tools running in under a minute. No manual configuration needed.
+
+## One-Click Setup
+
+Run this from the `docs/` directory:
+
+```bash
+bun scripts/setup-ai.mjs
+```
+
+This interactive script will:
+1. **Install MCP server dependencies** automatically
+2. **Configure VS Code / GitHub Copilot** — adds the MCP server to your VS Code settings
+3. **Configure Claude Desktop** — adds the MCP server to your Claude config
+4. **Verify AGENTS.md files** — checks that each repo has agent instructions
+
+### Non-Interactive Modes
+
+```bash
+# Set up everything without prompts
+bun scripts/setup-ai.mjs --all
+
+# Set up only VS Code
+bun scripts/setup-ai.mjs --vscode
+
+# Set up only Claude Desktop
+bun scripts/setup-ai.mjs --claude
+
+# Only check AGENTS.md files
+bun scripts/setup-ai.mjs --agents
+```
+
+## What Gets Configured
+
+### VS Code / GitHub Copilot
+
+The setup script adds this to your `.vscode/settings.json`:
+
+```json
+{
+  "github.copilot.chat.mcpServers": {
+    "cookest-docs": {
+      "command": "npx",
+      "args": ["tsx", "docs/mcp/src/index.ts"],
+      "env": {
+        "DOCS_ROOT": "docs/content/docs",
+        "MESSAGES_ROOT": "docs/messages"
+      }
+    }
+  }
+}
+```
+
+After setup, GitHub Copilot can:
+- Search the entire Cookest documentation
+- Read any page in any language
+- Check translation coverage
+- Understand the repository structure
+
+### Claude Desktop
+
+The setup script adds this to your Claude Desktop config:
+
+| Platform | Config Location |
+|----------|----------------|
+| macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| Windows | `%APPDATA%/Claude/claude_desktop_config.json` |
+| Linux | `~/.config/claude/claude_desktop_config.json` |
+
+After setup, Claude can access all the same tools and resources.
+
+### AGENTS.md Files
+
+Each repository has an `AGENTS.md` file that gives AI agents immediate context:
+
+| Repo | What It Tells the Agent |
+|------|------------------------|
+| `api/AGENTS.md` | Rust architecture, handler→service→entity pattern, auth rules |
+| `UI/AGENTS.md` | Flutter architecture, Riverpod patterns, design system |
+| `web/AGENTS.md` | Next.js structure, i18n system, component conventions |
+| `etl/AGENTS.md` | Pipeline stages, idempotency rules, rate limiting |
+
+These files are read automatically by GitHub Copilot and Claude when working in a repository.
+
+## What You Can Do After Setup
+
+Once configured, ask your AI assistant things like:
+
+**Development:**
+> "Search the docs for how authentication works"
+> "Show me the database schema for recipes"
+> "What's the commit convention for this project?"
+
+**Documentation:**
+> "Check which pages are missing French translations"
+> "What sections exist in the backend documentation?"
+> "Read the meal planning endpoint docs"
+
+**Architecture:**
+> "Show me the repository structure"
+> "How do the API and Flutter app communicate?"
+> "What subscription tiers exist?"
+
+## Troubleshooting
+
+### MCP server not responding
+
+```bash
+# Test the MCP server directly
+cd docs/mcp
+npx tsx src/index.ts
+```
+
+If dependencies are missing:
+```bash
+cd docs/mcp && npm install
+```
+
+### VS Code not detecting MCP
+
+1. Open Command Palette → "Developer: Reload Window"
+2. Check that `github.copilot.chat.mcpServers` exists in your settings
+3. Ensure `npx` and `tsx` are available in your PATH
+
+### Claude Desktop not detecting MCP
+
+1. Fully quit and restart Claude Desktop (not just close the window)
+2. Check the config file at the path shown in the table above
+3. Verify the paths in the config point to your actual docs directory
+
+## Manual Setup
+
+If you prefer to configure manually instead of using the script, see the full [MCP Server documentation](/docs/ai/mcp-server) for step-by-step instructions.
