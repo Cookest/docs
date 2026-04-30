@@ -1,0 +1,39 @@
+{
+  "nav": {
+    "docs": "Documentación",
+    "api": "API",
+    "mobile": "Aplicación Móvil",
+    "title": "Cookest"
+  },
+  "languageSwitcher": {
+    "label": "Idioma",
+    "switchTo": "Cambiar idioma"
+  },
+  "search": {
+    "placeholder": "Buscar en la documentación..."
+  },
+  "common": {
+    "editOnGithub": "Editar en GitHub",
+    "viewSource": "Ver código fuente",
+    "lastUpdated": "Última actualización",
+    "onThisPage": "En esta página",
+    "nextPage": "Siguiente",
+    "previousPage": "Anterior",
+    "translationNotice": "Esta página ha sido traducida por la comunidad. Puede no ser completamente precisa.",
+    "translationMissing": "Esta página aún no está disponible en tu idioma. Se muestra la versión en inglés.",
+    "contributeTranslation": "Ayúdanos a traducir esta página"
+  },
+  "sections": {
+    "architecture": "Arquitectura",
+    "backend": "API Backend",
+    "mobile": "Aplicación Móvil",
+    "userGuide": "Guía del Usuario",
+    "etl": "Pipeline ETL",
+    "contributing": "Contribuir",
+    "ai": "IA & Automatización"
+  },
+  "footer": {
+    "builtWith": "Creado con Fumadocs",
+    "copyright": "Cookest — Todos los derechos reservados"
+  }
+}
