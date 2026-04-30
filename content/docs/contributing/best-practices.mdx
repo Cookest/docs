@@ -1,0 +1,199 @@
+---
+title: Best Practices
+description: Commit conventions, PR workflows, code style, and development standards for the Cookest ecosystem
+---
+
+# Best Practices
+
+This page defines the development standards for all Cookest repositories. Follow these conventions for consistent, reviewable, and maintainable contributions.
+
+## Commit Message Format
+
+All commits follow [Conventional Commits](https://www.conventionalcommits.org/). The format is:
+
+```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+### Types
+
+| Type | When to use |
+|------|-------------|
+| `feat` | New feature or capability |
+| `fix` | Bug fix |
+| `docs` | Documentation only changes |
+| `style` | Formatting, missing semicolons (no code logic change) |
+| `refactor` | Code restructuring without changing behavior |
+| `perf` | Performance improvement |
+| `test` | Adding or fixing tests |
+| `build` | Build system or dependency changes |
+| `ci` | CI/CD configuration changes |
+| `chore` | Maintenance tasks (deps update, config changes) |
+
+### Scopes
+
+Use the component or module name as scope:
+
+| Repository | Example Scopes |
+|-----------|---------------|
+| `api` | `auth`, `recipe`, `meal-plan`, `chat`, `store`, `subscription`, `middleware` |
+| `UI` | `auth`, `home`, `recipes`, `pantry`, `shopping`, `chat`, `theme`, `navigation` |
+| `web` | `hero`, `features`, `nav`, `i18n`, `seo` |
+| `docs` | `backend`, `mobile`, `etl`, `i18n`, `architecture`, `contributing`, `ai` |
+| `etl` | `extract`, `transform`, `load`, `usda`, `mealdb` |
+
+### Examples
+
+```bash
+feat(auth): add refresh token rotation on reuse detection
+fix(recipe): correct dietary tag filtering for vegan+gluten-free
+docs(backend): add PDF pipeline endpoint documentation
+refactor(meal-plan): extract scoring logic into separate service
+ci(api): add Rust clippy lint step to CI workflow
+docs(i18n): add French translation for architecture overview
+```
+
+### Breaking Changes
+
+For breaking changes, add `!` after the type/scope and explain in the footer:
+
+```
+feat(auth)!: replace cookie-based refresh with rotating tokens
+
+BREAKING CHANGE: Existing refresh tokens are invalidated.
+Clients must re-authenticate after this update.
+```
+
+## Branch Naming
+
+```
+<type>/<short-description>
+```
+
+Examples:
+- `feat/recipe-search-filters`
+- `fix/auth-token-refresh-loop`
+- `docs/add-architecture-diagrams`
+- `refactor/extract-meal-plan-scoring`
+
+## Pull Request Standards
+
+### PR Title
+
+Same format as commit messages:
+
+```
+feat(recipe): add cuisine-based search filtering
+```
+
+### PR Description Template
+
+```markdown
+## What
+Brief description of the change.
+
+## Why
+Link to issue or explain the motivation.
+
+## How
+Key implementation details or architectural decisions.
+
+## Testing
+How you verified the change works.
+
+## Screenshots
+If UI changes are involved.
+```
+
+### Review Checklist
+
+Before requesting review:
+
+- [ ] Code compiles/builds without warnings
+- [ ] All existing tests pass
+- [ ] New features have tests
+- [ ] Documentation updated (if behavior changed)
+- [ ] Translations updated (if docs changed)
+- [ ] No secrets or credentials in code
+- [ ] Breaking changes documented
+
+## Code Style by Language
+
+### Rust (API)
+
+- Follow `rustfmt` defaults
+- Run `cargo clippy` before committing — no warnings allowed
+- Use `thiserror` for error types, not string errors
+- Prefer `?` over `.unwrap()` in production code
+- Group imports: std → external crates → internal modules
+- Document public functions with `///` doc comments
+- Keep handlers thin — business logic goes in `services/`
+
+### Dart (Flutter / UI)
+
+- Follow `dart format` and `flutter analyze`
+- Use `const` constructors where possible
+- Riverpod providers in dedicated files (one provider per file)
+- Widget decomposition: max ~150 lines per widget file
+- Name files in `snake_case`, classes in `PascalCase`
+- Use `final` for all local variables that don't change
+
+### TypeScript (Web / Docs)
+
+- Follow project ESLint/Prettier config
+- Prefer `const` over `let`, never use `var`
+- Use TypeScript strict mode — no `any` unless unavoidable
+- React components: one component per file, PascalCase filenames
+- Use `interface` for public contracts, `type` for unions/intersections
+
+### Python (ETL)
+
+- Follow PEP 8 (use `black` formatter)
+- Type hints for all function signatures
+- Docstrings for public functions (Google style)
+- Use `logging` module, not `print()`
+- Environment variables via `python-dotenv`
+
+## Environment Management
+
+### Required Tools
+
+| Tool | Version | Repository |
+|------|---------|-----------|
+| Rust | 1.78+ | `api` |
+| PostgreSQL | 15+ | `api`, `etl` |
+| Flutter | 3.x | `UI` |
+| Dart | 3.x | `UI` |
+| Node.js | 20+ | `web`, `docs` |
+| Bun | 1.x | `docs` |
+| Python | 3.10+ | `etl` |
+
+### Environment Variables
+
+Every repository that requires environment variables includes a `.env.example` file. Copy it to `.env` and fill in the values:
+
+```bash
+cp .env.example .env
+```
+
+**Never commit `.env` files.** They are gitignored.
+
+## Security Practices
+
+1. **No secrets in code.** Use environment variables for all credentials
+2. **Hash passwords with Argon2id** (API) — never store plaintext
+3. **SHA-256 refresh tokens** — raw tokens only exist in httpOnly cookies
+4. **Verify admin from DB** — never trust JWT claims alone for admin access
+5. **HMAC-verify webhooks** — Stripe webhook payloads are verified with SHA-256 HMAC
+6. **Rate limit all endpoints** — governor middleware on API, RPS limits on ETL
+
+## Dependency Management
+
+- **Rust**: Pin major versions in `Cargo.toml`, use `cargo update` regularly
+- **Flutter**: Pin versions in `pubspec.yaml`, run `flutter pub upgrade --major-versions` quarterly
+- **Node.js**: Use lockfiles (`bun.lock`), review breaking changes before upgrading
+- **Python**: Pin versions in `requirements.txt`, test upgrades in a venv
