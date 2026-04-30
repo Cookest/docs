@@ -15,6 +15,8 @@ Cookest is a full-stack meal planning and kitchen management platform built as a
   <Card title="ETL Pipeline" href="/docs/etl/overview" description="Python — recipe and nutrition data ingestion from USDA and TheMealDB" />
   <Card title="Architecture" href="/docs/architecture/overview" description="How the three components fit and communicate" />
   <Card title="User Guide" href="/docs/user-guide/overview" description="Using Cookest as an end user" />
+  <Card title="AI & Automation" href="/docs/ai/overview" description="Agentic skills, MCP server, and automated documentation" />
+  <Card title="Contributing" href="/docs/contributing/guide" description="Documentation standards, best practices, and translation guide" />
 </Cards>
 
 ## Project layout
@@ -23,9 +25,10 @@ Cookest is a full-stack meal planning and kitchen management platform built as a
 PAP/
   api/      — Rust backend (Actix-Web 4, SeaORM, PostgreSQL)
   UI/       — Flutter mobile app (Riverpod, GoRouter)
+  web/      — Next.js landing page (TailwindCSS, Framer Motion)
   etl/      — Python data pipeline
   dataset/  — Raw CSV dataset (MM-Food-100K)
-  docs/     — This site
+  docs/     — This site (Fumadocs, i18n)
 ```
 
 ## Tech at a glance
@@ -37,8 +40,10 @@ PAP/
 | AI | Ollama (llava for PDF vision, llama3.2 for chat) |
 | Payments | Stripe — webhooks + Free / Pro / Family tiers |
 | Mobile | Flutter 3 · Dart 3 · Riverpod · GoRouter |
+| Web | Next.js 16 · TailwindCSS 4 · Framer Motion |
 | Data | Python · psycopg2 · USDA FoodData Central · TheMealDB |
+| Docs | Next.js · Fumadocs · MDX · 5 languages |
 
 ---
 
-Available in [English](/docs) and [Português](/docs/pt).
+Available in [English](/docs), [Português](/docs/pt), [Français](/docs/fr), [Deutsch](/docs/de), and [Español](/docs/es).
