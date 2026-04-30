@@ -1,0 +1,188 @@
+---
+title: Translation Guide
+description: How to contribute translations to the Cookest documentation
+---
+
+# Translation Guide
+
+Cookest documentation supports multiple languages. This guide covers how to translate existing content, add UI string translations, and add entirely new languages.
+
+## Overview
+
+The documentation uses two translation systems:
+
+1. **MDX content files** — full-page translations in `content/docs/<locale>/`
+2. **JSON UI strings** — navigation, buttons, and labels in `messages/<locale>.json`
+
+Both must be updated when adding or improving translations.
+
+## Translation Tiers
+
+| Tier | Languages | Expectation |
+|------|-----------|-------------|
+| **Tier 1** | English, Portuguese | Full parity — every page must have a translation |
+| **Tier 2** | French, German, Spanish | Partial — index pages + high-traffic content |
+
+## Translating an Existing Page
+
+### Step 1: Find the English source
+
+All English content lives in `content/docs/`. Find the page you want to translate:
+
+```
+content/docs/backend/getting-started.mdx    ← English source
+```
+
+### Step 2: Create or update the translation
+
+Create the equivalent file under the locale folder, mirroring the path exactly:
+
+```
+content/docs/fr/backend/getting-started.mdx  ← French translation
+```
+
+### Step 3: Translate the content
+
+Rules for translating content:
+
+- **Translate** all prose, headings, table headers, callout text, and frontmatter (`title`, `description`)
+- **Keep in English**: code blocks, JSON examples, endpoint paths, file paths, technical terms (JWT, Bearer, webhook, API)
+- **Keep file names identical** — only the content inside changes
+- **Match the heading structure** — same H1/H2/H3 hierarchy as the English page
+- **Add the `meta.json`** in the section folder if it doesn't exist yet
+
+### Step 4: Add to navigation
+
+Ensure the locale's `meta.json` includes the new page. Each section folder needs its own `meta.json`:
+
+```json
+{
+  "title": "API Backend",
+  "pages": ["getting-started", "environment", "authentication"]
+}
+```
+
+## Translating UI Strings
+
+UI strings (navigation, buttons, labels) live in `messages/<locale>.json`. The structure mirrors `messages/en.json`:
+
+```json
+{
+  "nav": {
+    "docs": "Documentation",
+    "api": "API",
+    "mobile": "Application Mobile"
+  },
+  "common": {
+    "editOnGithub": "Modifier sur GitHub",
+    "nextPage": "Suivant",
+    "previousPage": "Précédent"
+  }
+}
+```
+
+### JSON Key Reference
+
+| Key Path | English Value | Description |
+|----------|--------------|-------------|
+| `nav.docs` | "Docs" | Top navigation link |
+| `nav.api` | "API" | Top navigation link |
+| `nav.mobile` | "Mobile" | Top navigation link |
+| `languageSwitcher.label` | "Language" | Language dropdown label |
+| `search.placeholder` | "Search documentation..." | Search input placeholder |
+| `common.editOnGithub` | "Edit on GitHub" | Page action button |
+| `common.translationNotice` | "This page has been translated..." | Community translation banner |
+| `common.translationMissing` | "This page is not yet available..." | Missing translation fallback |
+| `common.contributeTranslation` | "Help us translate this page" | CTA link |
+| `sections.*` | Section names | Sidebar section headings |
+| `footer.*` | Footer text | Page footer content |
+
+## Adding a New Language
+
+Adding a new language requires changes in 4 places:
+
+### 1. Update the locale registry
+
+In `lib/i18n.ts`, add the new locale to the `locales` object and the `Locale` type:
+
+```typescript
+export type Locale = 'en' | 'pt' | 'fr' | 'de' | 'es' | 'ja'; // ← add here
+
+export const locales: Record<Locale, LocaleConfig> = {
+  // ... existing locales ...
+  ja: { code: 'ja', label: '日本語', flag: '🇯🇵', searchLanguage: 'japanese', tier: 2 },
+};
+```
+
+### 2. Create the JSON message file
+
+Copy `messages/en.json` → `messages/ja.json` and translate all values.
+
+Then import it in `lib/i18n.ts`:
+
+```typescript
+import ja from '@/messages/ja.json';
+const messages: Record<Locale, Messages> = { en, pt, fr, de, es, ja };
+```
+
+### 3. Create content
+
+Create `content/docs/ja/` with at minimum:
+- `meta.json` — navigation structure
+- `index.mdx` — landing page with a community translation banner
+
+### 4. Create the route
+
+Create `app/docs/ja/layout.tsx` and `app/docs/ja/[[...slug]]/page.tsx`. Copy from an existing locale route (e.g., `fr/`) and change the locale string.
+
+## Language-Specific Style Guides
+
+### Portuguese (PT-PT)
+
+- Use European Portuguese, not Brazilian Portuguese
+- "palavra-passe" not "senha"
+- "subscrição" not "assinatura" (for subscription)
+- "autenticação" not "autentificação"
+
+### French
+
+- Use formal "vous" (not "tu") when addressing the reader
+- "mot de passe" for password
+- "abonnement" for subscription
+- Technical terms remain in English (API, JWT, webhook)
+
+### German
+
+- Use formal "Sie" when addressing the reader
+- Compound nouns follow German rules (e.g., "Datenbankschema")
+- "Passwort" for password
+- "Abonnement" for subscription
+
+### Spanish
+
+- Use neutral/formal Spanish
+- "contraseña" for password
+- "suscripción" for subscription
+- Avoid regional slang — keep it universal
+
+## Quality Standards
+
+1. **No machine translation without review.** AI-generated translations must be reviewed by a native speaker before merging
+2. **Consistency.** Use the same terminology throughout — refer to the style guide above
+3. **Accuracy.** Technical information must match the English source exactly
+4. **Completeness.** Don't leave sentences half-translated. If you can't finish a page, note what's done in the PR description
+5. **Freshness.** When the English source changes, translations must be updated. Stale translations should show a notice
+
+## PR Conventions for Translations
+
+```
+docs(fr): translate backend getting-started page
+docs(de): add German index page
+docs(i18n): add Japanese locale support
+docs(i18n): update UI strings for all locales
+```
+
+Include in the PR description:
+- Which locale and pages were translated
+- Whether the translation is AI-generated, human-reviewed, or native-written
+- Any terms you were unsure about
