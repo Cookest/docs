@@ -4,7 +4,7 @@ import { baseOptions } from '@/lib/layout.shared';
 
 export default function EnLayout({ children }: { children: React.ReactNode }) {
   return (
-    <DocsLayout tree={source.getPageTree('en')} {...baseOptions()}>
+    <DocsLayout tree={source.getPageTree('en')} {...baseOptions('en')}>
       {children}
     </DocsLayout>
   );

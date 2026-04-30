@@ -4,7 +4,7 @@ import { baseOptions } from '@/lib/layout.shared';
 
 export default function PtLayout({ children }: { children: React.ReactNode }) {
   return (
-    <DocsLayout tree={source.getPageTree('pt')} {...baseOptions()}>
+    <DocsLayout tree={source.getPageTree('pt')} {...baseOptions('pt')}>
       {children}
     </DocsLayout>
   );
