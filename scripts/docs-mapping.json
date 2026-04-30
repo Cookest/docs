@@ -1,0 +1,41 @@
+{
+  "Cookest/api": {
+    "src/handlers/auth.rs":        ["backend/authentication", "backend/endpoints/auth"],
+    "src/handlers/recipe.rs":      ["backend/endpoints/recipes"],
+    "src/handlers/meal_plan.rs":   ["backend/endpoints/meal-plans"],
+    "src/handlers/user.rs":        ["backend/endpoints/profile"],
+    "src/handlers/inventory.rs":   ["backend/endpoints/inventory"],
+    "src/handlers/shopping_list.rs": ["backend/endpoints/shopping-list"],
+    "src/handlers/subscription.rs": ["backend/endpoints/subscription"],
+    "src/handlers/store.rs":       ["backend/endpoints/stores"],
+    "src/handlers/chat.rs":        ["backend/endpoints/ai-chat"],
+    "src/entity/":                 ["backend/database"],
+    "src/services/auth.rs":        ["backend/authentication"],
+    "src/services/meal_plan.rs":   ["backend/endpoints/meal-plans"],
+    "src/services/preference.rs":  ["architecture/overview"],
+    "src/services/store.rs":       ["backend/pdf-pipeline", "backend/endpoints/stores"],
+    "src/middleware/":              ["backend/authentication"],
+    "Cargo.toml":                  ["architecture/repositories"],
+    "docker-compose.yml":          ["backend/getting-started"]
+  },
+  "Cookest/UI": {
+    "lib/src/features/auth/":      ["mobile/screens"],
+    "lib/src/features/recipes/":   ["mobile/screens"],
+    "lib/src/features/meal_plan/": ["mobile/screens"],
+    "lib/src/features/pantry/":    ["mobile/screens"],
+    "lib/src/features/chat/":      ["mobile/screens"],
+    "lib/src/shared/theme/":       ["mobile/theme"],
+    "lib/src/core/api/":           ["mobile/api-integration"],
+    "lib/main.dart":               ["mobile/architecture"],
+    "pubspec.yaml":                ["architecture/repositories"]
+  },
+  "Cookest/web": {
+    "app/components/":             ["architecture/repositories"],
+    "app/messages/":               ["architecture/repositories"],
+    "package.json":                ["architecture/repositories"]
+  },
+  "Cookest/etl": {
+    "main.py":                     ["etl/overview"],
+    "requirements.txt":            ["architecture/repositories"]
+  }
+}

@@ -1,0 +1,42 @@
+# Source Repository → Docs Notification Workflow
+#
+# Copy this file to .github/workflows/notify-docs.yml in each source repo
+# (api, UI, web, etl) to enable automatic documentation sync.
+#
+# Required secrets:
+#   DOCS_DISPATCH_TOKEN — GitHub PAT with repo scope for the docs repository
+#
+name: Notify Documentation
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  notify-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed files
+        id: changes
+        run: |
+          FILES=$(git diff --name-only HEAD~1 HEAD | jq -R -s -c 'split("\n") | map(select(. != ""))')
+          echo "files=$FILES" >> $GITHUB_OUTPUT
+
+      - name: Dispatch to docs
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.DOCS_DISPATCH_TOKEN }}
+          repository: Cookest/docs
+          event-type: code-change
+          client-payload: |
+            {
+              "repo": "${{ github.repository }}",
+              "ref": "${{ github.sha }}",
+              "files": ${{ steps.changes.outputs.files }},
+              "commit_message": "${{ github.event.head_commit.message }}",
+              "author": "${{ github.event.head_commit.author.name }}"
+            }
