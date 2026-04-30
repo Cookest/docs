@@ -1,0 +1,205 @@
+---
+title: Agent Instructions
+description: Detailed instructions and context for AI agents working on any Cookest repository
+---
+
+# Agent Instructions
+
+This page provides the complete set of instructions that any AI agent (GitHub Copilot, Claude, ChatGPT, or custom agents) should follow when working on Cookest repositories. These instructions are referenced by `AGENTS.md` files in each repository.
+
+## Universal Rules
+
+These rules apply to **every** Cookest repository:
+
+### 1. Read Before Writing
+
+Before making any change:
+1. Read the relevant documentation section at the docs site
+2. Read existing code in the same module/feature for patterns
+3. Check the source of truth (API README, schema docs, Flutter app structure)
+4. Never invent endpoint paths, field names, or architecture details — verify against source code
+
+### 2. Follow Conventions
+
+- **Commits**: Conventional Commits format — `<type>(<scope>): <description>`
+- **Branches**: `<type>/<short-description>` (e.g., `feat/recipe-search`)
+- **PRs**: Title matches commit format, body includes What/Why/How/Testing
+- **Code style**: Use the language-specific formatter and linter (see [Best Practices](/docs/contributing/best-practices))
+
+### 3. Maintain Documentation Parity
+
+- If you change behavior, update the documentation
+- If you add a feature, document it
+- If you change an API endpoint, update the endpoint docs
+- If you modify the Flutter app, update the mobile docs
+
+### 4. Test Your Changes
+
+- Ensure existing tests pass
+- Add tests for new features
+- Run the build to verify compilation
+
+### 5. Security First
+
+- Never commit secrets, API keys, or credentials
+- Use environment variables for configuration
+- Validate all user input
+- Follow the security practices documented in [Best Practices](/docs/contributing/best-practices)
+
+---
+
+## Repository-Specific Instructions
+
+### For `api/` (Rust)
+
+```markdown
+You are working on the Cookest API — a Rust REST API built with Actix-Web 4.
+
+Key files to read first:
+- README.md — full endpoint reference and architecture overview
+- docs/database/SCHEMA.md — complete database schema
+- src/errors.rs — error type definitions
+- src/config.rs — environment variable configuration
+
+Architecture:
+- handlers/ → thin HTTP handlers (validate input, call service, return response)
+- services/ → all business logic (database queries, external API calls, algorithms)
+- entity/ → SeaORM entity definitions (one per table)
+- models/ → DTOs for request/response bodies
+- middleware/ → JWT auth verification, rate limiting
+
+Conventions:
+- Use AppError for all error returns (never panic or unwrap in handlers)
+- Pro/Family features return 402 if user tier is insufficient
+- Always verify admin from database, never trust JWT alone
+- Refresh tokens stored as SHA-256 hashes
+- All migrations are idempotent (IF NOT EXISTS)
+
+When adding an endpoint:
+1. Define request/response types in models/
+2. Add validation rules in validation/
+3. Create handler in handlers/
+4. Implement logic in services/
+5. Register route in main.rs
+6. Document in docs/ site
+```
+
+### For `UI/` (Flutter)
+
+```markdown
+You are working on the Cookest mobile app — a Flutter application using Riverpod and GoRouter.
+
+Key files to read first:
+- lib/main.dart — entry point, theme, router setup
+- lib/src/shared/theme/ — color scheme and typography
+- lib/src/core/api/ — Dio HTTP client configuration
+
+Architecture:
+- features/ → one folder per feature (auth, recipes, meal_plan, etc.)
+  - Each feature has: screens/, providers/, repositories/, models/
+- core/ → shared infrastructure (API client, auth, storage)
+- shared/ → reusable widgets, components, theme
+
+Design system:
+- Brand color: #7A9A65 (sage green)
+- Fonts: Playfair Display (headings), Inter (body)
+- Theme: Material 3 with light + dark support
+- Use flutter_animate for micro-interactions
+
+State management:
+- Riverpod for all state (no setState except ephemeral UI state)
+- One provider per data concern
+- AsyncNotifierProvider for data that loads from API
+
+Navigation:
+- GoRouter with 5-tab ShellRoute
+- Deep linking supported
+- Route guards for auth
+
+Auth:
+- Access token in-memory only (never persisted)
+- Refresh token via httpOnly cookie (Dio cookie manager handles automatically)
+- Token auto-refresh on 401 via Dio interceptor
+- Subscription tier decoded from JWT locally
+```
+
+### For `web/` (Next.js Landing)
+
+```markdown
+You are working on the Cookest landing page — a Next.js marketing site.
+
+Key files to read first:
+- app/components/TranslationProvider.tsx — i18n context
+- app/messages/*.json — translation files (5 languages)
+
+Conventions:
+- All user-visible text must use the translation system
+- Components: one per file, PascalCase
+- Styling: TailwindCSS only (no CSS modules)
+- Animations: Framer Motion
+- Responsive: mobile-first
+- Theme: dark/light via ThemeProvider
+```
+
+### For `etl/` (Python)
+
+```markdown
+You are working on the Cookest ETL pipeline — a Python data ingestion system.
+
+Key files:
+- main.py — entry point (Extract → Transform → Load)
+- requirements.txt — dependencies
+- .env.example — required environment variables
+
+Pipeline stages:
+1. Extract: CSV + API (USDA, TheMealDB) with rate limiting
+2. Transform: normalize, deduplicate, convert units, enrich nutrition
+3. Load: bulk upsert into PostgreSQL (idempotent)
+
+Rules:
+- Respect API rate limits (configurable via env vars)
+- Use upsert (ON CONFLICT) for all inserts
+- Log with logging module, not print()
+- Type hints on all functions
+- tqdm for progress visualization
+```
+
+### For `docs/` (Documentation Site)
+
+```markdown
+You are working on the Cookest documentation site — a Fumadocs Next.js project.
+
+Key files to read first:
+- content/docs/contributing/guide.mdx — documentation standards
+- content/docs/contributing/translations.mdx — translation guide
+- lib/i18n.ts — locale registry and translation function
+- lib/source.ts — content loader configuration
+
+i18n system:
+- Content: MDX files per locale folder (content/docs/<locale>/)
+- UI strings: JSON files in messages/<locale>.json
+- Translation function: t(locale, key) from lib/i18n.ts
+- 5 locales: en (default), pt, fr, de, es
+
+When adding content:
+1. Write the English version first
+2. Add to the section's meta.json
+3. Create Portuguese translation (Tier 1 parity)
+4. Tier 2 languages: only if you're confident in translation quality
+
+When modifying i18n:
+1. Update lib/i18n.ts locale registry
+2. Add keys to ALL messages/*.json files
+3. Test language switching
+```
+
+---
+
+## Context Access
+
+AI agents can access documentation context through:
+
+1. **Direct file reading** — Read MDX files from `content/docs/`
+2. **LLM endpoints** — Access raw markdown at `/llms.txt` and `/llms-full.txt`
+3. **MCP Server** — Programmatic access via [Model Context Protocol](/docs/ai/mcp-server)
+4. **AGENTS.md** — Per-repo instruction files that reference this documentation
