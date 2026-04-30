@@ -3,24 +3,42 @@ title: Introduction
 description: Cookest — AI-assisted meal planning and kitchen management platform
 ---
 
-# Welcome to Cookest
+# Cookest
 
-Cookest is a full-stack AI-assisted meal planning and kitchen management platform built as a school project (PAP). It helps users plan weekly meals, manage their pantry, generate shopping lists, and get AI-powered cooking advice.
+Cookest is a full-stack meal planning and kitchen management platform built as a school project (PAP). A Rust REST API handles everything on the backend, a Flutter app runs on iOS and Android, and a Python pipeline seeds the recipe and ingredient database.
 
-## Project components
-
-| Component | Technology | Purpose |
-|-----------|-----------|---------|
-| **API** | Rust · Actix-Web 4 · SeaORM · PostgreSQL | REST backend |
-| **Mobile App** | Flutter · Dart · Riverpod | iOS & Android client |
-| **ETL Pipeline** | Python | Data ingestion & processing |
-
-## Quick navigation
+## What's in these docs
 
 <Cards>
-  <Card title="Architecture Overview" href="/docs/architecture/overview" description="How the three components fit together" />
-  <Card title="Backend API" href="/docs/backend/getting-started" description="Rust API setup and endpoints" />
-  <Card title="Mobile App" href="/docs/mobile/overview" description="Flutter app structure and design system" />
-  <Card title="ETL Pipeline" href="/docs/etl/overview" description="Python data pipeline" />
-  <Card title="Português" href="/docs/pt" description="Documentação em português" />
+  <Card title="Backend API" href="/docs/backend/getting-started" description="Rust · Actix-Web 4 · SeaORM — auth, endpoints, database schema, PDF pipeline" />
+  <Card title="Mobile App" href="/docs/mobile/overview" description="Flutter · Riverpod · GoRouter — screens, state management, design system" />
+  <Card title="ETL Pipeline" href="/docs/etl/overview" description="Python — recipe and nutrition data ingestion from USDA and TheMealDB" />
+  <Card title="Architecture" href="/docs/architecture/overview" description="How the three components fit and communicate" />
+  <Card title="User Guide" href="/docs/user-guide/overview" description="Using Cookest as an end user" />
 </Cards>
+
+## Project layout
+
+```
+PAP/
+  api/      — Rust backend (Actix-Web 4, SeaORM, PostgreSQL)
+  UI/       — Flutter mobile app (Riverpod, GoRouter)
+  etl/      — Python data pipeline
+  dataset/  — Raw CSV dataset (MM-Food-100K)
+  docs/     — This site
+```
+
+## Tech at a glance
+
+| Layer | Stack |
+|-------|-------|
+| API | Rust · Actix-Web 4 · SeaORM · PostgreSQL 15 |
+| Auth | Argon2id · JWT access + refresh · HttpOnly cookies |
+| AI | Ollama (llava for PDF vision, llama3.2 for chat) |
+| Payments | Stripe — webhooks + Free / Pro / Family tiers |
+| Mobile | Flutter 3 · Dart 3 · Riverpod · GoRouter |
+| Data | Python · psycopg2 · USDA FoodData Central · TheMealDB |
+
+---
+
+Available in [English](/docs) and [Português](/docs/pt).

@@ -3,24 +3,42 @@ title: Introdução
 description: Cookest — plataforma de planeamento de refeições com inteligência artificial
 ---
 
-# Bem-vindo ao Cookest
+# Cookest
 
-O Cookest é uma plataforma completa de planeamento de refeições e gestão de cozinha com inteligência artificial, desenvolvida como projeto de escola (PAP). Ajuda os utilizadores a planear refeições semanais, gerir a despensa, gerar listas de compras e obter conselhos de culinária por IA.
+O Cookest é uma plataforma completa de planeamento de refeições e gestão de cozinha desenvolvida como projeto de escola (PAP). O backend é uma API REST em Rust, o cliente é uma aplicação Flutter para iOS e Android, e um pipeline em Python alimenta a base de dados de receitas e ingredientes.
 
-## Componentes do projeto
-
-| Componente | Tecnologia | Finalidade |
-|-----------|-----------|---------|
-| **API** | Rust · Actix-Web 4 · SeaORM · PostgreSQL | Backend REST |
-| **Aplicação Móvel** | Flutter · Dart · Riverpod | Cliente iOS e Android |
-| **Pipeline ETL** | Python | Ingestão e processamento de dados |
-
-## Navegação rápida
+## O que está nesta documentação
 
 <Cards>
-  <Card title="Visão Geral da Arquitetura" href="/docs/pt/architecture/overview" description="Como os três componentes se ligam" />
-  <Card title="API Backend" href="/docs/pt/backend/getting-started" description="Configuração e endpoints da API Rust" />
-  <Card title="Aplicação Móvel" href="/docs/pt/mobile/overview" description="Estrutura e sistema de design da app Flutter" />
-  <Card title="Pipeline ETL" href="/docs/pt/etl/overview" description="Pipeline de dados em Python" />
-  <Card title="English" href="/docs" description="Switch to English documentation" />
+  <Card title="API Backend" href="/docs/pt/backend/getting-started" description="Rust · Actix-Web 4 · SeaORM — autenticação, endpoints, esquema da base de dados, pipeline de PDF" />
+  <Card title="Aplicação Móvel" href="/docs/pt/mobile/overview" description="Flutter · Riverpod · GoRouter — ecrãs, gestão de estado, sistema de design" />
+  <Card title="Pipeline ETL" href="/docs/pt/etl/overview" description="Python — ingestão de receitas e dados nutricionais do USDA e TheMealDB" />
+  <Card title="Arquitetura" href="/docs/pt/architecture/overview" description="Como os três componentes se ligam e comunicam" />
+  <Card title="Guia do Utilizador" href="/docs/pt/user-guide/overview" description="Como usar o Cookest como utilizador final" />
 </Cards>
+
+## Estrutura do projeto
+
+```
+PAP/
+  api/      — Backend Rust (Actix-Web 4, SeaORM, PostgreSQL)
+  UI/       — Aplicação Flutter (Riverpod, GoRouter)
+  etl/      — Pipeline de dados em Python
+  dataset/  — Dataset CSV em bruto (MM-Food-100K)
+  docs/     — Este site
+```
+
+## Tecnologias
+
+| Camada | Stack |
+|--------|-------|
+| API | Rust · Actix-Web 4 · SeaORM · PostgreSQL 15 |
+| Autenticação | Argon2id · JWT acesso + refresh · cookies HttpOnly |
+| IA | Ollama (llava para visão PDF, llama3.2 para chat) |
+| Pagamentos | Stripe — webhooks + planos Free / Pro / Family |
+| Móvel | Flutter 3 · Dart 3 · Riverpod · GoRouter |
+| Dados | Python · psycopg2 · USDA FoodData Central · TheMealDB |
+
+---
+
+Disponível em [English](/docs) e [Português](/docs/pt).
