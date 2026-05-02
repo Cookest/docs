@@ -22,6 +22,8 @@ Before making any change:
 ### 2. Follow Conventions
 
 - **Commits**: Conventional Commits format — `<type>(<scope>): <description>`
+- **Commit granularity**: One logical change per commit — one entity, one service, one handler. Never bundle unrelated files into a single commit (see [Best Practices](/docs/contributing/best-practices#commit-granularity))
+- **No AI co-author trailers**: Do not add `Co-authored-by` for AI tools (Copilot, Claude, etc.) — the human developer is the author
 - **Branches**: `<type>/<short-description>` (e.g., `feat/recipe-search`)
 - **PRs**: Title matches commit format, body includes What/Why/How/Testing
 - **Code style**: Use the language-specific formatter and linter (see [Best Practices](/docs/contributing/best-practices))
