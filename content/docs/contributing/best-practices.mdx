@@ -46,6 +46,51 @@ Use the component or module name as scope:
 | `docs` | `backend`, `mobile`, `etl`, `i18n`, `architecture`, `contributing`, `ai` |
 | `etl` | `extract`, `transform`, `load`, `usda`, `mealdb` |
 
+### Commit Granularity
+
+Each commit must represent **one logical change**. A logical change is a single entity, service, handler, component, or configuration — not a batch of loosely related files.
+
+**Rules:**
+
+1. **One domain concept per commit** — adding an ingredient entity is one commit, adding a recipe entity is another
+2. **Don't bundle files just because they were created at the same time** — "add 7 model files" is too broad; each model should be its own commit
+3. **Tightly coupled files can share a commit** — a handler and its route registration, or a service and its module re-export, are fine together
+4. **Infrastructure changes are their own commits** — Cargo.toml, Dockerfile, docker-compose, CI config each get separate commits
+5. **The commit message must describe what changed specifically** — not just the category of change
+
+**Good — specific and atomic:**
+
+```bash
+feat(recipe): add recipe entity with dietary flags and slug-based lookup
+feat(recipe): add ingredient allergen entity with 17 allergen types
+refactor(auth): add JWT token service with access and refresh encoding
+refactor(meal-plan): add meal plan service with AI-scored weekly generation
+build: add multi-stage Dockerfile for food-api
+```
+
+**Bad — too broad or vague:**
+
+```bash
+feat(recipe): add food-api entities           # which entities? too many files
+refactor(auth): add app-api services          # which services? what do they do?
+refactor: add request/response models         # meaningless without specifics
+feat: update various files                    # completely useless
+```
+
+### No AI Co-authorship Trailers
+
+Do **not** add `Co-authored-by` trailers for AI tools (GitHub Copilot, Claude, ChatGPT, etc.) in commit messages. AI tools are assistants, not co-authors. All commits are authored by the human developer who reviews and approves the changes.
+
+```bash
+# ❌ Wrong — do not add AI co-author trailers
+feat(auth): add refresh token rotation
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+
+# ✅ Correct — just the commit message
+feat(auth): add refresh token rotation
+```
+
 ### Examples
 
 ```bash
