@@ -1,0 +1,162 @@
+---
+title: Visão Geral dos Componentes UI
+description: CUCL — a biblioteca de componentes React do Cookest, construída com TailwindCSS 4 e Framer Motion
+---
+
+# Visão Geral dos Componentes UI
+
+**CUCL** (Cookest UI Components Library) é o sistema de design partilhado que alimenta a camada web do Cookest. Disponibiliza 12 componentes prontos para produção, uma API tipada de tokens de design e integração completa com Storybook.
+
+**Repositório:** [Cookest/cookest-ui-components-library](https://github.com/Cookest/cookest-ui-components-library)  
+**Nome do pacote:** `@cookest/ui`  
+**Versão:** `0.1.0`
+
+## Stack tecnológica
+
+| Ferramenta | Versão | Função |
+|------------|--------|--------|
+| React | 19 | Runtime de interface |
+| TypeScript | 6 | Segurança de tipos |
+| TailwindCSS | 4 | Estilização utilitária |
+| Framer Motion | 12 | Animações e transições |
+| clsx + tailwind-merge | latest | Utilitários de composição de classes |
+| Storybook | 10 | Desenvolvimento e documentação de componentes |
+| Vitest | 4 | Testes unitários e de integração |
+| Testing Library | 16 | Auxiliares de interação com o DOM |
+| tsup | 8 | Bundler da biblioteca (ESM + CJS) |
+| Bun | 1.x | Gestor de pacotes e executor de scripts |
+
+## Instalação
+
+```bash
+bun add @cookest/ui
+```
+
+### Dependências par
+
+```bash
+bun add react react-dom framer-motion
+```
+
+### Importar a folha de estilos
+
+Importe `@cookest/ui/styles.css` uma vez na raiz da aplicação — carrega os tokens de design como propriedades personalizadas CSS e as fontes web Playfair Display e Inter:
+
+```tsx
+// app/layout.tsx (Next.js) ou main.tsx (Vite)
+import "@cookest/ui/styles.css";
+```
+
+## Início rápido
+
+```tsx
+import { Button, Card, Input } from "@cookest/ui";
+import "@cookest/ui/styles.css";
+
+export default function CartaoDeLogin() {
+  return (
+    <Card>
+      <Input label="Email" type="email" placeholder="utilizador@exemplo.com" />
+      <Input label="Palavra-passe" type="password" />
+      <Button variant="primary" fullWidth>
+        Entrar
+      </Button>
+    </Card>
+  );
+}
+```
+
+## Tokens de design
+
+Aceda aos objetos de tokens tipados diretamente — útil para lógica sensível ao tema ou decoradores do Storybook:
+
+```ts
+import { colors, spacing, typography } from "@cookest/ui/tokens";
+
+// ex.: obter a cor primária da marca em tempo de execução
+const primary = colors.primary.DEFAULT; // "#7A9A65"
+```
+
+## Lista de componentes
+
+| Componente | Exportação | Descrição |
+|------------|------------|-----------|
+| `Button` | `Button` | Variantes primário, secundário, ghost e danger com estado de carregamento |
+| `Input` | `Input` | Campo de texto com rótulo, texto auxiliar, estado de erro e ícones |
+| `Card` | `Card`, `CardHeader`, `CardBody`, `CardFooter` | Contentor com secções opcionais de cabeçalho, corpo e rodapé |
+| `Badge` | `Badge` | Indicadores de estado com ponto opcional e botão de remoção |
+| `Avatar` | `Avatar`, `AvatarGroup` | Avatar do utilizador — imagem ou iniciais como fallback; grupos sobrepostos |
+| `Modal` | `Modal` | Diálogo acessível com foco preso e fechar por teclado |
+| `Tooltip` | `Tooltip` | Tooltip posicionado com seta e animação Framer Motion |
+| `Toggle` | `Toggle` | Interruptor com rótulo e estado desativado |
+| `Select` | `Select` | Dropdown personalizado com navegação por teclado e pesquisa opcional |
+| `Skeleton` | `Skeleton`, `SkeletonCard` | Placeholder de carregamento com animação de pulso |
+| `Alert` | `Alert` | Feedback contextual — informação, sucesso, aviso, erro |
+| `Divider` | `Divider` | Separador visual horizontal ou vertical |
+
+## Estrutura do projeto
+
+```
+cookest-ui-components-library/
+  src/
+    components/
+      Alert/
+        Alert.tsx
+        Alert.test.tsx
+        Alert.stories.tsx
+        index.ts
+      Avatar/    Badge/    Button/
+      Card/      Divider/  Input/
+      Modal/     Select/   Skeleton/
+      Toggle/    Tooltip/
+    tokens/
+      colors.ts
+      typography.ts
+      spacing.ts
+      effects.ts
+      index.ts
+    utils/
+      cn.ts          ← utilitário clsx + tailwind-merge
+    styles.css       ← TailwindCSS 4 @theme + propriedades CSS personalizadas
+    index.ts         ← API pública (barrel)
+  .storybook/        ← Configuração do Storybook
+```
+
+## Fluxo de desenvolvimento
+
+```bash
+# Instalar dependências
+bun install
+
+# Iniciar Storybook (sandbox de componentes)
+bun run storybook
+
+# Executar testes unitários
+bun run test
+
+# Executar testes em modo de observação
+bun run test:watch
+
+# Verificar TypeScript
+bun run lint
+
+# Formatar ficheiros de código
+bun run format
+
+# Compilar a biblioteca
+bun run build
+```
+
+## Exportações
+
+A biblioteca tem três caminhos de exportação:
+
+| Caminho | Conteúdo |
+|---------|----------|
+| `@cookest/ui` | Todos os componentes e o utilitário `cn` |
+| `@cookest/ui/tokens` | Objetos de tokens de design (`colors`, `spacing`, `typography`, `effects`) |
+| `@cookest/ui/styles.css` | Propriedades CSS personalizadas e importações de fontes web |
+
+<Callout type="info">
+A biblioteca disponibiliza compilações ESM (`dist/index.js`) e CJS (`dist/index.cjs`), sendo compatível com o App Router do Next.js, Vite e qualquer ambiente CommonJS.
+</Callout>

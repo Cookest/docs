@@ -1,0 +1,271 @@
+---
+title: Contributing to CUCL
+description: How to add a new component, write stories and tests, submit a pull request, and release a new version
+---
+
+# Contributing to CUCL
+
+This guide walks through every step required to contribute to the Cookest UI Components Library — from local setup to an accepted pull request.
+
+## Prerequisites
+
+| Tool | Version | Install |
+|------|---------|---------|
+| Node.js | 20+ | [nodejs.org](https://nodejs.org) |
+| Bun | 1.x | `npm install -g bun` |
+| Git | latest | [git-scm.com](https://git-scm.com) |
+
+## Local setup
+
+```bash
+# Clone the repository
+git clone https://github.com/Cookest/cookest-ui-components-library.git
+cd cookest-ui-components-library
+
+# Install dependencies
+bun install
+
+# Start Storybook
+bun run storybook
+```
+
+Storybook runs at `http://localhost:6006`. Every component has live stories you can interact with.
+
+---
+
+## Adding a new component
+
+### 1. Create the folder structure
+
+```bash
+mkdir src/components/ComponentName
+touch src/components/ComponentName/ComponentName.tsx
+touch src/components/ComponentName/ComponentName.test.tsx
+touch src/components/ComponentName/ComponentName.stories.tsx
+touch src/components/ComponentName/index.ts
+```
+
+### 2. Implement the component
+
+Requirements:
+- Accept a `className?: string` prop and merge it last with `cn()`
+- Use only `var(--ck-*)` CSS variables for colours
+- Export prop interface and variant/size types
+- Use `forwardRef` if wrapping a native DOM element
+- Follow the accessibility requirements in [Best Practices](/docs/cucl/best-practices)
+
+Minimum skeleton:
+
+```tsx
+// src/components/ComponentName/ComponentName.tsx
+"use client";
+
+import { forwardRef, type HTMLAttributes, type ReactNode } from "react";
+import { cn } from "../../utils/cn";
+
+export interface ComponentNameProps
+  extends Omit<HTMLAttributes<HTMLDivElement>, "className"> {
+  className?: string;
+  children: ReactNode;
+}
+
+export const ComponentName = forwardRef<HTMLDivElement, ComponentNameProps>(
+  ({ className, children, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn("font-sans text-[var(--ck-text)]", className)}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  },
+);
+
+ComponentName.displayName = "ComponentName";
+```
+
+### 3. Create the index.ts re-export
+
+```ts
+// src/components/ComponentName/index.ts
+export { ComponentName } from "./ComponentName";
+export type { ComponentNameProps } from "./ComponentName";
+```
+
+### 4. Add to the barrel export
+
+Open `src/index.ts` and add the exports in alphabetical order:
+
+```ts
+export { ComponentName } from "./components/ComponentName";
+export type { ComponentNameProps } from "./components/ComponentName";
+```
+
+### 5. Write Storybook stories
+
+Create stories for every variant and state. See the [Best Practices](/docs/cucl/best-practices) page for the required story list.
+
+```tsx
+// src/components/ComponentName/ComponentName.stories.tsx
+import type { Meta, StoryObj } from "@storybook/react";
+import { ComponentName } from "./ComponentName";
+
+const meta: Meta<typeof ComponentName> = {
+  title: "Components/ComponentName",
+  component: ComponentName,
+  tags: ["autodocs"],
+};
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  args: { children: "Example" },
+};
+```
+
+### 6. Write unit tests
+
+Tests must cover all variants, states, and interactions:
+
+```bash
+bun run test
+```
+
+### 7. Type-check
+
+```bash
+bun run lint
+```
+
+There must be zero TypeScript errors before opening a pull request.
+
+---
+
+## Modifying an existing component
+
+1. Read the existing component's test file to understand the current contract.
+2. Make the change — keep it backward-compatible unless the PR is a documented breaking change.
+3. Update the test file to cover the new behaviour.
+4. Update the stories file to demonstrate the new prop or variant.
+5. Update the [Components](/docs/cucl/components) documentation page with the new prop in the API table.
+
+---
+
+## Adding or updating design tokens
+
+1. Edit the relevant file in `src/tokens/`.
+2. If adding a new CSS variable, also add it to `:root` and `.dark` in `src/styles.css`.
+3. Run `bun run build` and verify the token exports in `dist/tokens/`.
+
+<Callout type="warn">
+Any change to an existing token value is a potentially breaking change. Audit all component usages before renaming or removing a token.
+</Callout>
+
+---
+
+## Pull request workflow
+
+### Branch naming
+
+```
+<type>/<component-or-scope>-<short-description>
+```
+
+Examples:
+- `feat/skeleton-card-variant`
+- `fix/input-aria-describedby`
+- `docs/button-icon-examples`
+- `refactor/select-keyboard-navigation`
+
+### Commit format
+
+```
+feat(skeleton): add SkeletonCard pre-built variant
+fix(input): correct aria-describedby link when error is absent
+```
+
+See [Best Practices](/docs/contributing/best-practices) for the full commit convention.
+
+### PR description template
+
+```markdown
+## What
+Brief description of the change.
+
+## Why
+Link to issue or explain the motivation.
+
+## How
+Key implementation decisions.
+
+## Testing
+How you verified the change.
+
+## Screenshots
+Storybook screenshot showing the new/changed component.
+```
+
+### Review checklist
+
+Before requesting review, confirm all items:
+
+- [ ] `bun run lint` passes (zero TypeScript errors)
+- [ ] `bun run test` passes (all tests green)
+- [ ] New component: stories cover all variants and states
+- [ ] New component: added to `src/index.ts` barrel
+- [ ] Modified component: existing tests updated
+- [ ] Token change: `src/styles.css` updated
+- [ ] Documentation page updated if API changed
+- [ ] No secrets or credentials in code
+
+---
+
+## Running the full CI check locally
+
+```bash
+# Type check
+bun run lint
+
+# Tests
+bun run test
+
+# Format check
+bun run format:check
+
+# Build (confirms the library distributes correctly)
+bun run build
+```
+
+All four commands must succeed before pushing.
+
+---
+
+## Storybook accessibility checks
+
+CUCL includes `@storybook/addon-a11y`. Run automated accessibility checks on every new story:
+
+1. Open Storybook at `http://localhost:6006`
+2. Navigate to the component story
+3. Click the **Accessibility** panel at the bottom
+4. Resolve any violations before submitting the PR
+
+---
+
+## Versioning
+
+CUCL follows [Semantic Versioning](https://semver.org/):
+
+| Change | Version bump |
+|--------|-------------|
+| New component or non-breaking prop | Patch or minor |
+| Breaking prop rename or removal | Major |
+| Token value change affecting visual output | Minor |
+| Token rename or removal | Major |
+
+Breaking changes require:
+1. `!` in the commit type (e.g., `feat(button)!: …`)
+2. `BREAKING CHANGE:` footer in the commit body
+3. Documentation of the migration path in the PR description

@@ -1,0 +1,213 @@
+---
+title: Tokens de Design
+description: Tokens do sistema de design Cookest — cores, tipografia, espaçamento, raio, sombras, transições e z-index
+---
+
+# Tokens de Design
+
+Os tokens de design são a única fonte de verdade para todas as decisões visuais no CUCL. São definidos em `src/tokens/` como constantes TypeScript e expostos como propriedades CSS personalizadas em tempo de execução através de `@cookest/ui/styles.css`.
+
+## Importar tokens
+
+```ts
+import { colors, spacing, typography, effects } from "@cookest/ui/tokens";
+```
+
+Cada ficheiro de tokens exporta também tipos TypeScript para total segurança de tipos:
+
+```ts
+import type { ColorToken, SpacingToken, FontFamilyToken } from "@cookest/ui/tokens";
+```
+
+---
+
+## Cores
+
+Paleta de marca ancorada no verde-salva (`#7A9A65`). Todos os tokens têm variantes para modo claro e escuro.
+
+### Primário
+
+| Token | Claro | Escuro | Utilização |
+|-------|-------|--------|------------|
+| `primary.DEFAULT` | `#7A9A65` | `#8AB575` | Botões, estados ativos, anéis de foco |
+| `primary.light` | `#B4CC9E` | `#6B9A55` | Destaques ao passar o rato |
+| `primary.dark` | `#4E7A3A` | `#A8D490` | Estados de pressão |
+
+A escala completa do primário vai de `primary.50` (`#F0F5EC`) a `primary.950` (`#1A2B14`).
+
+### Cores semânticas
+
+| Token | Claro | Escuro | Variável CSS |
+|-------|-------|--------|-------------|
+| `background` | `#F5F5F0` | `#0E1512` | `--ck-bg` |
+| `card` | `#FAFAF6` | `#172019` | `--ck-bg-card` |
+| `heading` | `#1C3A2A` | `#E0EDE4` | `--ck-heading` |
+| `text` | `#3D5040` | `#B0C8B5` | `--ck-text` |
+| `muted` | `#7A8E74` | `#6A8A70` | `--ck-text-muted` |
+| `border` | `#E4EBE0` | `#253D2E` | `--ck-border` |
+| `surface` | `#FFFFFF` | `#1A261E` | `--ck-surface` |
+
+### Cores de estado
+
+| Token | Hex | Variável CSS | Utilização |
+|-------|-----|-------------|------------|
+| `status.success` | `#4CAF50` | `--ck-success` | Badges e alertas de sucesso |
+| `status.warning` | `#FF9800` | `--ck-warning` | Badges e alertas de aviso |
+| `status.error` | `#F44336` | `--ck-error` | Mensagens de erro, botões danger |
+| `status.info` | `#2196F3` | `--ck-info` | Badges e alertas informativos |
+
+### Utilizar variáveis CSS nos componentes
+
+Os componentes referenciam propriedades CSS personalizadas — nunca valores hexadecimais codificados. O modo escuro funciona automaticamente quando a classe `.dark` é aplicada a um elemento pai:
+
+```tsx
+// ✅ Correto — usa token
+className="text-[var(--ck-heading)]"
+
+// ❌ Errado — cor codificada
+className="text-[#1C3A2A]"
+```
+
+---
+
+## Tipografia
+
+Dois tipos de letra são utilizados em todo o sistema:
+
+| Token | Valor | Utilização |
+|-------|-------|------------|
+| `fontFamily.serif` | `'Playfair Display', Georgia, …` | Cabeçalhos, títulos, texto de destaque |
+| `fontFamily.sans` | `'Inter', -apple-system, …` | Corpo de texto, rótulos, texto de interface |
+| `fontFamily.mono` | `'JetBrains Mono', 'Fira Code', …` | Blocos de código |
+
+**Regra:** Playfair Display está reservado apenas para títulos de Modal e cabeçalhos de grande destaque. Todos os elementos de interface utilizam Inter.
+
+### Escala de tipos
+
+| Token | Tamanho | Altura de linha | Utilização |
+|-------|---------|-----------------|------------|
+| `fontSize.xs` | 12px | 16px | Legendas, texto auxiliar |
+| `fontSize.sm` | 14px | 20px | Rótulos, metadados |
+| `fontSize.base` | 16px | 24px | Corpo de texto |
+| `fontSize.lg` | 18px | 28px | Sub-cabeçalhos |
+| `fontSize.xl` | 20px | 28px | Títulos de cartão |
+| `fontSize.2xl` | 24px | 32px | Cabeçalhos de secção |
+| `fontSize.3xl` | 30px | 36px | Cabeçalhos de página |
+| `fontSize.4xl` | 36px | 40px | Texto hero |
+| `fontSize.5xl` | 48px | 1 | Texto de destaque |
+
+### Pesos de letra
+
+| Token | Valor |
+|-------|-------|
+| `fontWeight.light` | 300 |
+| `fontWeight.normal` | 400 |
+| `fontWeight.medium` | 500 |
+| `fontWeight.semibold` | 600 |
+| `fontWeight.bold` | 700 |
+
+---
+
+## Espaçamento
+
+Baseado numa grelha de 4px com aliases semânticos para margens e preenchimentos de componentes.
+
+### Escala base
+
+| Token | Valor | Equivalente em px |
+|-------|-------|-------------------|
+| `spacing[1]` | `0.25rem` | 4px |
+| `spacing[2]` | `0.5rem` | 8px |
+| `spacing[3]` | `0.75rem` | 12px |
+| `spacing[4]` | `1rem` | 16px |
+| `spacing[5]` | `1.25rem` | 20px |
+| `spacing[6]` | `1.5rem` | 24px |
+| `spacing[8]` | `2rem` | 32px |
+| `spacing[10]` | `2.5rem` | 40px |
+| `spacing[12]` | `3rem` | 48px |
+
+### Aliases semânticos
+
+| Alias | Valor | px | Utilização típica |
+|-------|-------|----|-------------------|
+| `componentSpacing.xs` | `0.25rem` | 4px | Preenchimento de badges |
+| `componentSpacing.sm` | `0.5rem` | 8px | Campos compactos, espaços pequenos |
+| `componentSpacing.md` | `0.75rem` | 12px | Preenchimento padrão de componentes |
+| `componentSpacing.lg` | `1rem` | 16px | Preenchimento espaçoso |
+| `componentSpacing.xl` | `1.5rem` | 24px | Preenchimento de cartões, espaços entre secções |
+| `componentSpacing["2xl"]` | `2rem` | 32px | Espaçamento de secções grandes |
+| `componentSpacing["3xl"]` | `3rem` | 48px | Espaçamento ao nível da página |
+
+---
+
+## Efeitos
+
+### Raio de borda
+
+| Token | Valor | Utilização |
+|-------|-------|------------|
+| `radius.sm` | 4px | Chips pequenos, elementos compactos |
+| `radius.md` | 8px | Campos de entrada, botões |
+| `radius.lg` | 12px | Rodapés de modal, contentores internos |
+| `radius.xl` | 16px | Cartões, modais |
+| `radius["2xl"]` | 24px | Painéis flutuantes |
+| `radius.full` | 9999px | Badges, avatares, pílulas |
+
+### Sombras
+
+| Token | Valor | Utilização |
+|-------|-------|------------|
+| `shadow.sm` | `0 1px 2px rgba(0,0,0,0.05)` | Elevação subtil de cartão |
+| `shadow.md` | `0 4px 6px -1px rgba(0,0,0,0.1)` | Dropdowns |
+| `shadow.lg` | `0 10px 15px -3px rgba(0,0,0,0.1)` | Modais |
+| `shadow.primary` | `0 4px 16px rgba(122,154,101,0.35)` | Botões primários |
+| `shadow.primaryHover` | `0 8px 28px rgba(122,154,101,0.5)` | Botões primários ao passar o rato |
+
+### Transições
+
+| Token | Valor | Utilização |
+|-------|-------|------------|
+| `transition.fast` | `150ms ease` | Alterações de cor ao passar o rato |
+| `transition.normal` | `250ms ease` | Mostrar/ocultar componentes |
+| `transition.slow` | `350ms ease` | Transições ao nível da página |
+| `transition.bounce` | `500ms cubic-bezier(0.34, 1.56, 0.64, 1)` | Microinterações lúdicas |
+
+### Escala de z-index
+
+| Token | Valor | Utilização |
+|-------|-------|------------|
+| `zIndex.dropdown` | 10 | Painéis dropdown do Select |
+| `zIndex.sticky` | 20 | Cabeçalhos fixos |
+| `zIndex.overlay` | 30 | Fundos de modal |
+| `zIndex.modal` | 40 | Diálogos modais |
+| `zIndex.popover` | 50 | Popovers |
+| `zIndex.tooltip` | 60 | Tooltips |
+
+---
+
+## Referência de propriedades CSS personalizadas
+
+Todos os tokens semânticos mapeiam para variáveis CSS aplicadas em `:root` (claro) e `.dark`:
+
+```css
+:root {
+  --ck-primary: #7a9a65;
+  --ck-primary-light: #b4cc9e;
+  --ck-primary-dark: #4e7a3a;
+  --ck-bg: #f5f5f0;
+  --ck-bg-card: #fafaf6;
+  --ck-heading: #1c3a2a;
+  --ck-text: #3d5040;
+  --ck-text-muted: #7a8e74;
+  --ck-border: #e4ebe0;
+  --ck-surface: #ffffff;
+  --ck-success: #4caf50;
+  --ck-warning: #ff9800;
+  --ck-error: #f44336;
+  --ck-info: #2196f3;
+}
+```
+
+<Callout type="warn">
+Utilize sempre as propriedades personalizadas `var(--ck-*)` nos nomes de classe dos componentes em vez de importar as constantes de token. As constantes de token destinam-se à lógica TypeScript; as variáveis CSS destinam-se à estilização.
+</Callout>

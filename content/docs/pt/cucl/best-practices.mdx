@@ -1,0 +1,221 @@
+---
+title: Boas Práticas
+description: Normas de código CUCL — uso de tokens, acessibilidade, nomenclatura, convenções Tailwind e testes
+---
+
+# Boas Práticas
+
+Estas regras aplicam-se a todo o trabalho realizado no repositório `cookest-ui-components-library`. Siga-as para manter a biblioteca consistente, acessível e fácil de expandir.
+
+## Utilização de tokens de design
+
+### Sempre usar variáveis CSS nos componentes
+
+Os componentes devem referenciar propriedades CSS `var(--ck-*)` para todas as cores. Nunca codifique valores hexadecimais ou nomes de cores Tailwind.
+
+```tsx
+// ✅ Correto
+className="text-[var(--ck-heading)] bg-[var(--ck-surface)]"
+
+// ❌ Errado — cor hexadecimal codificada
+className="text-[#1C3A2A] bg-white"
+
+// ❌ Errado — cor Tailwind genérica
+className="text-green-900 bg-white"
+```
+
+### Usar constantes de token apenas para lógica TypeScript
+
+Importe constantes de token de `@cookest/ui/tokens` quando precisar de valores de cor ou espaçamento em lógica JavaScript (por exemplo, decoradores Storybook, configuração de Canvas). Não as utilize para construir strings de classes.
+
+### Seguir a escala de z-index
+
+Utilize os tokens `zIndex.*` ao definir `z-index` em novos componentes. Não invente valores de z-index arbitrários.
+
+| Camada | Token | Valor |
+|--------|-------|-------|
+| Dropdowns | `zIndex.dropdown` | 10 |
+| Modais | `zIndex.modal` | 40 |
+| Tooltips | `zIndex.tooltip` | 60 |
+
+---
+
+## Acessibilidade
+
+Todos os componentes CUCL devem cumprir WCAG 2.1 AA como base.
+
+### Obrigatório para todos os componentes interativos
+
+- Todos os elementos interativos devem ser alcançáveis via teclado (`Tab`, `Enter`, `Space`, teclas de seta onde apropriado).
+- Forneça `aria-label` para botões e controlos com ícone apenas.
+- Use `aria-invalid` e `aria-describedby` para ligar mensagens de erro aos respetivos campos.
+- Nunca remova os contornos de foco — o sistema fornece `focus-visible:outline-[var(--ck-primary)]`.
+
+### Requisitos específicos
+
+| Componente | Requisito |
+|------------|-----------|
+| `Button` | `aria-busy` definido como `true` durante o carregamento |
+| `Input` | `id` auto-gerado ligado ao `<label>`; `aria-describedby` liga erro/auxiliar |
+| `Modal` | `role="dialog"`, `aria-modal="true"`, foco preso ao abrir, restauração de foco ao fechar |
+| `Select` | `role="combobox"`, `role="listbox"` na lista de opções, `aria-selected` em cada opção |
+| `Alert` | `role="alert"` para que leitores de ecrã o anunciem imediatamente |
+| `Toggle` | Renderizado como `<input type="checkbox">` controlado com `<label>` associado |
+| `Avatar` | `role="img"` e `aria-label` no fallback de iniciais |
+
+---
+
+## Estrutura de componentes
+
+### Um componente por pasta
+
+```
+src/components/NomeDoComponente/
+  NomeDoComponente.tsx          ← implementação
+  NomeDoComponente.test.tsx     ← testes unitários
+  NomeDoComponente.stories.tsx  ← histórias Storybook
+  index.ts                      ← re-exportações
+```
+
+### Padrão index.ts
+
+```ts
+// src/components/NomeDoComponente/index.ts
+export { NomeDoComponente } from "./NomeDoComponente";
+export type { NomeDoComponenteProps } from "./NomeDoComponente";
+```
+
+### Exportação barrel
+
+Todos os componentes devem ser adicionados a `src/index.ts`:
+
+```ts
+export { NomeDoComponente } from "./components/NomeDoComponente";
+export type { NomeDoComponenteProps } from "./components/NomeDoComponente";
+```
+
+---
+
+## Convenções TypeScript
+
+- Use `interface` para tipos de props de componentes; exporte-os pelo nome.
+- Use `type` para tipos de união (variantes, tamanhos).
+- Use `forwardRef` para todos os componentes que envolvem um elemento DOM nativo.
+- Omita `className` dos atributos HTML estendidos e volte a adicioná-lo como `className?: string` no final.
+- Nunca use `any`. Se precisar de uma saída de emergência, use `unknown` e restrinja o tipo.
+
+---
+
+## Convenções de classes Tailwind
+
+### Usar `cn()` para toda a composição de classes
+
+O utilitário `cn` (re-exportado de `@cookest/ui`) combina `clsx` e `tailwind-merge`. Use-o sempre para combinar classes condicionais:
+
+```tsx
+import { cn } from "../../utils/cn";
+
+// ✅ Correto
+className={cn(
+  "classes-base",
+  condicao && "classe-condicional",
+  className,
+)}
+
+// ❌ Errado — a interpolação de strings quebra o Tailwind Merge
+className={`classes-base ${condicao ? "classe-condicional" : ""} ${className}`}
+```
+
+### Mapas de variantes
+
+Defina estilos de variante como constantes `Record<TipoVariante, string>` fora do componente:
+
+```ts
+const estilosVariante: Record<ButtonVariant, string> = {
+  primary: "bg-[var(--ck-primary)] text-white …",
+  secondary: "bg-[var(--ck-surface)] …",
+};
+```
+
+---
+
+## Animações
+
+### Usar Framer Motion para todo o movimento
+
+Não utilize `@keyframes` CSS ou propriedades `transition` para transições de estado de componentes. Use elementos `motion.*` e `AnimatePresence`.
+
+### Valores de animação padrão
+
+| Padrão | Implementação |
+|--------|---------------|
+| Entrada/saída de componentes | `initial={{ opacity: 0, y: -8 }}` / `animate={{ opacity: 1, y: 0 }}` / `exit={{ opacity: 0, y: -8 }}` com `duration: 0.2` |
+| Elevação ao passar o rato (botão) | `whileHover={{ y: -1 }}` com `duration: 0.15` |
+| Pressão de botão | `whileTap={{ scale: 0.98 }}` |
+| Dropdown | `initial={{ opacity: 0, y: -4 }}` / `animate={{ opacity: 1, y: 0 }}` com `duration: 0.15` |
+
+Envolva sempre renderizações condicionais com `<AnimatePresence>` para que as animações de saída sejam reproduzidas.
+
+---
+
+## Histórias Storybook
+
+Cada componente deve ter um ficheiro de histórias. Siga o Component Story Format 3 (CSF3) com um objeto `Meta` tipado.
+
+### Histórias obrigatórias
+
+Cada componente deve ter no mínimo:
+- `Default` — configuração base
+- Uma história por variante nomeada
+- Uma história que mostre o estado desativado/carregamento/erro (se aplicável)
+
+---
+
+## Testes
+
+Os testes utilizam **Vitest** com **Testing Library** e **jsdom**.
+
+### O que testar
+
+| Cenário | Deve testar |
+|---------|-------------|
+| Renderização | Sim — props padrão renderizam sem erros |
+| Variantes | Sim — cada variante aplica a classe ou comportamento correto |
+| Interação do utilizador | Sim — clique, escrita, navegação por teclado |
+| Acessibilidade | Sim — atributos `aria-*` presentes e corretos |
+| Estados desativado/erro | Sim |
+| Callbacks | Sim — `onClick`, `onChange`, `onDismiss` são chamados |
+
+### Executar testes
+
+```bash
+bun run test           # execução única
+bun run test:watch     # modo de observação
+bun run test:coverage  # relatório de cobertura
+```
+
+---
+
+## Convenções de commit para CUCL
+
+Siga o formato [Conventional Commits](/docs/pt/contributing/best-practices) de todo o projeto. O âmbito deve nomear o componente ou ficheiro de token:
+
+```bash
+feat(button): add iconLeft and iconRight slots
+fix(input): correct aria-describedby when both error and helper provided
+test(modal): add keyboard dismiss coverage
+docs(badge): add dot and removable examples to Storybook
+chore(deps): upgrade framer-motion to 12.38
+```
+
+### Âmbitos específicos do CUCL
+
+| Âmbito | Utilizado para |
+|--------|----------------|
+| Nomes de componentes (`button`, `input`, `card`, …) | Código fonte, histórias, testes |
+| `tokens` | Qualquer alteração dentro de `src/tokens/` |
+| `styles` | Alterações a `src/styles.css` |
+| `utils` | Alterações a `src/utils/` |
+| `storybook` | Configuração do Storybook |
+| `build` | `tsup.config.ts`, scripts de `package.json` |
+| `deps` | Atualizações de dependências |

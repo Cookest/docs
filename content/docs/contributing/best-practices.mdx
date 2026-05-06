@@ -43,7 +43,8 @@ Use the component or module name as scope:
 | `api` | `auth`, `recipe`, `meal-plan`, `chat`, `store`, `subscription`, `middleware` |
 | `UI` | `auth`, `home`, `recipes`, `pantry`, `shopping`, `chat`, `theme`, `navigation` |
 | `web` | `hero`, `features`, `nav`, `i18n`, `seo` |
-| `docs` | `backend`, `mobile`, `etl`, `i18n`, `architecture`, `contributing`, `ai` |
+| `cucl` | `button`, `input`, `card`, `modal`, `tokens`, `styles`, `storybook`, `build` |
+| `docs` | `backend`, `mobile`, `etl`, `i18n`, `architecture`, `contributing`, `ai`, `cucl` |
 | `etl` | `extract`, `transform`, `load`, `usda`, `mealdb` |
 
 ### Commit Granularity
@@ -195,6 +196,15 @@ Before requesting review:
 - React components: one component per file, PascalCase filenames
 - Use `interface` for public contracts, `type` for unions/intersections
 
+### TypeScript / React (CUCL)
+
+- All styles via `var(--ck-*)` CSS custom properties — no hard-coded hex values
+- Use `cn()` (clsx + tailwind-merge) for all class composition — never string interpolation
+- Use `forwardRef` for all components that wrap a native DOM element
+- Every component must have a `.test.tsx` and a `.stories.tsx` file
+- Every new component must be added to `src/index.ts` and exported by name
+- Run `bun run format:check` before committing — uses Prettier with `prettier-plugin-tailwindcss`
+
 ### Python (ETL)
 
 - Follow PEP 8 (use `black` formatter)
@@ -214,7 +224,7 @@ Before requesting review:
 | Flutter | 3.x | `UI` |
 | Dart | 3.x | `UI` |
 | Node.js | 20+ | `web`, `docs` |
-| Bun | 1.x | `docs` |
+| Bun | 1.x | `cucl`, `docs` |
 | Python | 3.10+ | `etl` |
 
 ### Environment Variables

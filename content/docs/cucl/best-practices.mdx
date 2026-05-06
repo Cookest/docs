@@ -1,0 +1,303 @@
+---
+title: Best Practices
+description: CUCL coding standards — token usage, accessibility, naming, Tailwind conventions, and testing
+---
+
+# Best Practices
+
+These rules apply to all work done inside the `cookest-ui-components-library` repository. Follow them to keep the library consistent, accessible, and easy to extend.
+
+## Design token usage
+
+### Always use CSS variables in components
+
+Components must reference `var(--ck-*)` custom properties for all colours. Never hard-code hex values or Tailwind colour names.
+
+```tsx
+// ✅ Correct
+className="text-[var(--ck-heading)] bg-[var(--ck-surface)]"
+
+// ❌ Wrong — hard-coded hex
+className="text-[#1C3A2A] bg-white"
+
+// ❌ Wrong — generic Tailwind colour
+className="text-green-900 bg-white"
+```
+
+### Use token constants for TypeScript logic only
+
+Import token constants from `@cookest/ui/tokens` when you need colour or spacing values in JavaScript logic (e.g., Storybook decorators, Canvas configuration). Do not use them to build class strings.
+
+```ts
+// ✅ OK in a Storybook decorator or theme helper
+import { colors } from "@cookest/ui/tokens";
+const brandColor = colors.primary.DEFAULT;
+
+// ❌ Wrong — constructing Tailwind classes from token values
+className={`text-[${colors.heading.light}]`}
+```
+
+### Follow the z-index scale
+
+Use `zIndex.*` tokens when setting `z-index` on new components. Do not invent arbitrary z-index values.
+
+| Layer | Token | Value |
+|-------|-------|-------|
+| Dropdowns | `zIndex.dropdown` | 10 |
+| Modals | `zIndex.modal` | 40 |
+| Tooltips | `zIndex.tooltip` | 60 |
+
+---
+
+## Accessibility
+
+Every CUCL component must meet WCAG 2.1 AA as a baseline.
+
+### Required for all interactive components
+
+- All interactive elements must be reachable via keyboard (`Tab`, `Enter`, `Space`, arrow keys where appropriate).
+- Provide `aria-label` for icon-only buttons and controls.
+- Use `aria-invalid` and `aria-describedby` to link error messages to their inputs.
+- Never remove focus outlines — the system provides `focus-visible:outline-[var(--ck-primary)]`.
+
+### Specific requirements
+
+| Component | Requirement |
+|-----------|-------------|
+| `Button` | `aria-busy` set to `true` during loading |
+| `Input` | Auto-generated `id` linked to `<label>`; `aria-describedby` links error/helper |
+| `Modal` | `role="dialog"`, `aria-modal="true"`, focus trap on open, focus restoration on close |
+| `Select` | `role="combobox"`, `role="listbox"` on the options list, `aria-selected` on each option |
+| `Alert` | `role="alert"` so screen readers announce it immediately |
+| `Toggle` | Rendered as a controlled `<input type="checkbox">` with an associated `<label>` |
+| `Avatar` | `role="img"` and `aria-label` on the initials fallback |
+
+---
+
+## Component structure
+
+### One component per folder
+
+```
+src/components/ComponentName/
+  ComponentName.tsx          ← implementation
+  ComponentName.test.tsx     ← unit tests
+  ComponentName.stories.tsx  ← Storybook stories
+  index.ts                   ← re-exports
+```
+
+### index.ts pattern
+
+```ts
+// src/components/ComponentName/index.ts
+export { ComponentName } from "./ComponentName";
+export type { ComponentNameProps } from "./ComponentName";
+```
+
+### Barrel export
+
+All components must be added to `src/index.ts`:
+
+```ts
+export { ComponentName } from "./components/ComponentName";
+export type { ComponentNameProps } from "./components/ComponentName";
+```
+
+---
+
+## TypeScript conventions
+
+- Use `interface` for component prop types; export them by name.
+- Use `type` for union types (variants, sizes).
+- Use `forwardRef` for all components that wrap a native DOM element.
+- Omit `className` from the extended HTML attributes and re-add it as `className?: string` so it stays at the end of the prop table.
+- Never use `any`. If you need an escape hatch, use `unknown` and narrow the type.
+
+```tsx
+// ✅ Correct prop interface pattern
+export interface ButtonProps
+  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className"> {
+  variant?: ButtonVariant;
+  className?: string;
+  children: ReactNode;
+}
+```
+
+---
+
+## Tailwind class conventions
+
+### Use `cn()` for all class composition
+
+The `cn` utility (re-exported from `@cookest/ui`) merges `clsx` and `tailwind-merge`. Always use it to combine conditional classes:
+
+```tsx
+import { cn } from "../../utils/cn";
+
+// ✅ Correct
+className={cn(
+  "base-classes",
+  condition && "conditional-class",
+  className,
+)}
+
+// ❌ Wrong — string interpolation breaks Tailwind Merge
+className={`base-classes ${condition ? "conditional-class" : ""} ${className}`}
+```
+
+### Class ordering
+
+Keep classes in this order inside `cn()` calls:
+1. Base layout and display classes
+2. Background and colour classes
+3. Border classes
+4. Typography classes
+5. Focus/active/disabled states
+6. Animation and transition classes
+7. The forwarded `className` prop (always last)
+
+### Variant maps
+
+Define variant styles as `Record<VariantType, string>` constants outside the component:
+
+```ts
+const variantStyles: Record<ButtonVariant, string> = {
+  primary: "bg-[var(--ck-primary)] text-white …",
+  secondary: "bg-[var(--ck-surface)] …",
+};
+```
+
+---
+
+## Animations
+
+### Use Framer Motion for all motion
+
+Do not use CSS `@keyframes` or raw `transition` properties for component state transitions. Use `motion.*` elements and `AnimatePresence`.
+
+### Standard animation values
+
+| Pattern | Implementation |
+|---------|---------------|
+| Component enter/exit | `initial={{ opacity: 0, y: -8 }}` / `animate={{ opacity: 1, y: 0 }}` / `exit={{ opacity: 0, y: -8 }}` with `duration: 0.2` |
+| Button hover lift | `whileHover={{ y: -1 }}` with `duration: 0.15` |
+| Button press | `whileTap={{ scale: 0.98 }}` |
+| Dropdown appear | `initial={{ opacity: 0, y: -4 }}` / `animate={{ opacity: 1, y: 0 }}` with `duration: 0.15` |
+
+Always wrap conditional renders with `<AnimatePresence>` so exit animations play.
+
+---
+
+## Storybook stories
+
+Every component must have a stories file. Follow the Component Story Format 3 (CSF3) with a typed `Meta` object.
+
+### Story template
+
+```tsx
+import type { Meta, StoryObj } from "@storybook/react";
+import { ComponentName } from "./ComponentName";
+
+const meta: Meta<typeof ComponentName> = {
+  title: "Components/ComponentName",
+  component: ComponentName,
+  tags: ["autodocs"],
+};
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  args: {
+    children: "Label",
+  },
+};
+
+export const Variant: Story = {
+  args: {
+    variant: "secondary",
+    children: "Label",
+  },
+};
+```
+
+### Required stories
+
+Every component must have at minimum:
+- `Default` — base configuration
+- One story per named variant
+- One story showing the disabled/loading/error state (if the component has one)
+
+---
+
+## Testing
+
+Tests use **Vitest** with **Testing Library** and **jsdom**.
+
+### What to test
+
+| Scenario | Must test |
+|----------|-----------|
+| Renders | Yes — default props render without crashing |
+| Variants | Yes — each variant applies the correct class or behaviour |
+| User interaction | Yes — click, type, keyboard navigation |
+| Accessibility | Yes — `aria-*` attributes present and correct |
+| Disabled / error states | Yes |
+| Callbacks | Yes — `onClick`, `onChange`, `onDismiss` are called |
+
+### Test template
+
+```tsx
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, it, expect, vi } from "vitest";
+import { ComponentName } from "./ComponentName";
+
+describe("ComponentName", () => {
+  it("renders correctly", () => {
+    render(<ComponentName>Label</ComponentName>);
+    expect(screen.getByText("Label")).toBeInTheDocument();
+  });
+
+  it("calls onClick when clicked", async () => {
+    const onClick = vi.fn();
+    render(<ComponentName onClick={onClick}>Label</ComponentName>);
+    await userEvent.click(screen.getByRole("button"));
+    expect(onClick).toHaveBeenCalledOnce();
+  });
+});
+```
+
+### Running tests
+
+```bash
+bun run test           # single run
+bun run test:watch     # watch mode
+bun run test:coverage  # coverage report
+```
+
+---
+
+## Commit conventions for CUCL
+
+Follow the project-wide [Conventional Commits](/docs/contributing/best-practices) format. The scope must name the component or token file:
+
+```bash
+feat(button): add iconLeft and iconRight slots
+fix(input): correct aria-describedby when both error and helper provided
+test(modal): add keyboard dismiss coverage
+docs(badge): add dot and removable examples to Storybook
+chore(deps): upgrade framer-motion to 12.38
+```
+
+### CUCL-specific scopes
+
+| Scope | Used for |
+|-------|----------|
+| Component names (`button`, `input`, `card`, …) | Component source, stories, tests |
+| `tokens` | Any change inside `src/tokens/` |
+| `styles` | Changes to `src/styles.css` |
+| `utils` | Changes to `src/utils/` |
+| `storybook` | Storybook configuration |
+| `build` | `tsup.config.ts`, `package.json` scripts |
+| `deps` | Dependency updates |
