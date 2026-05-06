@@ -1,0 +1,467 @@
+---
+title: Components
+description: API reference for all 12 CUCL components — props, variants, and usage examples
+---
+
+# Components
+
+All components are exported from `@cookest/ui`. Each one is fully typed, dark-mode-aware, and accessible by default.
+
+```tsx
+import {
+  Alert, Avatar, AvatarGroup, Badge, Button,
+  Card, CardHeader, CardBody, CardFooter,
+  Divider, Input, Modal, Select, Skeleton, SkeletonCard,
+  Toggle, Tooltip,
+} from "@cookest/ui";
+import "@cookest/ui/styles.css";
+```
+
+---
+
+## Button
+
+Animated button with four variants and a built-in loading spinner.
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `"primary" \| "secondary" \| "ghost" \| "danger"` | `"primary"` | Visual style |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Button size |
+| `loading` | `boolean` | `false` | Shows spinner and disables the button |
+| `iconLeft` | `ReactNode` | — | Icon rendered before the label |
+| `iconRight` | `ReactNode` | — | Icon rendered after the label |
+| `fullWidth` | `boolean` | `false` | Stretches to fill its container |
+| `disabled` | `boolean` | `false` | Native disabled attribute |
+| `className` | `string` | — | Additional Tailwind classes |
+
+All standard `<button>` HTML attributes are forwarded.
+
+### Examples
+
+```tsx
+// Variants
+<Button variant="primary">Save changes</Button>
+<Button variant="secondary">Cancel</Button>
+<Button variant="ghost">Learn more</Button>
+<Button variant="danger">Delete account</Button>
+
+// Sizes
+<Button size="sm">Small</Button>
+<Button size="md">Medium</Button>
+<Button size="lg">Large</Button>
+
+// Loading state
+<Button loading>Saving…</Button>
+
+// Icon slots
+<Button iconLeft={<PlusIcon />}>Add item</Button>
+<Button iconRight={<ArrowRightIcon />}>Continue</Button>
+```
+
+<Callout type="info">
+The button uses `motion.button` from Framer Motion — it lifts 1px on hover and scales to 0.98 on press. Animations are suppressed when `disabled` or `loading` is `true`.
+</Callout>
+
+---
+
+## Input
+
+Text input with label, helper text, error state, and icon slots.
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | `string` | — | Label text rendered above the input |
+| `helperText` | `string` | — | Helper text rendered below |
+| `error` | `string` | — | Error message — replaces helperText and styles the border red |
+| `iconLeft` | `ReactNode` | — | Icon in the left slot |
+| `iconRight` | `ReactNode` | — | Icon in the right slot |
+| `inputSize` | `"sm" \| "md" \| "lg"` | `"md"` | Input size (uses `inputSize` to avoid clash with HTML `size`) |
+| `fullWidth` | `boolean` | `false` | Stretches to container width |
+| `className` | `string` | — | Applied to the outer wrapper |
+
+All standard `<input>` HTML attributes are forwarded. `id` is auto-generated if not provided.
+
+### Examples
+
+```tsx
+// Basic
+<Input label="Email" type="email" placeholder="you@example.com" />
+
+// With helper text
+<Input label="Username" helperText="3–20 characters, lowercase only" />
+
+// Error state
+<Input label="Password" type="password" error="Minimum 8 characters required" />
+
+// Icon slots
+<Input label="Search" iconLeft={<SearchIcon />} placeholder="Search recipes…" />
+
+// Full-width
+<Input label="Name" fullWidth />
+```
+
+---
+
+## Card
+
+Container component with optional header, body, and footer sections.
+
+### Card props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `"default" \| "interactive" \| "outlined"` | `"default"` | Visual style — `interactive` adds hover animation |
+| `padding` | `"none" \| "sm" \| "md" \| "lg"` | `"md"` | Uniform inner padding |
+| `className` | `string` | — | Additional classes |
+
+### Sub-components
+
+`CardHeader`, `CardBody`, and `CardFooter` are used for structured layouts. They manage their own border and padding — do not add padding to the parent `Card` when using sub-components (`padding="none"`).
+
+### Examples
+
+```tsx
+// Simple card with padding
+<Card>
+  <p>Card content</p>
+</Card>
+
+// Structured card
+<Card padding="none">
+  <CardHeader>Recipe Details</CardHeader>
+  <CardBody>
+    <p>Ingredients and steps…</p>
+  </CardBody>
+  <CardFooter>
+    <Button>Start cooking</Button>
+  </CardFooter>
+</Card>
+
+// Interactive card (hover lift)
+<Card variant="interactive" onClick={handleClick}>
+  <p>Click me</p>
+</Card>
+```
+
+---
+
+## Badge
+
+Compact status indicator with optional dot and remove button.
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `"default" \| "success" \| "warning" \| "error" \| "info"` | `"default"` | Colour variant |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Badge size |
+| `dot` | `boolean` | `false` | Shows a colour dot before the label |
+| `removable` | `boolean` | `false` | Shows a remove (×) button |
+| `onRemove` | `() => void` | — | Called when the remove button is clicked |
+| `className` | `string` | — | Additional classes |
+
+### Examples
+
+```tsx
+<Badge variant="success">Active</Badge>
+<Badge variant="warning" dot>Expiring soon</Badge>
+<Badge variant="error" size="sm">Out of stock</Badge>
+<Badge removable onRemove={() => removeTag(id)}>Vegan</Badge>
+```
+
+---
+
+## Avatar
+
+User avatar with image, initials fallback, and group stacking.
+
+### Avatar props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `src` | `string` | — | Image URL — renders `<img>` when provided |
+| `alt` | `string` | required | Alt text (also used to derive initials) |
+| `initials` | `string` | — | Override auto-derived initials |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `"md"` | Avatar size |
+| `className` | `string` | — | Additional classes |
+
+When `src` is absent the component renders a `<span>` with the first two initials on a sage green background.
+
+### AvatarGroup props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `max` | `number` | — | Maximum avatars to show — overflow rendered as `+N` |
+| `children` | `ReactNode` | required | `Avatar` components |
+| `className` | `string` | — | Additional classes |
+
+### Examples
+
+```tsx
+// With image
+<Avatar src="/users/alice.jpg" alt="Alice Smith" size="lg" />
+
+// Initials fallback
+<Avatar alt="Bob Jones" size="md" />
+
+// Group
+<AvatarGroup max={3}>
+  <Avatar alt="Alice Smith" />
+  <Avatar alt="Bob Jones" />
+  <Avatar alt="Carol White" />
+  <Avatar alt="Dave Green" />
+</AvatarGroup>
+```
+
+---
+
+## Modal
+
+Accessible dialog overlay with focus trap and keyboard dismiss.
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `open` | `boolean` | required | Controls visibility |
+| `onClose` | `() => void` | required | Called when dismissed |
+| `title` | `string` | — | Renders a header row with close button |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Dialog max-width |
+| `closeOnBackdrop` | `boolean` | `true` | Dismiss when clicking the backdrop |
+| `closeOnEsc` | `boolean` | `true` | Dismiss on `Escape` key |
+| `footer` | `ReactNode` | — | Content in the footer row |
+| `className` | `string` | — | Applied to the dialog panel |
+
+### Example
+
+```tsx
+const [open, setOpen] = useState(false);
+
+<Button onClick={() => setOpen(true)}>Open modal</Button>
+
+<Modal
+  open={open}
+  onClose={() => setOpen(false)}
+  title="Confirm deletion"
+  footer={
+    <>
+      <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+      <Button variant="danger" onClick={handleDelete}>Delete</Button>
+    </>
+  }
+>
+  <p>This action cannot be undone.</p>
+</Modal>
+```
+
+<Callout type="info">
+The Modal manages `document.body.style.overflow` to prevent scroll while open and restores focus to the previously active element on close.
+</Callout>
+
+---
+
+## Tooltip
+
+Positioned tooltip with an animated arrow.
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `content` | `ReactNode` | required | Tooltip text or JSX |
+| `position` | `"top" \| "bottom" \| "left" \| "right"` | `"top"` | Arrow direction |
+| `delay` | `number` | `0` | Show delay in milliseconds |
+| `className` | `string` | — | Applied to the tooltip panel |
+| `children` | `ReactNode` | required | Trigger element |
+
+### Example
+
+```tsx
+<Tooltip content="Save your changes" position="top">
+  <Button variant="ghost" size="sm">
+    <SaveIcon />
+  </Button>
+</Tooltip>
+```
+
+---
+
+## Toggle
+
+Switch input with an optional label.
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `checked` | `boolean` | required | Toggle state |
+| `onChange` | `(checked: boolean) => void` | required | State change handler |
+| `label` | `string` | — | Label text |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Toggle size |
+| `disabled` | `boolean` | `false` | Prevents interaction |
+| `className` | `string` | — | Additional classes |
+
+### Example
+
+```tsx
+const [enabled, setEnabled] = useState(false);
+
+<Toggle
+  checked={enabled}
+  onChange={setEnabled}
+  label="Enable notifications"
+/>
+```
+
+---
+
+## Select
+
+Custom dropdown with keyboard navigation and optional search.
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `options` | `SelectOption[]` | required | Array of `{ value, label, disabled? }` |
+| `value` | `string` | — | Controlled selected value |
+| `onChange` | `(value: string) => void` | — | Selection handler |
+| `placeholder` | `string` | `"Select…"` | Placeholder text |
+| `label` | `string` | — | Label above the trigger |
+| `error` | `string` | — | Error message below |
+| `disabled` | `boolean` | `false` | Prevents interaction |
+| `searchable` | `boolean` | `false` | Adds a search input inside the dropdown |
+| `className` | `string` | — | Applied to the wrapper |
+
+### Example
+
+```tsx
+const [diet, setDiet] = useState("");
+
+<Select
+  label="Dietary preference"
+  options={[
+    { value: "none", label: "No preference" },
+    { value: "vegan", label: "Vegan" },
+    { value: "vegetarian", label: "Vegetarian" },
+    { value: "gluten-free", label: "Gluten-free" },
+  ]}
+  value={diet}
+  onChange={setDiet}
+  searchable
+/>
+```
+
+---
+
+## Skeleton
+
+Loading placeholder with a pulse animation.
+
+### Skeleton props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `"text" \| "circular" \| "rectangular"` | `"rectangular"` | Shape |
+| `width` | `string \| number` | — | CSS width value or px number |
+| `height` | `string \| number` | — | CSS height value or px number |
+| `lines` | `number` | `1` | Number of text lines (`variant="text"` only) |
+| `className` | `string` | — | Additional classes |
+
+### SkeletonCard
+
+Pre-built card skeleton for loading states:
+
+```tsx
+<SkeletonCard />
+```
+
+### Examples
+
+```tsx
+// Text lines
+<Skeleton variant="text" lines={3} />
+
+// Avatar placeholder
+<Skeleton variant="circular" width={40} height={40} />
+
+// Image placeholder
+<Skeleton variant="rectangular" width="100%" height={200} />
+
+// Full card
+<SkeletonCard />
+```
+
+---
+
+## Alert
+
+Contextual feedback banner with animated entrance and dismiss.
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | `"info" \| "success" \| "warning" \| "error"` | `"info"` | Colour and icon variant |
+| `title` | `string` | — | Bold title row |
+| `dismissible` | `boolean` | `false` | Shows a dismiss (×) button |
+| `onDismiss` | `() => void` | — | Called when dismissed |
+| `icon` | `ReactNode` | — | Override the default variant icon |
+| `visible` | `boolean` | `true` | Controls AnimatePresence visibility |
+| `className` | `string` | — | Additional classes |
+
+### Examples
+
+```tsx
+// Static info banner
+<Alert variant="info" title="Did you know?">
+  You can save up to 20% by switching to the Pro plan.
+</Alert>
+
+// Dismissible error
+const [show, setShow] = useState(true);
+<Alert
+  variant="error"
+  title="Upload failed"
+  dismissible
+  visible={show}
+  onDismiss={() => setShow(false)}
+>
+  The file exceeds the 10 MB limit.
+</Alert>
+```
+
+---
+
+## Divider
+
+Visual separator, horizontal or vertical.
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | Axis |
+| `label` | `string` | — | Centered label text (horizontal only) |
+| `className` | `string` | — | Additional classes |
+
+### Examples
+
+```tsx
+// Horizontal
+<Divider />
+
+// With label
+<Divider label="or continue with" />
+
+// Vertical (needs a fixed height context)
+<div className="flex h-8 items-center gap-4">
+  <span>Option A</span>
+  <Divider orientation="vertical" />
+  <span>Option B</span>
+</div>
+```

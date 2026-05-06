@@ -1,0 +1,213 @@
+---
+title: Design Tokens
+description: Cookest design system tokens — colors, typography, spacing, radius, shadows, transitions, and z-index
+---
+
+# Design Tokens
+
+Design tokens are the single source of truth for all visual decisions in CUCL. They are defined in `src/tokens/` as TypeScript constants and exposed as CSS custom properties at runtime via `@cookest/ui/styles.css`.
+
+## Importing tokens
+
+```ts
+import { colors, spacing, typography, effects } from "@cookest/ui/tokens";
+```
+
+Each token file also exports TypeScript types for full type safety:
+
+```ts
+import type { ColorToken, SpacingToken, FontFamilyToken } from "@cookest/ui/tokens";
+```
+
+---
+
+## Colors
+
+Brand palette anchored on sage green (`#7A9A65`). All tokens have light and dark variants.
+
+### Primary
+
+| Token | Light | Dark | Usage |
+|-------|-------|------|-------|
+| `primary.DEFAULT` | `#7A9A65` | `#8AB575` | Buttons, active states, focus rings |
+| `primary.light` | `#B4CC9E` | `#6B9A55` | Hover highlights |
+| `primary.dark` | `#4E7A3A` | `#A8D490` | Pressed states |
+
+The full primary scale runs from `primary.50` (`#F0F5EC`) to `primary.950` (`#1A2B14`).
+
+### Semantic colors
+
+| Token | Light | Dark | CSS variable |
+|-------|-------|------|-------------|
+| `background` | `#F5F5F0` | `#0E1512` | `--ck-bg` |
+| `card` | `#FAFAF6` | `#172019` | `--ck-bg-card` |
+| `heading` | `#1C3A2A` | `#E0EDE4` | `--ck-heading` |
+| `text` | `#3D5040` | `#B0C8B5` | `--ck-text` |
+| `muted` | `#7A8E74` | `#6A8A70` | `--ck-text-muted` |
+| `border` | `#E4EBE0` | `#253D2E` | `--ck-border` |
+| `surface` | `#FFFFFF` | `#1A261E` | `--ck-surface` |
+
+### Status colors
+
+| Token | Hex | CSS variable | Usage |
+|-------|-----|-------------|-------|
+| `status.success` | `#4CAF50` | `--ck-success` | Success badges, alerts |
+| `status.warning` | `#FF9800` | `--ck-warning` | Warning badges, alerts |
+| `status.error` | `#F44336` | `--ck-error` | Error messages, danger buttons |
+| `status.info` | `#2196F3` | `--ck-info` | Informational badges, alerts |
+
+### Using CSS variables in components
+
+Components reference CSS custom properties — never hard-coded hex values. This means dark mode works automatically when the `.dark` class is applied to a parent:
+
+```tsx
+// ✅ Correct — uses token
+className="text-[var(--ck-heading)]"
+
+// ❌ Wrong — hard-coded colour
+className="text-[#1C3A2A]"
+```
+
+---
+
+## Typography
+
+Two typefaces are used throughout the system:
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `fontFamily.serif` | `'Playfair Display', Georgia, …` | Headings, titles, display text |
+| `fontFamily.sans` | `'Inter', -apple-system, …` | Body text, labels, UI copy |
+| `fontFamily.mono` | `'JetBrains Mono', 'Fira Code', …` | Code blocks |
+
+**Rule:** Playfair Display is reserved for Modal titles and high-emphasis headings only. All UI elements use Inter.
+
+### Type scale
+
+| Token | Size | Line height | Usage |
+|-------|------|-------------|-------|
+| `fontSize.xs` | 12px | 16px | Captions, helper text |
+| `fontSize.sm` | 14px | 20px | Labels, metadata |
+| `fontSize.base` | 16px | 24px | Body text |
+| `fontSize.lg` | 18px | 28px | Sub-headings |
+| `fontSize.xl` | 20px | 28px | Card titles |
+| `fontSize.2xl` | 24px | 32px | Section headings |
+| `fontSize.3xl` | 30px | 36px | Page headings |
+| `fontSize.4xl` | 36px | 40px | Hero text |
+| `fontSize.5xl` | 48px | 1 | Display text |
+
+### Font weights
+
+| Token | Value |
+|-------|-------|
+| `fontWeight.light` | 300 |
+| `fontWeight.normal` | 400 |
+| `fontWeight.medium` | 500 |
+| `fontWeight.semibold` | 600 |
+| `fontWeight.bold` | 700 |
+
+---
+
+## Spacing
+
+Based on a 4px grid with semantic aliases for component padding and margins.
+
+### Base scale
+
+| Token | Value | px equivalent |
+|-------|-------|--------------|
+| `spacing[1]` | `0.25rem` | 4px |
+| `spacing[2]` | `0.5rem` | 8px |
+| `spacing[3]` | `0.75rem` | 12px |
+| `spacing[4]` | `1rem` | 16px |
+| `spacing[5]` | `1.25rem` | 20px |
+| `spacing[6]` | `1.5rem` | 24px |
+| `spacing[8]` | `2rem` | 32px |
+| `spacing[10]` | `2.5rem` | 40px |
+| `spacing[12]` | `3rem` | 48px |
+
+### Semantic aliases
+
+| Alias | Value | px | Typical use |
+|-------|-------|----|-------------|
+| `componentSpacing.xs` | `0.25rem` | 4px | Badge padding |
+| `componentSpacing.sm` | `0.5rem` | 8px | Compact inputs, small gaps |
+| `componentSpacing.md` | `0.75rem` | 12px | Default component padding |
+| `componentSpacing.lg` | `1rem` | 16px | Spacious padding |
+| `componentSpacing.xl` | `1.5rem` | 24px | Card padding, section gaps |
+| `componentSpacing["2xl"]` | `2rem` | 32px | Large section spacing |
+| `componentSpacing["3xl"]` | `3rem` | 48px | Page-level spacing |
+
+---
+
+## Effects
+
+### Border radius
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `radius.sm` | 4px | Small chips, tight elements |
+| `radius.md` | 8px | Inputs, buttons |
+| `radius.lg` | 12px | Modal footers, inner containers |
+| `radius.xl` | 16px | Cards, modals |
+| `radius["2xl"]` | 24px | Floating panels |
+| `radius.full` | 9999px | Badges, avatars, pills |
+
+### Shadows
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `shadow.sm` | `0 1px 2px rgba(0,0,0,0.05)` | Subtle card lift |
+| `shadow.md` | `0 4px 6px -1px rgba(0,0,0,0.1)` | Dropdowns |
+| `shadow.lg` | `0 10px 15px -3px rgba(0,0,0,0.1)` | Modals |
+| `shadow.primary` | `0 4px 16px rgba(122,154,101,0.35)` | Primary buttons |
+| `shadow.primaryHover` | `0 8px 28px rgba(122,154,101,0.5)` | Primary button hover |
+
+### Transitions
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `transition.fast` | `150ms ease` | Hover colour changes |
+| `transition.normal` | `250ms ease` | Component show/hide |
+| `transition.slow` | `350ms ease` | Page-level transitions |
+| `transition.bounce` | `500ms cubic-bezier(0.34, 1.56, 0.64, 1)` | Playful micro-interactions |
+
+### Z-index scale
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `zIndex.dropdown` | 10 | Select dropdown panels |
+| `zIndex.sticky` | 20 | Sticky headers |
+| `zIndex.overlay` | 30 | Modal backdrops |
+| `zIndex.modal` | 40 | Modal dialogs |
+| `zIndex.popover` | 50 | Popovers |
+| `zIndex.tooltip` | 60 | Tooltips |
+
+---
+
+## CSS custom properties reference
+
+All semantic tokens map to CSS variables applied in `:root` (light) and `.dark`:
+
+```css
+:root {
+  --ck-primary: #7a9a65;
+  --ck-primary-light: #b4cc9e;
+  --ck-primary-dark: #4e7a3a;
+  --ck-bg: #f5f5f0;
+  --ck-bg-card: #fafaf6;
+  --ck-heading: #1c3a2a;
+  --ck-text: #3d5040;
+  --ck-text-muted: #7a8e74;
+  --ck-border: #e4ebe0;
+  --ck-surface: #ffffff;
+  --ck-success: #4caf50;
+  --ck-warning: #ff9800;
+  --ck-error: #f44336;
+  --ck-info: #2196f3;
+}
+```
+
+<Callout type="warn">
+Always reference `var(--ck-*)` custom properties inside component class names rather than importing token constants. Token constants are for TypeScript logic; CSS variables are for styling.
+</Callout>

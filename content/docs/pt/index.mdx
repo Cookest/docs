@@ -15,6 +15,7 @@ O Cookest é uma plataforma completa de planeamento de refeições e gestão de 
   <Card title="Pipeline ETL" href="/docs/pt/etl/overview" description="Python — ingestão de receitas e dados nutricionais do USDA e TheMealDB" />
   <Card title="Arquitetura" href="/docs/pt/architecture/overview" description="Como os três componentes se ligam e comunicam" />
   <Card title="Guia do Utilizador" href="/docs/pt/user-guide/overview" description="Como usar o Cookest como utilizador final" />
+  <Card title="Componentes UI" href="/docs/pt/cucl/overview" description="CUCL · React · TailwindCSS 4 · Framer Motion — biblioteca de componentes partilhada, tokens de design e Storybook" />
 </Cards>
 
 ## Estrutura do projeto
@@ -25,6 +26,7 @@ PAP/
   UI/       — Aplicação Flutter (Riverpod, GoRouter)
   etl/      — Pipeline de dados em Python
   dataset/  — Dataset CSV em bruto (MM-Food-100K)
+  cucl/     — Biblioteca de componentes React (TailwindCSS 4, Framer Motion)
   docs/     — Este site
 ```
 
@@ -37,6 +39,7 @@ PAP/
 | IA | Ollama (llava para visão PDF, llama3.2 para chat) |
 | Pagamentos | Stripe — webhooks + planos Free / Pro / Family |
 | Móvel | Flutter 3 · Dart 3 · Riverpod · GoRouter |
+| Componentes UI | React · TailwindCSS 4 · Framer Motion · Storybook |
 | Dados | Python · psycopg2 · USDA FoodData Central · TheMealDB |
 
 ---

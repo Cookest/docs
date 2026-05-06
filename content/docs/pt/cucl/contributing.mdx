@@ -1,0 +1,177 @@
+---
+title: Contribuir para o CUCL
+description: Como adicionar um novo componente, escrever histórias e testes, submeter um pull request e lançar uma nova versão
+---
+
+# Contribuir para o CUCL
+
+Este guia percorre cada passo necessário para contribuir para a Cookest UI Components Library — desde a configuração local até um pull request aceite.
+
+## Pré-requisitos
+
+| Ferramenta | Versão | Instalação |
+|------------|--------|------------|
+| Node.js | 20+ | [nodejs.org](https://nodejs.org) |
+| Bun | 1.x | `npm install -g bun` |
+| Git | latest | [git-scm.com](https://git-scm.com) |
+
+## Configuração local
+
+```bash
+# Clonar o repositório
+git clone https://github.com/Cookest/cookest-ui-components-library.git
+cd cookest-ui-components-library
+
+# Instalar dependências
+bun install
+
+# Iniciar Storybook
+bun run storybook
+```
+
+O Storybook está disponível em `http://localhost:6006`. Cada componente tem histórias interativas.
+
+---
+
+## Adicionar um novo componente
+
+### 1. Criar a estrutura de pastas
+
+```bash
+mkdir src/components/NomeDoComponente
+touch src/components/NomeDoComponente/NomeDoComponente.tsx
+touch src/components/NomeDoComponente/NomeDoComponente.test.tsx
+touch src/components/NomeDoComponente/NomeDoComponente.stories.tsx
+touch src/components/NomeDoComponente/index.ts
+```
+
+### 2. Implementar o componente
+
+Requisitos:
+- Aceitar uma prop `className?: string` e combiná-la por último com `cn()`
+- Usar apenas variáveis CSS `var(--ck-*)` para cores
+- Exportar a interface de props e os tipos de variante/tamanho
+- Usar `forwardRef` ao envolver um elemento DOM nativo
+- Seguir os requisitos de acessibilidade em [Boas Práticas](/docs/pt/cucl/best-practices)
+
+### 3. Criar o re-export index.ts
+
+```ts
+// src/components/NomeDoComponente/index.ts
+export { NomeDoComponente } from "./NomeDoComponente";
+export type { NomeDoComponenteProps } from "./NomeDoComponente";
+```
+
+### 4. Adicionar à exportação barrel
+
+Abra `src/index.ts` e adicione as exportações por ordem alfabética:
+
+```ts
+export { NomeDoComponente } from "./components/NomeDoComponente";
+export type { NomeDoComponenteProps } from "./components/NomeDoComponente";
+```
+
+### 5. Escrever histórias Storybook
+
+Crie histórias para cada variante e estado. Consulte a página [Boas Práticas](/docs/pt/cucl/best-practices) para a lista de histórias obrigatórias.
+
+### 6. Escrever testes unitários
+
+Os testes devem cobrir todas as variantes, estados e interações:
+
+```bash
+bun run test
+```
+
+### 7. Verificação de tipos
+
+```bash
+bun run lint
+```
+
+Deve haver zero erros TypeScript antes de abrir um pull request.
+
+---
+
+## Modificar um componente existente
+
+1. Leia o ficheiro de testes do componente para compreender o contrato atual.
+2. Faça a alteração — mantenha a compatibilidade retroativa, exceto se o PR for uma mudança de rutura documentada.
+3. Atualize o ficheiro de testes para cobrir o novo comportamento.
+4. Atualize o ficheiro de histórias para demonstrar a nova prop ou variante.
+5. Atualize a página de documentação [Componentes](/docs/pt/cucl/components) com a nova prop na tabela de API.
+
+---
+
+## Adicionar ou atualizar tokens de design
+
+1. Edite o ficheiro relevante em `src/tokens/`.
+2. Se adicionar uma nova variável CSS, adicione-a também a `:root` e `.dark` em `src/styles.css`.
+3. Execute `bun run build` e verifique as exportações de tokens em `dist/tokens/`.
+
+<Callout type="warn">
+Qualquer alteração a um valor de token existente é potencialmente uma mudança de rutura. Audite todas as utilizações dos componentes antes de renomear ou remover um token.
+</Callout>
+
+---
+
+## Fluxo de pull request
+
+### Nomenclatura de branches
+
+```
+<tipo>/<componente-ou-âmbito>-<descrição-curta>
+```
+
+Exemplos:
+- `feat/skeleton-card-variant`
+- `fix/input-aria-describedby`
+- `docs/button-icon-examples`
+- `refactor/select-keyboard-navigation`
+
+### Verificação local completa de CI
+
+```bash
+# Verificação de tipos
+bun run lint
+
+# Testes
+bun run test
+
+# Verificação de formatação
+bun run format:check
+
+# Compilação (confirma que a biblioteca se distribui corretamente)
+bun run build
+```
+
+Todos os quatro comandos devem ter sucesso antes de fazer push.
+
+---
+
+## Verificações de acessibilidade no Storybook
+
+O CUCL inclui `@storybook/addon-a11y`. Execute verificações de acessibilidade automáticas em cada nova história:
+
+1. Abra o Storybook em `http://localhost:6006`
+2. Navegue até à história do componente
+3. Clique no painel **Accessibility** na parte inferior
+4. Resolva quaisquer violações antes de submeter o PR
+
+---
+
+## Versionamento
+
+O CUCL segue o [Versionamento Semântico](https://semver.org/):
+
+| Alteração | Incremento de versão |
+|-----------|----------------------|
+| Novo componente ou prop sem rutura | Patch ou minor |
+| Renomeação ou remoção de prop com rutura | Major |
+| Alteração de valor de token que afeta a saída visual | Minor |
+| Renomeação ou remoção de token | Major |
+
+As mudanças de rutura requerem:
+1. `!` no tipo de commit (por exemplo, `feat(button)!: …`)
+2. Rodapé `BREAKING CHANGE:` no corpo do commit
+3. Documentação do caminho de migração na descrição do PR

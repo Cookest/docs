@@ -1,0 +1,463 @@
+---
+title: Componentes
+description: Referência de API para todos os 12 componentes CUCL — props, variantes e exemplos de utilização
+---
+
+# Componentes
+
+Todos os componentes são exportados de `@cookest/ui`. Cada um é totalmente tipado, compatível com modo escuro e acessível por defeito.
+
+```tsx
+import {
+  Alert, Avatar, AvatarGroup, Badge, Button,
+  Card, CardHeader, CardBody, CardFooter,
+  Divider, Input, Modal, Select, Skeleton, SkeletonCard,
+  Toggle, Tooltip,
+} from "@cookest/ui";
+import "@cookest/ui/styles.css";
+```
+
+---
+
+## Button
+
+Botão animado com quatro variantes e um spinner de carregamento integrado.
+
+### Props
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `variant` | `"primary" \| "secondary" \| "ghost" \| "danger"` | `"primary"` | Estilo visual |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Tamanho do botão |
+| `loading` | `boolean` | `false` | Mostra spinner e desativa o botão |
+| `iconLeft` | `ReactNode` | — | Ícone renderizado antes do rótulo |
+| `iconRight` | `ReactNode` | — | Ícone renderizado após o rótulo |
+| `fullWidth` | `boolean` | `false` | Estende-se para preencher o contentor |
+| `disabled` | `boolean` | `false` | Atributo disabled nativo |
+| `className` | `string` | — | Classes Tailwind adicionais |
+
+Todos os atributos HTML padrão de `<button>` são repassados.
+
+### Exemplos
+
+```tsx
+// Variantes
+<Button variant="primary">Guardar alterações</Button>
+<Button variant="secondary">Cancelar</Button>
+<Button variant="ghost">Saber mais</Button>
+<Button variant="danger">Eliminar conta</Button>
+
+// Tamanhos
+<Button size="sm">Pequeno</Button>
+<Button size="md">Médio</Button>
+<Button size="lg">Grande</Button>
+
+// Estado de carregamento
+<Button loading>A guardar…</Button>
+
+// Ícones
+<Button iconLeft={<PlusIcon />}>Adicionar item</Button>
+<Button iconRight={<ArrowRightIcon />}>Continuar</Button>
+```
+
+<Callout type="info">
+O botão utiliza `motion.button` do Framer Motion — sobe 1px ao passar o rato e reduz para 0.98 ao ser premido. As animações são suprimidas quando `disabled` ou `loading` é `true`.
+</Callout>
+
+---
+
+## Input
+
+Campo de texto com rótulo, texto auxiliar, estado de erro e ícones.
+
+### Props
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `label` | `string` | — | Texto do rótulo acima do campo |
+| `helperText` | `string` | — | Texto auxiliar abaixo |
+| `error` | `string` | — | Mensagem de erro — substitui helperText e estiliza a borda a vermelho |
+| `iconLeft` | `ReactNode` | — | Ícone na posição esquerda |
+| `iconRight` | `ReactNode` | — | Ícone na posição direita |
+| `inputSize` | `"sm" \| "md" \| "lg"` | `"md"` | Tamanho do campo (usa `inputSize` para evitar conflito com o atributo HTML `size`) |
+| `fullWidth` | `boolean` | `false` | Estende-se até à largura do contentor |
+| `className` | `string` | — | Aplicado ao contentor externo |
+
+Todos os atributos HTML padrão de `<input>` são repassados. O `id` é gerado automaticamente se não for fornecido.
+
+### Exemplos
+
+```tsx
+// Básico
+<Input label="Email" type="email" placeholder="utilizador@exemplo.com" />
+
+// Com texto auxiliar
+<Input label="Nome de utilizador" helperText="3–20 caracteres, apenas minúsculas" />
+
+// Estado de erro
+<Input label="Palavra-passe" type="password" error="Mínimo 8 caracteres obrigatório" />
+
+// Ícones
+<Input label="Pesquisar" iconLeft={<SearchIcon />} placeholder="Pesquisar receitas…" />
+
+// Largura total
+<Input label="Nome" fullWidth />
+```
+
+---
+
+## Card
+
+Componente de contentor com secções opcionais de cabeçalho, corpo e rodapé.
+
+### Props do Card
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `variant` | `"default" \| "interactive" \| "outlined"` | `"default"` | Estilo visual — `interactive` adiciona animação ao passar o rato |
+| `padding` | `"none" \| "sm" \| "md" \| "lg"` | `"md"` | Preenchimento interno uniforme |
+| `className` | `string` | — | Classes adicionais |
+
+### Sub-componentes
+
+`CardHeader`, `CardBody` e `CardFooter` são utilizados para layouts estruturados. Gerem as suas próprias bordas e preenchimentos — não adicione preenchimento ao `Card` pai quando utilizar sub-componentes (`padding="none"`).
+
+### Exemplos
+
+```tsx
+// Cartão simples com preenchimento
+<Card>
+  <p>Conteúdo do cartão</p>
+</Card>
+
+// Cartão estruturado
+<Card padding="none">
+  <CardHeader>Detalhes da Receita</CardHeader>
+  <CardBody>
+    <p>Ingredientes e passos…</p>
+  </CardBody>
+  <CardFooter>
+    <Button>Começar a cozinhar</Button>
+  </CardFooter>
+</Card>
+
+// Cartão interativo (elevação ao passar o rato)
+<Card variant="interactive" onClick={handleClick}>
+  <p>Clique em mim</p>
+</Card>
+```
+
+---
+
+## Badge
+
+Indicador de estado compacto com ponto opcional e botão de remoção.
+
+### Props
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `variant` | `"default" \| "success" \| "warning" \| "error" \| "info"` | `"default"` | Variante de cor |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Tamanho do badge |
+| `dot` | `boolean` | `false` | Mostra um ponto colorido antes do rótulo |
+| `removable` | `boolean` | `false` | Mostra um botão de remoção (×) |
+| `onRemove` | `() => void` | — | Chamado quando o botão de remoção é clicado |
+| `className` | `string` | — | Classes adicionais |
+
+### Exemplos
+
+```tsx
+<Badge variant="success">Ativo</Badge>
+<Badge variant="warning" dot>A expirar em breve</Badge>
+<Badge variant="error" size="sm">Sem stock</Badge>
+<Badge removable onRemove={() => removeTag(id)}>Vegan</Badge>
+```
+
+---
+
+## Avatar
+
+Avatar do utilizador com imagem, fallback de iniciais e agrupamento em pilha.
+
+### Props do Avatar
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `src` | `string` | — | URL da imagem — renderiza `<img>` quando fornecido |
+| `alt` | `string` | obrigatório | Texto alternativo (também usado para derivar iniciais) |
+| `initials` | `string` | — | Sobrepõe as iniciais derivadas automaticamente |
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `"md"` | Tamanho do avatar |
+| `className` | `string` | — | Classes adicionais |
+
+Quando `src` está ausente, o componente renderiza um `<span>` com as duas primeiras iniciais sobre fundo verde-salva.
+
+### Props do AvatarGroup
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `max` | `number` | — | Máximo de avatares a mostrar — excedente renderizado como `+N` |
+| `children` | `ReactNode` | obrigatório | Componentes `Avatar` |
+| `className` | `string` | — | Classes adicionais |
+
+### Exemplos
+
+```tsx
+// Com imagem
+<Avatar src="/utilizadores/alice.jpg" alt="Alice Silva" size="lg" />
+
+// Fallback de iniciais
+<Avatar alt="Bob Jones" size="md" />
+
+// Grupo
+<AvatarGroup max={3}>
+  <Avatar alt="Alice Silva" />
+  <Avatar alt="Bob Jones" />
+  <Avatar alt="Carla Branco" />
+  <Avatar alt="David Verde" />
+</AvatarGroup>
+```
+
+---
+
+## Modal
+
+Overlay de diálogo acessível com foco preso e fechar por teclado.
+
+### Props
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `open` | `boolean` | obrigatório | Controla a visibilidade |
+| `onClose` | `() => void` | obrigatório | Chamado ao dispensar |
+| `title` | `string` | — | Renderiza uma linha de cabeçalho com botão de fechar |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Largura máxima do diálogo |
+| `closeOnBackdrop` | `boolean` | `true` | Fecha ao clicar no fundo |
+| `closeOnEsc` | `boolean` | `true` | Fecha com a tecla `Escape` |
+| `footer` | `ReactNode` | — | Conteúdo na linha do rodapé |
+| `className` | `string` | — | Aplicado ao painel do diálogo |
+
+### Exemplo
+
+```tsx
+const [aberto, setAberto] = useState(false);
+
+<Button onClick={() => setAberto(true)}>Abrir modal</Button>
+
+<Modal
+  open={aberto}
+  onClose={() => setAberto(false)}
+  title="Confirmar eliminação"
+  footer={
+    <>
+      <Button variant="ghost" onClick={() => setAberto(false)}>Cancelar</Button>
+      <Button variant="danger" onClick={handleEliminar}>Eliminar</Button>
+    </>
+  }
+>
+  <p>Esta ação não pode ser desfeita.</p>
+</Modal>
+```
+
+---
+
+## Tooltip
+
+Tooltip posicionado com seta animada.
+
+### Props
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `content` | `ReactNode` | obrigatório | Texto ou JSX do tooltip |
+| `position` | `"top" \| "bottom" \| "left" \| "right"` | `"top"` | Direção da seta |
+| `delay` | `number` | `0` | Atraso de exibição em milissegundos |
+| `className` | `string` | — | Aplicado ao painel do tooltip |
+| `children` | `ReactNode` | obrigatório | Elemento de acionamento |
+
+### Exemplo
+
+```tsx
+<Tooltip content="Guardar alterações" position="top">
+  <Button variant="ghost" size="sm">
+    <SaveIcon />
+  </Button>
+</Tooltip>
+```
+
+---
+
+## Toggle
+
+Interruptor com rótulo opcional.
+
+### Props
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `checked` | `boolean` | obrigatório | Estado do interruptor |
+| `onChange` | `(checked: boolean) => void` | obrigatório | Tratador de alteração de estado |
+| `label` | `string` | — | Texto do rótulo |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Tamanho do interruptor |
+| `disabled` | `boolean` | `false` | Impede a interação |
+| `className` | `string` | — | Classes adicionais |
+
+### Exemplo
+
+```tsx
+const [ativado, setAtivado] = useState(false);
+
+<Toggle
+  checked={ativado}
+  onChange={setAtivado}
+  label="Ativar notificações"
+/>
+```
+
+---
+
+## Select
+
+Dropdown personalizado com navegação por teclado e pesquisa opcional.
+
+### Props
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `options` | `SelectOption[]` | obrigatório | Array de `{ value, label, disabled? }` |
+| `value` | `string` | — | Valor selecionado controlado |
+| `onChange` | `(value: string) => void` | — | Tratador de seleção |
+| `placeholder` | `string` | `"Select…"` | Texto de substituição |
+| `label` | `string` | — | Rótulo acima do acionador |
+| `error` | `string` | — | Mensagem de erro abaixo |
+| `disabled` | `boolean` | `false` | Impede a interação |
+| `searchable` | `boolean` | `false` | Adiciona campo de pesquisa dentro do dropdown |
+| `className` | `string` | — | Aplicado ao contentor |
+
+### Exemplo
+
+```tsx
+const [dieta, setDieta] = useState("");
+
+<Select
+  label="Preferência alimentar"
+  options={[
+    { value: "none", label: "Sem preferência" },
+    { value: "vegan", label: "Vegan" },
+    { value: "vegetarian", label: "Vegetariano" },
+    { value: "gluten-free", label: "Sem glúten" },
+  ]}
+  value={dieta}
+  onChange={setDieta}
+  searchable
+/>
+```
+
+---
+
+## Skeleton
+
+Placeholder de carregamento com animação de pulso.
+
+### Props do Skeleton
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `variant` | `"text" \| "circular" \| "rectangular"` | `"rectangular"` | Forma |
+| `width` | `string \| number` | — | Valor CSS de largura ou número em px |
+| `height` | `string \| number` | — | Valor CSS de altura ou número em px |
+| `lines` | `number` | `1` | Número de linhas de texto (apenas `variant="text"`) |
+| `className` | `string` | — | Classes adicionais |
+
+### SkeletonCard
+
+Skeleton de cartão pré-construído para estados de carregamento:
+
+```tsx
+<SkeletonCard />
+```
+
+### Exemplos
+
+```tsx
+// Linhas de texto
+<Skeleton variant="text" lines={3} />
+
+// Placeholder de avatar
+<Skeleton variant="circular" width={40} height={40} />
+
+// Placeholder de imagem
+<Skeleton variant="rectangular" width="100%" height={200} />
+
+// Cartão completo
+<SkeletonCard />
+```
+
+---
+
+## Alert
+
+Banner de feedback contextual com entrada animada e dispensa.
+
+### Props
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `variant` | `"info" \| "success" \| "warning" \| "error"` | `"info"` | Variante de cor e ícone |
+| `title` | `string` | — | Linha de título em negrito |
+| `dismissible` | `boolean` | `false` | Mostra botão de dispensa (×) |
+| `onDismiss` | `() => void` | — | Chamado ao dispensar |
+| `icon` | `ReactNode` | — | Sobrepõe o ícone padrão da variante |
+| `visible` | `boolean` | `true` | Controla a visibilidade AnimatePresence |
+| `className` | `string` | — | Classes adicionais |
+
+### Exemplos
+
+```tsx
+// Banner informativo estático
+<Alert variant="info" title="Sabia que…?">
+  Pode poupar até 20% ao mudar para o plano Pro.
+</Alert>
+
+// Erro dispensável
+const [mostrar, setMostrar] = useState(true);
+<Alert
+  variant="error"
+  title="Falha no envio"
+  dismissible
+  visible={mostrar}
+  onDismiss={() => setMostrar(false)}
+>
+  O ficheiro excede o limite de 10 MB.
+</Alert>
+```
+
+---
+
+## Divider
+
+Separador visual, horizontal ou vertical.
+
+### Props
+
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | Eixo |
+| `label` | `string` | — | Texto de rótulo centrado (apenas horizontal) |
+| `className` | `string` | — | Classes adicionais |
+
+### Exemplos
+
+```tsx
+// Horizontal
+<Divider />
+
+// Com rótulo
+<Divider label="ou continuar com" />
+
+// Vertical (necessita contexto de altura definida)
+<div className="flex h-8 items-center gap-4">
+  <span>Opção A</span>
+  <Divider orientation="vertical" />
+  <span>Opção B</span>
+</div>
+```

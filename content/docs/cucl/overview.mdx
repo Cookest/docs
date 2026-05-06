@@ -1,0 +1,162 @@
+---
+title: UI Components Overview
+description: CUCL — the Cookest React component library built with TailwindCSS 4 and Framer Motion
+---
+
+# UI Components Overview
+
+**CUCL** (Cookest UI Components Library) is the shared React design system powering the Cookest web layer. It ships 12 production-ready components, a typed design-token API, and full Storybook integration.
+
+**Repository:** [Cookest/cookest-ui-components-library](https://github.com/Cookest/cookest-ui-components-library)  
+**Package name:** `@cookest/ui`  
+**Version:** `0.1.0`
+
+## Tech stack
+
+| Tool | Version | Role |
+|------|---------|------|
+| React | 19 | UI runtime |
+| TypeScript | 6 | Type safety |
+| TailwindCSS | 4 | Utility-first styling |
+| Framer Motion | 12 | Animations and transitions |
+| clsx + tailwind-merge | latest | Conditional class utilities |
+| Storybook | 10 | Component development and documentation |
+| Vitest | 4 | Unit and integration tests |
+| Testing Library | 16 | DOM interaction helpers |
+| tsup | 8 | Library bundler (ESM + CJS) |
+| Bun | 1.x | Package manager and script runner |
+
+## Installation
+
+```bash
+bun add @cookest/ui
+```
+
+### Peer dependencies
+
+```bash
+bun add react react-dom framer-motion
+```
+
+### Import the stylesheet
+
+Import `@cookest/ui/styles.css` once at the root of your application — it loads the design tokens as CSS custom properties and the Playfair Display + Inter web fonts:
+
+```tsx
+// app/layout.tsx (Next.js) or main.tsx (Vite)
+import "@cookest/ui/styles.css";
+```
+
+## Quick start
+
+```tsx
+import { Button, Card, Input } from "@cookest/ui";
+import "@cookest/ui/styles.css";
+
+export default function LoginCard() {
+  return (
+    <Card>
+      <Input label="Email" type="email" placeholder="you@example.com" />
+      <Input label="Password" type="password" />
+      <Button variant="primary" fullWidth>
+        Sign in
+      </Button>
+    </Card>
+  );
+}
+```
+
+## Design tokens
+
+Access the typed token objects directly — useful for theme-aware logic or Storybook decorators:
+
+```ts
+import { colors, spacing, typography } from "@cookest/ui/tokens";
+
+// e.g. get the primary brand colour at runtime
+const primary = colors.primary.DEFAULT; // "#7A9A65"
+```
+
+## Component list
+
+| Component | Export | Description |
+|-----------|--------|-------------|
+| `Button` | `Button` | Primary, secondary, ghost, danger variants with loading state |
+| `Input` | `Input` | Text input with label, helper text, error state, icon slots |
+| `Card` | `Card`, `CardHeader`, `CardBody`, `CardFooter` | Container with optional header, body, footer sections |
+| `Badge` | `Badge` | Status indicators with optional dot and remove button |
+| `Avatar` | `Avatar`, `AvatarGroup` | User avatar — image or initials fallback; stacked groups |
+| `Modal` | `Modal` | Accessible dialog with focus trap and keyboard dismiss |
+| `Tooltip` | `Tooltip` | Positioned tooltip with arrow and Framer Motion animation |
+| `Toggle` | `Toggle` | Switch input with label and disabled state |
+| `Select` | `Select` | Custom dropdown with optional keyboard navigation and search |
+| `Skeleton` | `Skeleton`, `SkeletonCard` | Loading placeholder with pulse animation |
+| `Alert` | `Alert` | Contextual feedback — info, success, warning, error |
+| `Divider` | `Divider` | Horizontal or vertical visual separator |
+
+## Project structure
+
+```
+cookest-ui-components-library/
+  src/
+    components/
+      Alert/
+        Alert.tsx
+        Alert.test.tsx
+        Alert.stories.tsx
+        index.ts
+      Avatar/    Badge/    Button/
+      Card/      Divider/  Input/
+      Modal/     Select/   Skeleton/
+      Toggle/    Tooltip/
+    tokens/
+      colors.ts
+      typography.ts
+      spacing.ts
+      effects.ts
+      index.ts
+    utils/
+      cn.ts          ← clsx + tailwind-merge helper
+    styles.css       ← TailwindCSS 4 @theme + CSS custom properties
+    index.ts         ← Public API barrel
+  .storybook/        ← Storybook configuration
+```
+
+## Development workflow
+
+```bash
+# Install dependencies
+bun install
+
+# Start Storybook (component sandbox)
+bun run storybook
+
+# Run unit tests
+bun run test
+
+# Run tests in watch mode
+bun run test:watch
+
+# Check TypeScript
+bun run lint
+
+# Format source files
+bun run format
+
+# Build the library
+bun run build
+```
+
+## Exports
+
+The library has three export paths:
+
+| Path | Contents |
+|------|----------|
+| `@cookest/ui` | All components and the `cn` utility |
+| `@cookest/ui/tokens` | Design token objects (`colors`, `spacing`, `typography`, `effects`) |
+| `@cookest/ui/styles.css` | CSS custom properties and web font imports |
+
+<Callout type="info">
+The library ships both ESM (`dist/index.js`) and CJS (`dist/index.cjs`) builds, so it works in Next.js App Router, Vite, and any CommonJS environment.
+</Callout>
