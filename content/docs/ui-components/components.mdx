@@ -1,0 +1,140 @@
+---
+title: Component Reference
+description: Complete reference for all 12 Cookest UI components — React and Flutter side by side.
+---
+
+# Component Reference
+
+Every component is available in both **React** and **Flutter** with matching visual output and similar API patterns.
+
+## Button
+
+Triggers actions. Supports four variants, three sizes, loading state, and icon slots.
+
+| Prop / Param | React | Flutter | Values |
+|---|---|---|---|
+| Variant | `variant` | `variant` | `primary`, `secondary`, `ghost`, `danger` |
+| Size | `size` | `size` | `sm`, `md`, `lg` |
+| Loading | `loading` | `loading` | `boolean` / `bool` |
+| Full width | `fullWidth` | `fullWidth` | `boolean` / `bool` |
+| Leading icon | `iconLeft` | `iconLeft` | `ReactNode` / `Widget` |
+| Trailing icon | `iconRight` | `iconRight` | `ReactNode` / `Widget` |
+
+## Input
+
+Text field with label, validation, and icon support.
+
+| Prop / Param | React | Flutter | Values |
+|---|---|---|---|
+| Label | `label` | `label` | `string` / `String` |
+| Placeholder | `placeholder` | `placeholder` | `string` / `String` |
+| Error | `error` | `error` | `string` / `String` |
+| Helper text | `helperText` | `helperText` | `string` / `String` |
+| Size | `inputSize` | `inputSize` | `sm`, `md`, `lg` |
+
+## Card
+
+Container with optional header, body, and footer sections.
+
+| Prop / Param | React | Flutter | Values |
+|---|---|---|---|
+| Variant | `variant` | `variant` | `default`/`standard`, `interactive`, `outlined` |
+| Padding | `padding` | `padding` | `none`, `sm`, `md`, `lg` |
+
+**Sub-components:** `CardHeader` / `CkCardHeader`, `CardBody` / `CkCardBody`, `CardFooter` / `CkCardFooter`
+
+## Badge
+
+Small label for statuses and tags.
+
+| Prop / Param | React | Flutter | Values |
+|---|---|---|---|
+| Variant | `variant` | `variant` | `default`/`standard`, `success`, `warning`, `error`, `info` |
+| Size | `size` | `size` | `sm`, `md`, `lg` |
+| Dot | `dot` | `dot` | `boolean` / `bool` |
+| Removable | `removable` | `removable` | `boolean` / `bool` |
+
+## Avatar
+
+User image with initials fallback and group layout.
+
+| Prop / Param | React | Flutter | Values |
+|---|---|---|---|
+| Image | `src` | `imageUrl` | URL string |
+| Alt text | `alt` | `alt` | `string` / `String` |
+| Size | `size` | `size` | `xs`, `sm`, `md`, `lg`, `xl` |
+
+**Group:** `AvatarGroup` / `CkAvatarGroup` with `max` prop for overflow count.
+
+## Modal
+
+Dialog overlay with backdrop, transitions, and close behavior.
+
+| Prop / Param | React | Flutter | Values |
+|---|---|---|---|
+| Title | `title` | `title` | `string` / `String` |
+| Size | `size` | `size` | `sm`, `md`, `lg` |
+| Close on backdrop | `closeOnBackdrop` | `closeOnBackdrop` | `boolean` / `bool` |
+| Footer | `footer` | `footer` | `ReactNode` / `Widget` |
+
+## Tooltip
+
+Hover/focus hint with directional positioning.
+
+| Prop / Param | React | Flutter | Values |
+|---|---|---|---|
+| Content | `content` | `message` | `string` / `String` |
+| Position | `position` | `position` | `top`, `bottom`, `left`, `right` |
+| Delay | `delay` (ms) | `waitDuration` | `number` / `Duration` |
+
+## Toggle
+
+Switch control with label and description.
+
+| Prop / Param | React | Flutter | Values |
+|---|---|---|---|
+| Checked | `checked` | `value` | `boolean` / `bool` |
+| Label | `label` | `label` | `string` / `String` |
+| Description | `description` | `description` | `string` / `String` |
+| Size | `toggleSize` | `toggleSize` | `sm`, `md`, `lg` |
+
+## Select
+
+Dropdown with search support.
+
+| Prop / Param | React | Flutter | Values |
+|---|---|---|---|
+| Options | `options` | `options` | `SelectOption[]` / `List<CkSelectOption>` |
+| Value | `value` | `value` | `string` / `String` |
+| Searchable | `searchable` | `searchable` | `boolean` / `bool` |
+| Placeholder | `placeholder` | `placeholder` | `string` / `String` |
+
+## Skeleton
+
+Loading placeholders.
+
+| Prop / Param | React | Flutter | Values |
+|---|---|---|---|
+| Variant | `variant` | `variant` | `text`, `circular`, `rectangular` |
+| Lines | `lines` | `lines` | `number` / `int` |
+
+**Presets:** `SkeletonCard` / `CkSkeletonCard` — full card loading placeholder.
+
+## Alert
+
+Status notification banners.
+
+| Prop / Param | React | Flutter | Values |
+|---|---|---|---|
+| Variant | `variant` | `variant` | `info`, `success`, `warning`, `error` |
+| Title | `title` | `title` | `string` / `String` |
+| Dismissible | `dismissible` | `dismissible` | `boolean` / `bool` |
+
+## Divider
+
+Visual separator.
+
+| Prop / Param | React | Flutter | Values |
+|---|---|---|---|
+| Orientation | `orientation` | `orientation` | `horizontal`, `vertical` |
+| Label | `label` | `label` | `string` / `String` |

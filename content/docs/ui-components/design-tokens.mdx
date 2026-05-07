@@ -1,0 +1,138 @@
+---
+title: Design Tokens
+description: Shared design tokens powering both React and Flutter components — colors, typography, spacing, and effects.
+---
+
+# Design Tokens
+
+Design tokens are the **single source of truth** for the Cookest design system. They are defined as platform-agnostic JSON and built into CSS custom properties (React) and Dart constants (Flutter) via [Style Dictionary](https://styledictionary.com).
+
+## Token Files
+
+```
+ui-components/tokens/
+├── colors.json       # Full color palette with light/dark modes
+├── spacing.json      # 4px grid + semantic aliases
+├── typography.json   # Font families, sizes, weights, line heights
+└── effects.json      # Border radius, shadows, transitions, z-index
+```
+
+## Colors
+
+### Brand Palette
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `primary.DEFAULT` | `#7A9A65` | Primary brand sage green |
+| `primary.light` | `#B4CC9E` | Lighter accent |
+| `primary.dark` | `#4E7A3A` | Darker accent, hover states |
+
+### Semantic Colors (Light / Dark)
+
+| Token | Light | Dark | Usage |
+|-------|-------|------|-------|
+| `background` | `#F5F5F0` | `#0E1512` | Page background |
+| `card` | `#FAFAF6` | `#172019` | Card surfaces |
+| `heading` | `#1C3A2A` | `#E0EDE4` | Heading text |
+| `text` | `#3D5040` | `#B0C8B5` | Body text |
+| `muted` | `#7A8E74` | `#6A8A70` | Placeholder/helper text |
+| `border` | `#E4EBE0` | `#253D2E` | Borders and dividers |
+| `surface` | `#FFFFFF` | `#1A261E` | Component surfaces |
+
+### Status Colors
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `success` | `#4CAF50` | Success states |
+| `warning` | `#FF9800` | Warning states |
+| `error` | `#F44336` | Error states, danger buttons |
+| `info` | `#2196F3` | Informational |
+
+## Typography
+
+| Token | Value | Platform |
+|-------|-------|----------|
+| `font.family.serif` | Playfair Display | Headings |
+| `font.family.sans` | Inter | Body text |
+| `font.family.mono` | JetBrains Mono | Code |
+
+### Font Sizes
+
+| Token | px | Usage |
+|-------|-----|-------|
+| `xs` | 12 | Badges, fine print |
+| `sm` | 14 | Body small, buttons |
+| `base` | 16 | Body default |
+| `lg` | 18 | Large body |
+| `xl` | 20 | Small headings |
+| `2xl` | 24 | Section headings |
+| `3xl` | 30 | Page titles |
+| `4xl` | 36 | Hero headings |
+| `5xl` | 48 | Display |
+
+## Spacing
+
+Based on a **4px grid system**:
+
+| Token | px | Semantic Alias |
+|-------|-----|----------------|
+| `1` | 4 | `xs` — tight elements |
+| `2` | 8 | `sm` — compact inputs |
+| `3` | 12 | `md` — default padding |
+| `4` | 16 | `lg` — spacious padding |
+| `6` | 24 | `xl` — card padding |
+| `8` | 32 | `2xl` — large sections |
+| `12` | 48 | `3xl` — page spacing |
+
+## Border Radius
+
+| Token | px | Usage |
+|-------|-----|-------|
+| `sm` | 4 | Small elements |
+| `md` | 8 | Inputs, badges |
+| `lg` | 12 | Small buttons |
+| `xl` | 16 | Buttons, cards, inputs |
+| `2xl` | 24 | Modals |
+| `full` | 9999 | Circles, pills |
+
+## Building Tokens
+
+```bash
+# From ui-components/
+bun run tokens:build
+```
+
+This generates:
+
+- `tokens/build/styles.generated.css` — CSS custom properties for React
+- `tokens/build/cookest_tokens.dart` — Dart constants for Flutter
+
+## Using Tokens
+
+### React (CSS Custom Properties)
+
+```css
+.my-component {
+  color: var(--ck-heading);
+  background: var(--ck-surface);
+  border: 1px solid var(--ck-border);
+}
+```
+
+### Flutter (Dart Constants)
+
+```dart
+import 'package:cookest_ui/cookest_ui.dart';
+
+Container(
+  color: CookestTokens.colorSurfaceLight,
+  padding: EdgeInsets.all(CookestTokens.spacingN4),
+  child: Text(
+    'Hello',
+    style: TextStyle(
+      color: CookestTokens.colorHeadingLight,
+      fontSize: CookestTokens.fontSizeBase,
+    ),
+  ),
+)
+```
