@@ -1,6 +1,6 @@
 ---
 title: Component Reference
-description: Complete reference for all 12 Cookest UI components — React and Flutter side by side.
+description: Complete reference for all 18 Cookest UI components — React and Flutter side by side.
 ---
 
 # Component Reference
@@ -30,6 +30,20 @@ Text field with label, validation, and icon support.
 | Placeholder | `placeholder` | `placeholder` | `string` / `String` |
 | Error | `error` | `error` | `string` / `String` |
 | Helper text | `helperText` | `helperText` | `string` / `String` |
+| Size | `inputSize` | `inputSize` | `sm`, `md`, `lg` |
+
+## Textarea
+
+Multi-line text input mirroring the Input visual language.
+
+| Prop / Param | React | Flutter | Values |
+|---|---|---|---|
+| Label | `label` | `label` | `string` / `String` |
+| Max length | `maxLength` | `maxLength` | `number` / `int` |
+| Show count | `showCount` | `showCount` | `boolean` / `bool` |
+| Auto resize | `autoResize` | — | `boolean` |
+| Min rows | `minRows` | `minLines` | `number` / `int` |
+| Max rows | `maxRows` | `maxLines` | `number` / `int` |
 | Size | `inputSize` | `inputSize` | `sm`, `md`, `lg` |
 
 ## Card
@@ -122,13 +136,18 @@ Loading placeholders.
 
 ## Alert
 
-Status notification banners.
+Glassmorphism notification banner with colored accent bar and ambient shadow.
 
 | Prop / Param | React | Flutter | Values |
 |---|---|---|---|
 | Variant | `variant` | `variant` | `info`, `success`, `warning`, `error` |
+| Size | `size` | — | `sm`, `md`, `lg` |
 | Title | `title` | `title` | `string` / `String` |
 | Dismissible | `dismissible` | `dismissible` | `boolean` / `bool` |
+| Icon | `icon` | `icon` | `ReactNode` / `Widget` |
+| Visible | `visible` | — | `boolean` |
+
+> The React Alert uses `backdrop-blur-sm`, a 4px colored left accent bar, and `shadow-{color}/15` ambient shadows for depth.
 
 ## Divider
 
@@ -138,3 +157,69 @@ Visual separator.
 |---|---|---|---|
 | Orientation | `orientation` | `orientation` | `horizontal`, `vertical` |
 | Label | `label` | `label` | `string` / `String` |
+
+## Slider
+
+Range input with track, custom thumb, and optional marks.
+
+| Prop / Param | React | Flutter | Values |
+|---|---|---|---|
+| Value | `value` | `value` | `number` / `double` |
+| Min / Max | `min`, `max` | `min`, `max` | `number` / `double` |
+| Step | `step` | `step` | `number` / `double` |
+| Color | `color` | `color` | `primary`, `blue`, `amber`, `rose` |
+| Size | `size` | `size` | `sm`, `md`, `lg` |
+| Show value | `showValue` | `showValue` | `boolean` / `bool` |
+| Marks | `marks` | `marks` | `SliderMark[]` / `List<CkSliderMark>` |
+| Disabled | `disabled` | `disabled` | `boolean` / `bool` |
+
+## Progress
+
+Progress bar — determinate or indeterminate.
+
+| Prop / Param | React | Flutter | Values |
+|---|---|---|---|
+| Value | `value` | `value` | `number` 0–100 / `double` (null = indeterminate) |
+| Color | `color` | `color` | `primary`, `blue`, `amber`, `rose`, `green` |
+| Size | `size` | `size` | `sm`, `md`, `lg` |
+| Striped | `striped` | `striped` | `boolean` / `bool` |
+| Animated | `animated` | `animated` | `boolean` / `bool` |
+| Show label | `showLabel` | `showLabel` | `boolean` / `bool` |
+
+## Spinner
+
+Animated loading ring with a breathing dual-arc design.
+
+| Prop / Param | React | Flutter | Values |
+|---|---|---|---|
+| Color | `color` | `color` | `primary`, `blue`, `amber`, `rose`, `white`, `muted` |
+| Size | `size` | `size` | `sm`, `md`, `lg`, `xl` |
+| Stroke width | `strokeWidth` | `strokeWidth` | `number` / `double` |
+
+## Tabs
+
+Tab navigation with animated indicator.
+
+| Prop / Param | React | Flutter | Values |
+|---|---|---|---|
+| Variant | `variant` | `variant` | `underline`, `pills`, `boxed` |
+| Items | `items` | `items` | `TabItem[]` / `List<CkTabItem>` |
+| Default tab | `defaultTab` | `initialTab` | `string` / `String` |
+| Full width | `fullWidth` | `fullWidth` | `boolean` / `bool` |
+| On change | `onChange` | `onChanged` | `(id: string) => void` / `ValueChanged<String>` |
+
+**`TabItem` / `CkTabItem` fields:** `id`, `label`, `icon?`, `badge?`, `content?`
+
+## Accordion
+
+Animated expandable panels.
+
+| Prop / Param | React | Flutter | Values |
+|---|---|---|---|
+| Variant | `variant` | `variant` | `default`, `bordered`, `separated` |
+| Multiple | `multiple` | `multiple` | `boolean` / `bool` |
+| Default open | `defaultOpen` | `defaultOpen` | `string[]` / `Set<String>` |
+| Items | `items` | `items` | `AccordionItem[]` / `List<CkAccordionItem>` |
+
+**`AccordionItem` / `CkAccordionItem` fields:** `id`, `title`, `content`, `subtitle?`, `icon?`, `disabled?`
+
