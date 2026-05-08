@@ -23,6 +23,17 @@ Then run:
 flutter pub get
 ```
 
+### Alternative: CLI install
+
+Copy individual widget source files directly into your project:
+
+```bash
+npx @cookest/ui-cli add button --flutter
+npx @cookest/ui-cli add tabs accordion --flutter
+```
+
+See the [CLI docs](/docs/ui-components/cli) for full reference.
+
 ## Setup
 
 Apply the Cookest theme in your `MaterialApp`:
@@ -193,6 +204,8 @@ CkSelect(
 
 ### CkAlert
 
+The Alert uses a translucent colored background with a left accent bar.
+
 ```dart
 CkAlert(
   variant: CkAlertVariant.warning,
@@ -200,6 +213,140 @@ CkAlert(
   dismissible: true,
   onDismiss: () {},
   child: Text('Some ingredients in your pantry are running low.'),
+)
+```
+
+### CkSlider
+
+```dart
+CkSlider(
+  value: _cookTime,
+  min: 5,
+  max: 120,
+  step: 5,
+  color: CkSliderColor.primary,   // primary, blue, amber, rose
+  size: CkSliderSize.md,          // sm, md, lg
+  showValue: true,
+  label: 'Cook Time (min)',
+  onChanged: (v) => setState(() => _cookTime = v),
+  marks: const [
+    CkSliderMark(value: 5, label: '5m'),
+    CkSliderMark(value: 60, label: '1h'),
+    CkSliderMark(value: 120, label: '2h'),
+  ],
+)
+```
+
+### CkProgress
+
+```dart
+// Determinate (0–100)
+CkProgress(
+  value: _uploadProgress,
+  color: CkProgressColor.primary,
+  showLabel: true,
+  label: 'Uploading recipe...',
+)
+
+// Indeterminate (null value)
+CkProgress(color: CkProgressColor.blue)
+
+// Striped
+CkProgress(value: 60, striped: true, animated: true)
+```
+
+### CkSpinner
+
+```dart
+// Standalone
+const CkSpinner(
+  color: CkSpinnerColor.primary,  // primary, blue, amber, rose, white, muted
+  size: CkSpinnerSize.md,         // sm, md, lg, xl
+)
+
+// Inside a button
+CkButton(
+  onPressed: _isSaving ? null : _save,
+  child: _isSaving
+      ? const Row(children: [
+          CkSpinner(color: CkSpinnerColor.white, size: CkSpinnerSize.sm),
+          SizedBox(width: 8),
+          Text('Saving...'),
+        ])
+      : const Text('Save'),
+)
+```
+
+### CkTabs
+
+```dart
+CkTabs(
+  variant: CkTabsVariant.underline,  // underline, pills, boxed
+  items: [
+    CkTabItem(
+      id: 'ingredients',
+      label: 'Ingredients',
+      icon: const Icon(Icons.list_alt),
+      content: IngredientsList(),
+    ),
+    CkTabItem(
+      id: 'method',
+      label: 'Method',
+      badge: '5 steps',
+      content: MethodSteps(),
+    ),
+    CkTabItem(
+      id: 'nutrition',
+      label: 'Nutrition',
+      content: NutritionPanel(),
+    ),
+  ],
+  onChanged: (id) => debugPrint('Switched to $id'),
+)
+```
+
+### CkAccordion
+
+```dart
+CkAccordion(
+  variant: CkAccordionVariant.default_,  // default_, bordered, separated
+  multiple: false,
+  defaultOpen: {'q1'},
+  items: [
+    CkAccordionItem(
+      id: 'q1',
+      title: 'Ingredient Substitutions',
+      subtitle: '3 alternatives',
+      content: Text('You can replace butter with coconut oil...'),
+    ),
+    CkAccordionItem(
+      id: 'q2',
+      title: 'Storage & Reheating',
+      content: Text('Store in an airtight container for up to 3 days.'),
+    ),
+  ],
+)
+```
+
+### CkTextarea
+
+```dart
+CkTextarea(
+  label: 'Recipe Description',
+  placeholder: 'Describe the flavors, technique, and origin...',
+  maxLength: 500,
+  showCount: true,
+  minLines: 4,
+  maxLines: 8,
+  inputSize: CkTextareaSize.md,  // sm, md, lg
+  onChanged: (val) => setState(() => _description = val),
+)
+
+// With validation
+CkTextarea(
+  label: 'Notes',
+  errorText: _error,
+  helperText: 'Optional cooking notes',
 )
 ```
 
