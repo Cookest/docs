@@ -1,4 +1,4 @@
 {
   "title": "@cookest/ui Components",
-  "pages": ["overview", "design-tokens", "react", "flutter", "components"]
+  "pages": ["overview", "design-tokens", "react", "flutter", "cli", "components"]
 }
