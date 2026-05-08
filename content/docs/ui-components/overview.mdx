@@ -17,23 +17,27 @@ graph TD
   C --> E["cookest_ui (Flutter)"]
   D --> F[Next.js Web App]
   E --> G[Flutter Mobile App]
+  H["@cookest/ui-cli (CLI)"] -->|copies source| F
+  H -->|copies source| G
 ```
 
 ## Packages
 
-| Package | Platform | Path | Tech Stack |
-|---------|----------|------|------------|
-| `@cookest/ui` | Web | `ui-components/src/` | React 19, TailwindCSS 4, Framer Motion |
-| `cookest_ui` | Mobile | `ui-components/flutter/` | Flutter 3, Material 3, Google Fonts |
+| Package | Platform | Install | Path |
+|---------|----------|---------|------|
+| `@cookest/ui` | Web (React) | `npm install @cookest/ui` | `ui-components/src/` |
+| `cookest_ui` | Mobile (Flutter) | path dependency | `ui-components/flutter/` |
+| `@cookest/ui-cli` | Both | `npx @cookest/ui-cli add <component>` | `ui-components/cli/` |
 
-## Components (12)
+## Components (18)
 
-All components are available in both React and Flutter with matching APIs:
+All 18 components are available in both React and Flutter with matching APIs:
 
 | Component | React | Flutter | Description |
 |-----------|-------|---------|-------------|
 | Button | `<Button>` | `CkButton` | Primary, secondary, ghost, danger variants with sizes and loading state |
 | Input | `<Input>` | `CkInput` | Text fields with label, error, helper text, and icon support |
+| Textarea | `<Textarea>` | `CkTextarea` | Multi-line input with character count and auto-resize |
 | Card | `<Card>` | `CkCard` | Content container with header, body, footer sub-components |
 | Badge | `<Badge>` | `CkBadge` | Status indicators with dot and removable support |
 | Avatar | `<Avatar>` | `CkAvatar` | User avatars with image, initials fallback, and group layout |
@@ -42,8 +46,13 @@ All components are available in both React and Flutter with matching APIs:
 | Toggle | `<Toggle>` | `CkToggle` | Switch controls with animated thumb |
 | Select | `<Select>` | `CkSelect` | Dropdown selection with search support |
 | Skeleton | `<Skeleton>` | `CkSkeleton` | Loading placeholders for text, circular, and card layouts |
-| Alert | `<Alert>` | `CkAlert` | Status messages — info, success, warning, error |
+| Alert | `<Alert>` | `CkAlert` | Glassmorphism banners — info, success, warning, error with size variants |
 | Divider | `<Divider>` | `CkDivider` | Horizontal/vertical separators with optional label |
+| Slider | `<Slider>` | `CkSlider` | Range input with marks, color variants, and value badge |
+| Progress | `<Progress>` | `CkProgress` | Determinate/indeterminate bar with striped and animated modes |
+| Spinner | `<Spinner>` | `CkSpinner` | Animated loading ring with dual-arc design |
+| Tabs | `<Tabs>` | `CkTabs` | Tab navigation — underline, pills, and boxed variants |
+| Accordion | `<Accordion>` | `CkAccordion` | Animated expandable panels — default, bordered, separated |
 
 ## Design Principles
 
@@ -55,10 +64,11 @@ All components are available in both React and Flutter with matching APIs:
 
 ## Quick Start
 
-### React
+### React (npm)
 
 ```bash
-# From your React project
+npm install @cookest/ui
+# or
 bun add @cookest/ui
 ```
 
@@ -69,6 +79,12 @@ import "@cookest/ui/styles.css";
 export default function App() {
   return <Button variant="primary">Get Started</Button>;
 }
+```
+
+### React (CLI — copy source into your project)
+
+```bash
+npx @cookest/ui-cli add button
 ```
 
 ### Flutter
@@ -94,3 +110,10 @@ MaterialApp(
   ),
 );
 ```
+
+### Flutter (CLI — copy widgets into your project)
+
+```bash
+npx @cookest/ui-cli add button --flutter
+```
+

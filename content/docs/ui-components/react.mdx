@@ -5,14 +5,16 @@ description: How to install and use @cookest/ui React components in your project
 
 # React — Getting Started
 
-`@cookest/ui` is a React component library built with **React 19**, **TailwindCSS 4**, and **Framer Motion**. Components are fully typed, tree-shakeable, and ship with dual ESM/CJS output.
+`@cookest/ui` is a React component library built with **React 19**, **TailwindCSS 4**, and **Framer Motion**. It is published on npm and fully typed, tree-shakeable, and ships with dual ESM/CJS output.
 
 ## Installation
 
 ```bash
+npm install @cookest/ui
+# or
 bun add @cookest/ui
 # or
-npm install @cookest/ui
+pnpm add @cookest/ui
 ```
 
 ## Setup
@@ -23,7 +25,28 @@ Import the stylesheet in your app's entry point:
 import "@cookest/ui/styles.css";
 ```
 
-This loads the CSS custom properties (design tokens) and Google Fonts.
+This loads the CSS custom properties (design tokens) and Google Fonts (Playfair Display + Inter).
+
+### TailwindCSS v4 projects
+
+If your project uses TailwindCSS v4, add a `@source` directive so Tailwind scans the component library's utility classes:
+
+```css
+/* globals.css */
+@import "tailwindcss";
+@import "@cookest/ui/src/styles.css";
+@source "../node_modules/@cookest/ui/src";
+```
+
+## Alternative: CLI install (shadcn-style)
+
+Instead of installing as a package dependency, copy component source directly into your project:
+
+```bash
+npx @cookest/ui-cli add button input card
+```
+
+See the [CLI docs](/docs/ui-components/cli) for full reference.
 
 ## Usage
 
@@ -56,7 +79,7 @@ export function RecipeCard() {
 <Button
   variant="primary"   // "primary" | "secondary" | "ghost" | "danger"
   size="md"           // "sm" | "md" | "lg"
-  loading={false}     // Shows spinner
+  loading={false}
   disabled={false}
   fullWidth={false}
   iconLeft={<Icon />}
@@ -73,10 +96,23 @@ export function RecipeCard() {
   label="Email"
   placeholder="you@example.com"
   helperText="We'll never share your email"
-  error="Invalid email"       // Shows error state
+  error="Invalid email"
   inputSize="md"              // "sm" | "md" | "lg"
   iconLeft={<MailIcon />}
   fullWidth
+/>
+```
+
+### Textarea
+
+```tsx
+<Textarea
+  label="Recipe Description"
+  placeholder="Describe the flavors..."
+  maxLength={500}
+  showCount
+  minRows={4}
+  autoResize
 />
 ```
 
@@ -111,6 +147,22 @@ export function RecipeCard() {
 </Modal>
 ```
 
+### Alert
+
+The Alert uses a glassmorphism design with a colored accent bar and ambient shadow.
+
+```tsx
+<Alert
+  variant="info"       // "info" | "success" | "warning" | "error"
+  size="md"            // "sm" | "md" | "lg"
+  title="Heads up"
+  dismissible
+  onDismiss={() => {}}
+>
+  Your meal plan has been updated.
+</Alert>
+```
+
 ### Select
 
 ```tsx
@@ -119,12 +171,98 @@ export function RecipeCard() {
   options={[
     { value: "italian", label: "Italian" },
     { value: "japanese", label: "Japanese" },
-    { value: "mexican", label: "Mexican" },
   ]}
   value={selected}
   onChange={setSelected}
   searchable
   placeholder="Choose a cuisine..."
+/>
+```
+
+### Slider
+
+```tsx
+<Slider
+  value={cookTime}
+  onChange={setCookTime}
+  min={5}
+  max={120}
+  step={5}
+  color="primary"    // "primary" | "blue" | "amber" | "rose"
+  size="md"          // "sm" | "md" | "lg"
+  showValue
+  marks={[
+    { value: 5, label: "5m" },
+    { value: 60, label: "1h" },
+    { value: 120, label: "2h" },
+  ]}
+/>
+```
+
+### Progress
+
+```tsx
+{/* Determinate */}
+<Progress value={72} color="primary" showLabel label="Uploading..." />
+
+{/* Indeterminate */}
+<Progress color="blue" />
+
+{/* Striped */}
+<Progress value={60} striped animated />
+```
+
+### Spinner
+
+```tsx
+<Spinner
+  color="primary"   // "primary" | "blue" | "amber" | "rose" | "white" | "muted"
+  size="md"         // "sm" | "md" | "lg" | "xl"
+/>
+```
+
+### Tabs
+
+```tsx
+<Tabs
+  variant="underline"    // "underline" | "pills" | "boxed"
+  defaultTab="overview"
+  items={[
+    {
+      id: "overview",
+      label: "Overview",
+      content: <OverviewPanel />,
+    },
+    {
+      id: "details",
+      label: "Details",
+      badge: "3",
+      content: <DetailsPanel />,
+    },
+  ]}
+/>
+```
+
+### Accordion
+
+```tsx
+<Accordion
+  variant="default"      // "default" | "bordered" | "separated"
+  multiple={false}
+  defaultOpen={["q1"]}
+  items={[
+    {
+      id: "q1",
+      title: "What is Cookest?",
+      content: <p>A meal planning platform...</p>,
+    },
+    {
+      id: "q2",
+      title: "How does it work?",
+      subtitle: "Quick overview",
+      content: <p>Add ingredients, plan meals...</p>,
+    },
+  ]}
 />
 ```
 
@@ -137,7 +275,7 @@ cd ui-components
 bun run storybook
 ```
 
-Storybook launches at `http://localhost:6006` with live controls for every prop.
+Storybook launches at `http://localhost:6006` with live controls for all 18 components.
 
 ## Build
 
@@ -150,6 +288,18 @@ Outputs to `dist/` with:
 - `index.d.ts` (TypeScript declarations)
 - `styles.css` (design tokens + Tailwind)
 
+## Publishing
+
+`@cookest/ui` is published to npm. New versions are released by pushing a `ui-v*` tag:
+
+```bash
+# Bump version in package.json, then:
+git tag ui-v0.2.0
+git push origin ui-v0.2.0
+```
+
+GitHub Actions handles the build and `npm publish` automatically.
+
 ## Testing
 
 ```bash
@@ -158,4 +308,3 @@ bun run test:watch      # Watch mode
 bun run test:coverage   # With coverage report
 ```
 
-63 tests across 12 component files using Vitest + React Testing Library.
