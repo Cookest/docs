@@ -1,4 +1,4 @@
 {
   "title": "Cookest Docs",
-  "pages": ["index", "user-guide", "architecture", "backend", "mobile", "ui-components", "etl", "cucl", "ai", "contributing"]
+  "pages": ["index", "roadmap", "user-guide", "architecture", "backend", "mobile", "ui-components", "etl", "cucl", "ai", "contributing"]
 }
