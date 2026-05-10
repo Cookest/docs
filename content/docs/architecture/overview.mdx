@@ -5,37 +5,49 @@ description: How the Cookest backend, mobile app, and ETL pipeline fit together
 
 # Architecture Overview
 
-Cookest is organized into three independent components that communicate via HTTP.
+Cookest is organized into four main pieces that communicate via HTTP.
 
 ## Component diagram
 
 ```mermaid
 graph TD
   App["📱 Flutter Mobile App\n(iOS / Android)"]
-  API["⚙️ Rust API\n(Actix-Web 4 · Port 8080)"]
-  DB["🗄️ PostgreSQL 15\n(SeaORM)"]
+  FoodAPI["🥗 Food API\n(Actix-Web 4 · Port 8081)"]
+  AppAPI["⚙️ App API\n(Actix-Web 4 · Port 8080)"]
+  FoodDB["🗄️ Food PostgreSQL 15\n(SeaORM)"]
+  AppDB["🗄️ App PostgreSQL 15\n(SeaORM)"]
   Ollama["🤖 Ollama\n(LLM / Vision)"]
   Stripe["💳 Stripe\n(Payments)"]
   ETL["🔄 Python ETL\n(Data ingestion)"]
 
-  App -- "HTTPS · JWT Bearer" --> API
-  API -- "SeaORM queries" --> DB
-  API -- "HTTP · Chat / PDF vision" --> Ollama
-  API -- "Webhook · Checkout" --> Stripe
-  ETL -- "SQL inserts" --> DB
+  App -- "HTTPS · JWT Bearer" --> AppAPI
+  AppAPI -- "Food API URL" --> FoodAPI
+  FoodAPI -- "SeaORM queries" --> FoodDB
+  AppAPI -- "SeaORM queries" --> AppDB
+  AppAPI -- "HTTP · Chat / PDF vision" --> Ollama
+  AppAPI -- "Webhook · Checkout" --> Stripe
+  ETL -- "SQL inserts" --> FoodDB
+  ETL -- "SQL inserts" --> AppDB
 ```
 
 ## Components
 
-### Rust API (`api/`)
+### Food API (`api/crates/food-api`)
 
-The backbone of the platform. Built with **Actix-Web 4** for high-throughput async handling. Key responsibilities:
+The standalone catalog service. Built with **Actix-Web 4** for high-throughput async handling. Key responsibilities:
+- ingredient search and detail
+- recipe catalog CRUD for API-key clients
+- nutrition, portions, and allergen data
+
+### App API (`api/crates/app-api`)
+
+The authenticated product backend. Key responsibilities:
 - JWT-based authentication with access + refresh token pair
-- Recipe management (CRUD + favouriting + rating + cook tracking)
-- Weekly meal plan generation (AI-scored slot assignment)
-- Pantry/inventory tracking with expiry alerts
-- Shopping list with optional price comparison
-- AI chat via Ollama (llava for PDF vision, general model for chat)
+- recipe browsing, favouriting, rating, and cook tracking
+- weekly meal plan generation
+- pantry/inventory tracking with expiry alerts
+- shopping list with optional price comparison
+- AI chat via Ollama
 - Stripe subscription with webhook idempotency
 
 ### Flutter Mobile App (`UI/`)
@@ -49,7 +61,7 @@ A cross-platform iOS/Android client with a custom design system inspired by Shad
 
 ### Python ETL (`etl/`)
 
-A data ingestion pipeline that processes external food and nutritional data and seeds the PostgreSQL database used by the API.
+A data ingestion pipeline that processes external food and nutritional data and seeds the PostgreSQL databases used by the backend.
 
 ## Key design decisions
 

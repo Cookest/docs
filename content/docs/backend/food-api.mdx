@@ -1,0 +1,50 @@
+---
+title: Food API
+description: Standalone ingredient and recipe catalog service
+---
+
+# Food API
+
+The Food API is the standalone catalog service. It runs on port `8081` by default and owns the public food data layer for Cookest.
+
+It provides:
+
+- ingredient search and detail
+- recipe catalog browsing
+- recipe/ingredient nutrition data
+- portion sizes and allergens
+- API-key protected write access for catalog maintenance
+
+The App API consumes this service through `FOOD_API_URL`.
+
+## Base URL
+
+```text
+http://localhost:8081
+```
+
+## Health check
+
+```bash
+GET /health
+```
+
+## Authentication
+
+Read endpoints are public. Write endpoints require an `x-api-key` header with a write-tier key.
+
+```bash
+curl -H "x-api-key: <key>" http://localhost:8081/api/v1/recipes
+```
+
+## Endpoint groups
+
+| Group | Path prefix | Auth required |
+|-------|-------------|---------------|
+| Ingredients | `/api/v1/ingredients` | No |
+| Recipes | `/api/v1/recipes` | Public reads, API key for writes |
+
+## Notes
+
+- The Food API uses `FOOD_DATABASE_URL`, `FOOD_HOST`, `FOOD_PORT`, and `FOOD_CORS_ORIGIN`.
+- The App API talks to this service through `FOOD_API_URL` and optionally `FOOD_API_KEY`.

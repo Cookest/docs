@@ -1,9 +1,11 @@
 ---
-title: Auth & Ingredients
-description: Authentication endpoints and ingredient search
+title: Authentication
+description: App API authentication, onboarding, and account management
 ---
 
-# Auth & Ingredients
+# Authentication
+
+These endpoints live on the **App API**. The separate Food API owns the public ingredient catalog.
 
 ## POST /api/auth/register
 
@@ -182,75 +184,3 @@ This action is irreversible. All user data including recipes, meal plans, invent
 ### Response `204 No Content`
 
 ---
-
-## GET /api/ingredients
-
-Search the ingredient catalog.
-
-| Method | Path | Auth | Tier |
-|--------|------|------|------|
-| GET | `/api/ingredients` | None | Free |
-
-### Query parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `q` | string | Search query (uses `pg_trgm` fuzzy matching) |
-| `limit` | integer | Max results (default: 20) |
-| `offset` | integer | Pagination offset |
-
-### Response `200 OK`
-
-```json
-[
-  {
-    "id": 1,
-    "name": "Chicken Breast",
-    "category": "meat",
-    "calories_per_100g": 165,
-    "protein_per_100g": 31.0,
-    "carbs_per_100g": 0.0,
-    "fat_per_100g": 3.6
-  }
-]
-```
-
----
-
-## GET /api/ingredients/:id
-
-Get full ingredient details including micronutrients and portion sizes.
-
-| Method | Path | Auth | Tier |
-|--------|------|------|------|
-| GET | `/api/ingredients/:id` | None | Free |
-
-### Response `200 OK`
-
-```json
-{
-  "id": 1,
-  "name": "Chicken Breast",
-  "category": "meat",
-  "calories_per_100g": 165,
-  "protein_per_100g": 31.0,
-  "carbs_per_100g": 0.0,
-  "fat_per_100g": 3.6,
-  "nutrients": {
-    "fiber": 0,
-    "sugar": 0,
-    "sodium": 74,
-    "vitamin_c": 0,
-    "calcium": 11,
-    "iron": 0.9
-  },
-  "portion_sizes": [
-    { "name": "1 breast", "grams": 174 },
-    { "name": "100g", "grams": 100 }
-  ]
-}
-```
-
-| Status | Meaning |
-|--------|---------|
-| 404 | Ingredient not found |

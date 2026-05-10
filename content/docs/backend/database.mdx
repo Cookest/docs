@@ -5,7 +5,12 @@ description: Entity-relationship diagram and table descriptions for the Cookest 
 
 # Database Schema
 
-The Cookest API uses **PostgreSQL 15+** accessed via **SeaORM 1.1**. Migrations run automatically at server startup — all operations use `IF NOT EXISTS` making them safe to replay.
+Cookest now uses two backend services with separate startup migrations:
+
+- the **Food API** owns the catalog database tables
+- the **App API** owns the authenticated app tables
+
+Both use **PostgreSQL 15+** accessed via **SeaORM 1.1**. Migrations run automatically at server startup — all operations use `IF NOT EXISTS` making them safe to replay.
 
 ## ER Diagram
 
@@ -547,5 +552,5 @@ erDiagram
 ## Source of truth
 
 <Callout type="info">
-The migration SQL in `api/src/main.rs` is the canonical schema. This document reflects that schema — consult the source file for exact column types and constraints.
+The migration SQL in `api/crates/food-api/src/main.rs` and `api/crates/app-api/src/main.rs` is the canonical schema. This document reflects that schema — consult the source files for exact column types and constraints.
 </Callout>

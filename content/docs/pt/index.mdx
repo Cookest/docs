@@ -5,12 +5,12 @@ description: Cookest — plataforma de planeamento de refeições com inteligên
 
 # Cookest
 
-O Cookest é uma plataforma completa de planeamento de refeições e gestão de cozinha desenvolvida como projeto de escola (PAP). O backend é uma API REST em Rust, o cliente é uma aplicação Flutter para iOS e Android, e um pipeline em Python alimenta a base de dados de receitas e ingredientes.
+O Cookest é uma plataforma completa de planeamento de refeições e gestão de cozinha desenvolvida como projeto de escola (PAP). O backend está agora dividido numa Food API para os dados de catálogo e numa App API para os fluxos autenticados, o cliente é uma aplicação Flutter para iOS e Android, e um pipeline em Python alimenta a base de dados de receitas e ingredientes.
 
 ## O que está nesta documentação
 
 <Cards>
-  <Card title="API Backend" href="/docs/pt/backend/getting-started" description="Rust · Actix-Web 4 · SeaORM — autenticação, endpoints, esquema da base de dados, pipeline de PDF" />
+  <Card title="APIs Backend" href="/docs/pt/backend/getting-started" description="Rust · Actix-Web 4 · SeaORM — Food API, App API, autenticação, endpoints, esquema da base de dados, pipeline de PDF" />
   <Card title="Aplicação Móvel" href="/docs/pt/mobile/overview" description="Flutter · Riverpod · GoRouter — ecrãs, gestão de estado, sistema de design" />
   <Card title="Pipeline ETL" href="/docs/pt/etl/overview" description="Python — ingestão de receitas e dados nutricionais do USDA e TheMealDB" />
   <Card title="Arquitetura" href="/docs/pt/architecture/overview" description="Como os três componentes se ligam e comunicam" />
@@ -22,7 +22,7 @@ O Cookest é uma plataforma completa de planeamento de refeições e gestão de 
 
 ```
 PAP/
-  api/      — Backend Rust (Actix-Web 4, SeaORM, PostgreSQL)
+  api/      — Workspace backend Rust (Food API + App API, Actix-Web 4, SeaORM, PostgreSQL)
   UI/       — Aplicação Flutter (Riverpod, GoRouter)
   etl/      — Pipeline de dados em Python
   dataset/  — Dataset CSV em bruto (MM-Food-100K)
@@ -34,7 +34,7 @@ PAP/
 
 | Camada | Stack |
 |--------|-------|
-| API | Rust · Actix-Web 4 · SeaORM · PostgreSQL 15 |
+| API | Rust · Actix-Web 4 · SeaORM · PostgreSQL 15 — dividido em Food API + App API |
 | Autenticação | Argon2id · JWT acesso + refresh · cookies HttpOnly |
 | IA | Ollama (llava para visão PDF, llama3.2 para chat) |
 | Pagamentos | Stripe — webhooks + planos Free / Pro / Family |

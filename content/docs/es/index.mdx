@@ -9,16 +9,16 @@ description: Cookest — Plataforma de planificación de comidas y gestión de c
 Esta traducción es proporcionada por la comunidad y puede no estar completamente actualizada. Para la documentación completa, consulte la [versión en inglés](/docs).
 </Callout>
 
-Cookest es una plataforma completa de planificación de comidas y gestión de cocina, construida como proyecto escolar (PAP). Una API REST en Rust maneja todo el backend, una aplicación Flutter funciona en iOS y Android, y un pipeline en Python alimenta la base de datos de recetas e ingredientes.
+Cookest es una plataforma completa de planificación de comidas y gestión de cocina, construida como proyecto escolar (PAP). El backend ahora se divide en una Food API para los datos de catálogo y una App API para los flujos autenticados, una aplicación Flutter funciona en iOS y Android, y un pipeline en Python alimenta la base de datos de recetas e ingredientes.
 
 ## Contenido de esta documentación
 
 | Sección | Descripción |
 |---------|-------------|
-| [API Backend](/docs/backend/getting-started) | Rust · Actix-Web 4 · SeaORM — autenticación, endpoints, esquema de base de datos |
+| [APIs Backend](/docs/backend/getting-started) | Rust · Actix-Web 4 · SeaORM — Food API, App API, autenticación, endpoints, esquema de base de datos |
 | [Aplicación Móvil](/docs/mobile/overview) | Flutter · Riverpod · GoRouter — pantallas, gestión de estado, sistema de diseño |
 | [Pipeline ETL](/docs/etl/overview) | Python — ingestión de datos de recetas y nutrición desde USDA y TheMealDB |
-| [Arquitectura](/docs/architecture/overview) | Cómo los tres componentes se conectan y comunican |
+| [Arquitectura](/docs/architecture/overview) | Cómo los cuatro componentes se conectan y comunican |
 
 ---
 

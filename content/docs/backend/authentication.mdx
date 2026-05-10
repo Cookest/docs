@@ -1,11 +1,11 @@
 ---
 title: Authentication
-description: JWT-based auth flow — login, refresh, and protected endpoints
+description: App API JWT-based auth flow — login, refresh, and protected endpoints
 ---
 
 # Authentication
 
-Cookest uses a **JWT access + refresh token pair**. Access tokens are short-lived (15 min); refresh tokens are long-lived (30 days) and stored server-side as `sha256(token)`.
+The App API uses a **JWT access + refresh token pair**. Access tokens are short-lived (15 min); refresh tokens are long-lived (30 days) and stored server-side as `sha256(token)`.
 
 ## Flow
 

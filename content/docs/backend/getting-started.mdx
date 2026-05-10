@@ -1,6 +1,6 @@
 ---
 title: Getting Started
-description: Running the Cookest Rust API locally
+description: Running the Cookest Food API and App API locally
 ---
 
 # Getting Started
@@ -10,6 +10,7 @@ description: Running the Cookest Rust API locally
 | Tool | Minimum version | Install |
 |------|----------------|---------|
 | Rust | 1.78+ | `rustup update stable` |
+| Docker + Compose | latest | [docker.com](https://www.docker.com) |
 | PostgreSQL | 15+ | [postgresql.org](https://www.postgresql.org) |
 | Ollama | latest | [ollama.ai](https://ollama.ai) (optional — for AI features) |
 | poppler | latest | `brew install poppler` / `apt install poppler-utils` (optional — for PDF pipeline) |
@@ -20,53 +21,77 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 ```
 
-## Setup
+## What runs where
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| Food API | `8081` | Ingredient and recipe catalog service |
+| App API | `8080` | Authenticated app backend, meal planning, inventory, chat, and payments |
+
+## Recommended setup: Docker Compose
+
+This starts the databases and both Rust services together.
 
 ```bash
-# 1. Enter the api directory
 cd api
+docker compose up --build
+```
 
-# 2. Copy environment template
+The compose file creates:
+
+- `food-db` on port `5432`
+- `app-db` on port `5433`
+- `food-api` on port `8081`
+- `app-api` on port `8080`
+
+## Run with Cargo
+
+If you prefer running the binaries directly, start Postgres first and then run each service in its own terminal.
+
+```bash
+cd api
 cp .env.example .env
-# Edit .env — at minimum set DATABASE_URL and JWT_SECRET
+# Fill in FOOD_DATABASE_URL, APP_DATABASE_URL, JWT_SECRET, and FOOD_API_URL
+```
 
-# 3. Create the database
-createdb cookest
+```bash
+# Terminal 1
+cargo run -p cookest-food-api
 
-# 4. Start the server (runs migrations automatically)
-cargo run
-# Server starts on http://0.0.0.0:8080
+# Terminal 2
+cargo run -p cookest-app-api
+```
+
+If you are not using Docker, create the two databases first:
+
+```bash
+createdb cookest_food
+createdb cookest_app
 ```
 
 ## Build for production
 
 ```bash
-cargo build --release
-./target/release/cookest-api
+cargo build -p cookest-food-api --release
+cargo build -p cookest-app-api --release
 ```
 
-## Docker (optional)
-
-```dockerfile
-FROM rust:1.78-slim as builder
-WORKDIR /app
-COPY . .
-RUN cargo build --release
-
-FROM debian:bookworm-slim
-COPY --from=builder /app/target/release/cookest-api /usr/local/bin/
-CMD ["cookest-api"]
-```
-
-## Verifying the server
+## Docker images individually
 
 ```bash
-curl http://localhost:8080/api/ingredients?q=chicken
-# Returns a JSON array of matching ingredients
+docker build -f crates/food-api/Dockerfile -t cookest-food-api .
+docker build -f crates/app-api/Dockerfile -t cookest-app-api .
+```
+
+## Verifying the services
+
+```bash
+curl http://localhost:8081/health
+curl http://localhost:8080/health
 ```
 
 ## Development tips
 
-- **Hot reload:** Install `cargo-watch` (`cargo install cargo-watch`) and run `cargo watch -x run`
+- **Hot reload:** Install `cargo-watch` (`cargo install cargo-watch`) and run `cargo watch -x 'run -p cookest-food-api'` or `cargo watch -x 'run -p cookest-app-api'` in separate terminals
 - **Logs:** Set `RUST_LOG=debug` in your `.env` for verbose output
-- **Migrations:** Run on every `cargo run` — safe to restart freely
+- **Migrations:** Run automatically on startup for both services

@@ -1,6 +1,6 @@
 ---
 title: Environment Variables
-description: All configuration variables for the Cookest API
+description: All configuration variables for the Cookest Food API and App API
 ---
 
 # Environment Variables
@@ -11,26 +11,34 @@ Copy `.env.example` to `.env` and fill in the required values.
 cp .env.example .env
 ```
 
-## Required variables
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | `postgres://user:pass@localhost/cookest` |
-| `JWT_SECRET` | JWT signing key — minimum 32 characters | `super-secret-key-at-least-32-chars` |
-
-## Optional variables
+## Food API
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `HOST` | `0.0.0.0` | Server bind address |
-| `PORT` | `8080` | Server port |
+| `FOOD_DATABASE_URL` | `DATABASE_URL` fallback | PostgreSQL connection string for the Food API |
+| `FOOD_HOST` | `0.0.0.0` | Bind address |
+| `FOOD_PORT` | `8081` | HTTP port |
+| `FOOD_CORS_ORIGIN` | `*` | Allowed CORS origin |
+
+## App API
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `APP_DATABASE_URL` | `DATABASE_URL` fallback | PostgreSQL connection string for the App API |
+| `JWT_SECRET` | required | JWT signing key — minimum 32 characters |
+| `HOST` | `127.0.0.1` | Bind address |
+| `PORT` | `8080` | HTTP port |
 | `CORS_ORIGIN` | `http://localhost:3000` | Allowed CORS origin |
 | `JWT_ACCESS_EXPIRY_SECONDS` | `900` | Access token TTL (15 minutes) |
-| `JWT_REFRESH_EXPIRY_SECONDS` | `2592000` | Refresh token TTL (30 days) |
+| `JWT_REFRESH_EXPIRY_SECONDS` | `604800` | Refresh token TTL (7 days) |
 | `OLLAMA_URL` | `http://localhost:11434` | Ollama API base URL |
 | `OLLAMA_MODEL` | `llava` | Vision model for PDF price extraction |
-| `PDF_UPLOAD_DIR` | `/var/cookest/pdfs` | Writable directory for uploaded PDFs |
-| `STRIPE_WEBHOOK_SECRET` | — | Stripe webhook signing secret (`whsec_...`) |
+| `PDF_UPLOAD_DIR` | `./cookest_pdfs` | Writable directory for uploaded PDFs |
+| `STRIPE_WEBHOOK_SECRET` | optional | Stripe webhook signing secret (`whsec_...`) |
+| `FOOD_API_URL` | `http://localhost:8081` | Food API base URL |
+| `FOOD_API_KEY` | optional | API key used for Food API write requests |
+| `RESEND_API_KEY` | optional | Resend email API key |
+| `RESEND_FROM_EMAIL` | `noreply@m.cookest.app` | From address for outbound email |
 
 ## Security notes
 
@@ -38,6 +46,7 @@ cp .env.example .env
 Never commit your `.env` file. The `.gitignore` already excludes it. In production, inject secrets via environment variables or a secrets manager — never via a committed file.
 </Callout>
 
+- `FOOD_DATABASE_URL` and `APP_DATABASE_URL` can both fall back to `DATABASE_URL` for local monolith-style runs
 - `JWT_SECRET` must be at least 32 characters of random data (`openssl rand -hex 32`)
 - `STRIPE_WEBHOOK_SECRET` starts with `whsec_` — obtain from the Stripe dashboard
-- `DATABASE_URL` should use a dedicated database user with least-privilege permissions in production
+- Use dedicated database users for the Food API and App API in production

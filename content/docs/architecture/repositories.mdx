@@ -17,8 +17,10 @@ graph TD
     end
 
     subgraph Backend["Backend Services"]
-        API["⚙️ api\nRust REST API\nActix-Web 4"]
-        DB["🗄️ PostgreSQL 15"]
+        FoodAPI["🥗 food-api\nRust Food API\nActix-Web 4"]
+        AppAPI["⚙️ app-api\nRust App API\nActix-Web 4"]
+        FoodDB["🗄️ Food PostgreSQL 15"]
+        AppDB["🗄️ App PostgreSQL 15"]
         Ollama["🤖 Ollama\nAI Models"]
         Stripe["💳 Stripe\nPayments"]
     end
@@ -33,30 +35,34 @@ graph TD
         GH[".github\nOrg Profile"]
     end
 
-    UI -->|"HTTPS + JWT"| API
-    API -->|"SeaORM"| DB
-    API -->|"HTTP"| Ollama
-    API -->|"Webhook"| Stripe
-    ETL -->|"SQL inserts"| DB
+    UI -->|"HTTPS + JWT"| AppAPI
+    AppAPI -->|"Food API URL"| FoodAPI
+    FoodAPI -->|"SeaORM"| FoodDB
+    AppAPI -->|"SeaORM"| AppDB
+    AppAPI -->|"HTTP"| Ollama
+    AppAPI -->|"Webhook"| Stripe
+    ETL -->|"SQL inserts"| FoodDB
+    ETL -->|"SQL inserts"| AppDB
     Dataset -->|"CSV read"| ETL
-    Docs -.->|"documents"| API & UI & Web & ETL
+    Docs -.->|"documents"| FoodAPI & AppAPI & UI & Web & ETL
 ```
 
 ## Repository Details
 
-### `api/` — Rust Backend API
+### `api/` — Rust backend workspace
 
 | Attribute | Value |
 |-----------|-------|
 | **Language** | Rust 1.78+ |
 | **Framework** | Actix-Web 4 |
 | **ORM** | SeaORM 1.1 |
+| **Services** | Food API + App API |
 | **Database** | PostgreSQL 15+ |
-| **Auth** | Argon2id + JWT (access + refresh) |
-| **AI** | Ollama (llava vision + chat) |
+| **Auth** | Argon2id + JWT (App API only) |
+| **AI** | Ollama (App API chat + PDF vision) |
 | **Payments** | Stripe webhooks |
 
-**Purpose:** Core backend serving authentication, recipes, inventory, meal planning, AI chat, subscription management, and PDF price-scraping for supermarket promotions.
+**Purpose:** Core backend workspace with a standalone food catalog service and an authenticated application service.
 
 **Key directories:**
 ```
@@ -72,9 +78,8 @@ api/src/
 **Quick start:**
 ```bash
 cd api
-cp .env.example .env           # Configure DATABASE_URL, JWT_SECRET, etc.
-docker compose up -d            # Start PostgreSQL
-cargo run                       # Start API on port 8080
+cp .env.example .env
+docker compose up --build
 ```
 
 ---

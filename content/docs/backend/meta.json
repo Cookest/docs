@@ -1,4 +1,4 @@
 {
-  "title": "Backend API",
-  "pages": ["getting-started", "environment", "authentication", "endpoints", "database", "pdf-pipeline"]
+  "title": "Backend APIs",
+  "pages": ["getting-started", "environment", "authentication", "food-api", "endpoints", "database", "pdf-pipeline"]
 }

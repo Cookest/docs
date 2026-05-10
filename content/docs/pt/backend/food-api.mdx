@@ -1,0 +1,50 @@
+---
+title: Food API
+description: Serviço autónomo de catálogo de ingredientes e receitas
+---
+
+# Food API
+
+A Food API é o serviço autónomo de catálogo. Corre na porta `8081` por omissão e trata da camada pública de dados alimentares do Cookest.
+
+Fornece:
+
+- pesquisa e detalhe de ingredientes
+- navegação do catálogo de receitas
+- dados nutricionais de receitas e ingredientes
+- porções e alergénios
+- escrita protegida por API key para manutenção do catálogo
+
+A App API consome este serviço através de `FOOD_API_URL`.
+
+## URL base
+
+```text
+http://localhost:8081
+```
+
+## Verificação de saúde
+
+```bash
+GET /health
+```
+
+## Autenticação
+
+Os endpoints de leitura são públicos. Os endpoints de escrita requerem o header `x-api-key` com uma chave de nível de escrita.
+
+```bash
+curl -H "x-api-key: <key>" http://localhost:8081/api/v1/recipes
+```
+
+## Grupos de endpoints
+
+| Grupo | Prefixo | Autenticação |
+|-------|---------|--------------|
+| Ingredientes | `/api/v1/ingredients` | Não |
+| Receitas | `/api/v1/recipes` | Leituras públicas, API key para escrita |
+
+## Notas
+
+- A Food API usa `FOOD_DATABASE_URL`, `FOOD_HOST`, `FOOD_PORT` e `FOOD_CORS_ORIGIN`.
+- A App API comunica com este serviço através de `FOOD_API_URL` e, opcionalmente, `FOOD_API_KEY`.

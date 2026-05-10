@@ -5,22 +5,28 @@ description: Complete Cookest API endpoint reference
 
 # Endpoints Overview
 
-The Cookest API is a REST API running on Actix-Web 4. All endpoints return JSON.
+Cookest now exposes two Rust backend services:
+
+- the **Food API** on port `8081` for catalog data
+- the **App API** on port `8080` for authenticated app workflows
+
+All endpoints return JSON unless noted otherwise.
 
 ## Base URL
 
 ```
-http://localhost:8080   (development)
+http://localhost:8080   (App API)
+http://localhost:8081   (Food API)
 ```
 
 ## Authentication
 
-Protected endpoints require:
+App API protected endpoints require:
 ```
 Authorization: Bearer <access_token>
 ```
 
-Subscription-gated endpoints return **402** when accessed by a Free user:
+Subscription-gated App API endpoints return **402** when accessed by a Free user:
 ```json
 { "error": "subscription_required", "feature": "user_recipes" }
 ```
@@ -29,7 +35,8 @@ Subscription-gated endpoints return **402** when accessed by a Free user:
 
 | Group | Path prefix | Auth required |
 |-------|-------------|---------------|
-| [Auth & Account](./auth) | `/api/auth` | Varies |
+| [Food API](../food-api) | `/api/v1/ingredients`, `/api/v1/recipes` | Public reads / API key writes |
+| [Auth](./auth) | `/api/auth` | Varies |
 | [Profile & Preferences](./profile) | `/api/me` | JWT |
 | [Recipes](./recipes) | `/api/recipes` | Varies |
 | [Meal Plans](./meal-plans) | `/api/meal-plans` | JWT |
@@ -38,7 +45,6 @@ Subscription-gated endpoints return **402** when accessed by a Free user:
 | [Subscription](./subscription) | `/api/subscription` | JWT |
 | [Stores & Promotions](./stores) | `/api/stores`, `/api/admin` | Varies |
 | [AI Chat](./ai-chat) | `/api/chat` | JWT |
-| [Ingredients](./auth) | `/api/ingredients` | No |
 
 ## Subscription tiers
 

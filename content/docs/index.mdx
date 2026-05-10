@@ -7,15 +7,15 @@ description: Cookest — AI-assisted meal planning and kitchen management platfo
 
 # Cookest
 
-Cookest is a full-stack meal planning and kitchen management platform built as a school project (PAP). A Rust REST API handles everything on the backend, a Flutter app runs on iOS and Android, and a Python pipeline seeds the recipe and ingredient database.
+Cookest is a full-stack meal planning and kitchen management platform built as a school project (PAP). The backend is now split into a standalone Food API for catalog data and an App API for authenticated product flows, a Flutter app runs on iOS and Android, and a Python pipeline seeds the recipe and ingredient database.
 
 ## What's in these docs
 
 <Cards>
-  <Card title="Backend API" href="/docs/backend/getting-started" description="Rust · Actix-Web 4 · SeaORM — auth, endpoints, database schema, PDF pipeline" />
+  <Card title="Backend APIs" href="/docs/backend/getting-started" description="Rust · Actix-Web 4 · SeaORM — Food API, App API, auth, endpoints, database schema, PDF pipeline" />
   <Card title="Mobile App" href="/docs/mobile/overview" description="Flutter · Riverpod · GoRouter — screens, state management, design system" />
   <Card title="ETL Pipeline" href="/docs/etl/overview" description="Python — recipe and nutrition data ingestion from USDA and TheMealDB" />
-  <Card title="Architecture" href="/docs/architecture/overview" description="How the three components fit and communicate" />
+  <Card title="Architecture" href="/docs/architecture/overview" description="How the four components fit and communicate" />
   <Card title="User Guide" href="/docs/user-guide/overview" description="Using Cookest as an end user" />
   <Card title="AI & Automation" href="/docs/ai/overview" description="Agentic skills, MCP server, and automated documentation" />
   <Card title="UI Components" href="/docs/ui-components/overview" description="@cookest/ui — shared React and Flutter design system with 12 components" />
@@ -27,7 +27,7 @@ Cookest is a full-stack meal planning and kitchen management platform built as a
 
 ```
 PAP/
-  api/             — Rust backend (Actix-Web 4, SeaORM, PostgreSQL)
+  api/             — Rust backend workspace (Food API + App API)
   UI/              — Flutter mobile app (Riverpod, GoRouter)
   web/             — Next.js landing page (TailwindCSS, Framer Motion)
   ui-components/   — Shared component library (React + Flutter)
@@ -40,7 +40,7 @@ PAP/
 
 | Layer | Stack |
 |-------|-------|
-| API | Rust · Actix-Web 4 · SeaORM · PostgreSQL 15 |
+| API | Rust · Actix-Web 4 · SeaORM · PostgreSQL 15 — split into Food API + App API |
 | Auth | Argon2id · JWT access + refresh · HttpOnly cookies |
 | AI | Ollama (llava for PDF vision, llama3.2 for chat) |
 | Payments | Stripe — webhooks + Free / Pro / Family tiers |
