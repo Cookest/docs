@@ -174,6 +174,7 @@ function setupAgents() {
   header("📋 Checking AGENTS.md files...");
 
   const repos = [
+    { name: "docs", dir: DOCS_ROOT },
     { name: "api", dir: join(PROJECT_ROOT, "api") },
     { name: "UI", dir: join(PROJECT_ROOT, "UI") },
     { name: "web", dir: join(PROJECT_ROOT, "web") },
