@@ -44,19 +44,36 @@ Searchable and filterable recipe library.
   - Metadata row: cuisine tag · prep+cook time · calorie count
   - Heart icon (toggleable favourite)
   - Rating with star icon and count
-- **Empty state** — "No recipes found for \<query\>" with a clear search button.
+- **Empty state** — "No recipes found for <query>" with a clear search button.
+- **IA entry point** — an **IA** button in the AppBar that opens the Generate Recipe flow.
+
+---
+
+## Generate Recipe Screen
+
+AI-assisted recipe generation with a preview-first save flow.
+
+**Structure:**
+- **Prompt field** — free-text input for requests like "high-protein breakfast with eggs".
+- **Use pantry toggle** — controls whether pantry ingredients should be prioritised.
+- **Cuisine hint input** — optional cuisine/style helper (for example, Italian or Portuguese).
+- **Max minutes input** — optional time cap for generation.
+- **Generate button** — primary CTA that starts the AI recipe generation request.
+- **Generated recipe preview card** — shows the proposed title, summary, ingredients, steps, macros, tags, and the returned score object before the user decides to save it.
+- **Regenerate / save actions** — let the user compare the draft, tweak the prompt, or persist the generated recipe.
 
 ---
 
 ## Recipe Detail Screen
 
-Full recipe view with all ingredients, steps, and cook mode.
+Full recipe view with all ingredients, steps, cook mode, and AI image generation.
 
 **Structure:**
 - **SliverAppBar** — hero image that collapses as the user scrolls. Title fades in on scroll.
 - **Info pills row** — horizontal row of compact pills: difficulty badge, prep time, cook time, servings selector (tappable +/−), calorie count.
 - **Ingredient list** — grouped by category. Each item shows ingredient name, quantity scaled by the servings selector, and a pantry availability indicator (green dot = in pantry, grey = missing).
 - **Steps list** — numbered cooking steps. Each step can be tapped to mark as done (checked state with sage green strike-through).
+- **AI image actions** — hero image generation and per-step image generation both call the `/api/image-gen/...` routes, then poll `/api/image-gen/jobs/{job_id}` until the async job finishes.
 - **Cook mode FAB** — "Start Cooking" floating button. Enters a simplified step-by-step view with larger text and a timer.
 - **Rating section** — at the bottom: 5-star tap widget and an optional notes text field.
 - **Favourite button** — in the app bar, heart icon that toggles the favourite state with a scale animation.
