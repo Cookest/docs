@@ -3,6 +3,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { readdir, readFile } from "fs/promises";
 import { join, relative, extname } from "path";
 import { existsSync } from "fs";
+import { z } from "zod";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -135,12 +136,12 @@ server.tool(
   "search_docs",
   "Full-text search across all documentation pages",
   {
-    query: { type: "string", description: "Search query" },
-    locale: { type: "string", description: "Filter by locale (optional)" },
-    limit: { type: "number", description: "Max results (default: 10)" },
+    query: z.string().describe("Search query"),
+    locale: z.string().optional().describe("Filter by locale (optional)"),
+    limit: z.number().optional().describe("Max results (default: 10)"),
   },
   async ({ query, locale, limit }) => {
-    const maxResults = (limit as number) || 10;
+    const maxResults = limit ?? 10;
     const targetLocales = locale ? [locale as Locale] : [...LOCALES];
     const results: Array<{ locale: string; path: string; title?: string; score: number; excerpt: string }> = [];
 
@@ -151,11 +152,11 @@ server.tool(
         const rel = relative(loc === "en" ? DOCS_ROOT : dir, file).replace(/\.mdx$/, "");
         if (loc === "en" && LOCALES.some((l) => l !== "en" && rel.startsWith(l + "/"))) continue;
         const content = await readFile(file, "utf-8");
-        const score = simpleSearch(content, query as string);
+        const score = simpleSearch(content, query);
         if (score > 0) {
           const { title } = extractFrontmatter(content);
           const lowerContent = content.toLowerCase();
-          const firstTerm = (query as string).toLowerCase().split(/\s+/)[0];
+          const firstTerm = query.toLowerCase().split(/\s+/)[0];
           const idx = lowerContent.indexOf(firstTerm);
           const start = Math.max(0, idx - 50);
           const excerpt = content.substring(start, start + 200).replace(/\n/g, " ");
@@ -175,11 +176,11 @@ server.tool(
   "get_page",
   "Retrieve a specific documentation page by path",
   {
-    path: { type: "string", description: "Page path (e.g., 'backend/authentication')" },
-    locale: { type: "string", description: "Locale (default: 'en')" },
+    path: z.string().describe("Page path (e.g., 'backend/authentication')"),
+    locale: z.string().optional().describe("Locale (default: 'en')"),
   },
   async ({ path, locale }) => {
-    const loc = (locale as Locale) || "en";
+    const loc = (locale as Locale | undefined) ?? "en";
     const dir = loc === "en" ? DOCS_ROOT : join(DOCS_ROOT, loc);
     const filePath = join(dir, `${path}.mdx`);
     if (!existsSync(filePath)) {
@@ -194,10 +195,10 @@ server.tool(
   "list_sections",
   "List all documentation sections and their pages",
   {
-    locale: { type: "string", description: "Locale (default: 'en')" },
+    locale: z.string().optional().describe("Locale (default: 'en')"),
   },
   async ({ locale }) => {
-    const loc = (locale as Locale) || "en";
+    const loc = (locale as Locale | undefined) ?? "en";
     const dir = loc === "en" ? DOCS_ROOT : join(DOCS_ROOT, loc);
     const sections: Record<string, string[]> = {};
 
@@ -221,7 +222,7 @@ server.tool(
   "check_translations",
   "Check translation coverage for a locale",
   {
-    locale: { type: "string", description: "Target locale to check" },
+    locale: z.string().describe("Target locale to check"),
   },
   async ({ locale }) => {
     const loc = locale as Locale;
