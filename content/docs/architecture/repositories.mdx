@@ -12,31 +12,49 @@ Cookest is a multi-repository project. Each repository is an independent compone
 ```mermaid
 graph TD
     subgraph Clients["Client Applications"]
-        UI["📱 UI\nFlutter Mobile App\niOS + Android"]
-        Web["🌐 web\nNext.js Landing Page\nMarketing site"]
+        UI["📱 UI
+Flutter Mobile App
+iOS + Android"]
+        Web["🌐 web
+Next.js Landing Page
+Marketing site"]
     end
 
     subgraph Backend["Backend Services"]
-        FoodAPI["🥗 food-api\nRust Food API\nActix-Web 4"]
-        AppAPI["⚙️ app-api\nRust App API\nActix-Web 4"]
+        FoodAPI["🥗 food-api
+Rust Food API
+Actix-Web 4"]
+        AppAPI["⚙️ app-api
+Rust App API
+Actix-Web 4"]
+        ImageGen["🖼️ image-gen
+Python Image Service
+Recipe media jobs"]
         FoodDB["🗄️ Food PostgreSQL 15"]
         AppDB["🗄️ App PostgreSQL 15"]
-        Ollama["🤖 Ollama\nAI Models"]
-        Stripe["💳 Stripe\nPayments"]
+        Ollama["🤖 Ollama
+AI Models"]
+        Stripe["💳 Stripe
+Payments"]
     end
 
     subgraph Data["Data Layer"]
-        ETL["🔄 etl\nPython Pipeline"]
-        Dataset["📊 dataset\nMM-Food-100K CSV"]
+        ETL["🔄 etl
+Python Pipeline"]
+        Dataset["📊 dataset
+MM-Food-100K CSV"]
     end
 
     subgraph Meta["Meta / Documentation"]
-        Docs["📖 docs\nFumadocs Site"]
-        GH[".github\nOrg Profile"]
+        Docs["📖 docs
+Fumadocs Site"]
+        GH[".github
+Org Profile"]
     end
 
     UI -->|"HTTPS + JWT"| AppAPI
-    AppAPI -->|"Food API URL"| FoodAPI
+    AppAPI -->|"FOOD_API_URL"| FoodAPI
+    AppAPI -->|"IMAGE_GEN_URL"| ImageGen
     FoodAPI -->|"SeaORM"| FoodDB
     AppAPI -->|"SeaORM"| AppDB
     AppAPI -->|"HTTP"| Ollama
@@ -44,36 +62,41 @@ graph TD
     ETL -->|"SQL inserts"| FoodDB
     ETL -->|"SQL inserts"| AppDB
     Dataset -->|"CSV read"| ETL
-    Docs -.->|"documents"| FoodAPI & AppAPI & UI & Web & ETL
+    Docs -.->|"documents"| FoodAPI & AppAPI & ImageGen & UI & Web & ETL
 ```
 
 ## Repository Details
 
-### `api/` — Rust backend workspace
+### `api/` — Backend workspace
 
 | Attribute | Value |
 |-----------|-------|
-| **Language** | Rust 1.78+ |
-| **Framework** | Actix-Web 4 |
-| **ORM** | SeaORM 1.1 |
-| **Services** | Food API + App API |
+| **Languages** | Rust 1.78+ + Python 3.10+ |
+| **Frameworks** | Actix-Web 4, SeaORM 1.1, FastAPI-style Python microservice |
+| **Workspace** | Multi-crate Cargo workspace |
+| **Services** | `app-api`, `food-api`, `image-gen` |
+| **Shared crate** | `crates/shared` for common errors and types |
 | **Database** | PostgreSQL 15+ |
-| **Auth** | Argon2id + JWT (App API only) |
-| **AI** | Ollama (App API chat + PDF vision) |
-| **Payments** | Stripe webhooks |
+| **AI** | Ollama + async image generation |
 
-**Purpose:** Core backend workspace with a standalone food catalog service and an authenticated application service.
+**Purpose:** The `api/` repo now contains the full backend workspace: the deployed App API, the standalone Food API, shared Rust crates, the legacy monolith source retained for reference, and the Python image-generation microservice.
 
 **Key directories:**
+```bash
+api/
+├── src/                    ← legacy monolith (not the deployed binary)
+├── crates/app-api/         ← deployed App API with auth, meal plans, pantry, AI chat, and proxies
+├── crates/food-api/        ← standalone food catalog service
+├── crates/shared/          ← shared errors, DTOs, and common types
+└── image-gen/              ← Python image generation microservice
 ```
-api/src/
-├── entity/        ← 20+ SeaORM data models
-├── handlers/      ← HTTP request handlers (one per domain)
-├── services/      ← Business logic (17 service files)
-├── middleware/     ← JWT auth + rate limiting
-├── models/        ← DTOs and request/response types
-└── validation/    ← Request validation rules
-```
+
+**Crate / service roles:**
+- `crates/app-api` — the main deployed API used by mobile and web clients
+- `crates/food-api` — catalog and browse service for recipes and ingredients
+- `crates/shared` — reusable errors and shared Rust types
+- `image-gen/` — async hero/step recipe image generation service
+- `src/` — legacy monolith code, kept for migration/reference purposes only
 
 **Quick start:**
 ```bash
@@ -98,7 +121,7 @@ docker compose up --build
 **Purpose:** Native iOS/Android client for meal planning, shopping, pantry management, and AI chat.
 
 **Key directories:**
-```
+```bash
 UI/lib/src/
 ├── core/          ← API client, auth, storage
 ├── features/      ← Feature modules (auth, recipes, meal_plan, etc.)
@@ -127,7 +150,7 @@ flutter run                     # Run on connected device/emulator
 **Purpose:** Public-facing marketing site showcasing Cookest features, app download links, and sustainability mission.
 
 **Key components:**
-```
+```bash
 web/app/components/
 ├── Nav.tsx, Hero.tsx, Features.tsx
 ├── Showcase.tsx, HowItWorks.tsx
@@ -142,6 +165,24 @@ cd web
 npm install
 npm run dev                     # Start on localhost:3000
 ```
+
+---
+
+### `cookest-ad/` — Remotion video ads
+
+| Attribute | Value |
+|-----------|-------|
+| **Language** | TypeScript 5 |
+| **Framework** | Remotion |
+| **Composition** | 5-scene cursor-driven ad composition |
+| **Automation** | Puppeteer screenshot automation |
+
+**Purpose:** Generates polished video ad assets for Cookest marketing campaigns and promos.
+
+**Highlights:**
+- Multi-scene Remotion composition driven by scripted cursor motion
+- Automated screenshot capture via Puppeteer for repeatable scene assets
+- Separate marketing-focused repo so motion work can iterate independently from app and backend code
 
 ---
 
@@ -239,13 +280,17 @@ sequenceDiagram
 
 ```mermaid
 graph LR
-    CSV["MM-Food-100K\n(CSV)"] --> ETL["Python ETL"]
+    CSV["MM-Food-100K
+(CSV)"] --> ETL["Python ETL"]
     USDA["USDA API"] --> ETL
     MealDB["TheMealDB API"] --> ETL
     ETL --> DB["PostgreSQL"]
     DB --> API["Rust API"]
     API --> App["Flutter App"]
-    API --> PDF["PDF Pipeline\n(pdftoppm + Ollama)"]
+    API --> PDF["PDF Pipeline
+(pdftoppm + Ollama)"]
+    API --> IMG["ImageGen
+Python microservice"]
     PDF --> DB
 ```
 
