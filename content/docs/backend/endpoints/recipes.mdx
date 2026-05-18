@@ -244,3 +244,81 @@ Record that the user cooked this recipe. Triggers inventory deduction.
   "ingredients_deducted": 4
 }
 ```
+
+---
+
+## POST /api/recipes/generate
+
+Generate a new recipe draft with AI. **Pro tier required.**
+
+| Method | Path | Auth | Tier |
+|--------|------|------|------|
+| POST | `/api/recipes/generate` | JWT Bearer | **Pro** |
+
+### Request body
+
+```json
+{
+  "prompt": "high-protein breakfast with eggs",
+  "use_pantry": true,
+  "cuisine_hint": "Italian",
+  "max_minutes": 30
+}
+```
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `prompt` | string | Free-text recipe request from the user |
+| `use_pantry` | boolean | Prefer pantry ingredients when generating |
+| `cuisine_hint` | string \| null | Optional cuisine/style steering |
+| `max_minutes` | integer \| null | Optional total time cap |
+
+### Response `200 OK`
+
+```json
+{
+  "name": "Frittata al Parmigiano",
+  "description": "A fluffy baked egg dish...",
+  "cuisine": "Italian",
+  "difficulty": "easy",
+  "prep_minutes": 10,
+  "cook_minutes": 20,
+  "servings": 2,
+  "ingredients": [
+    { "name": "eggs", "quantity": 4.0, "unit": "pieces", "is_pantry_item": true },
+    { "name": "parmesan", "quantity": 50.0, "unit": "g", "is_pantry_item": false }
+  ],
+  "steps": ["Preheat oven to 180°C", "Beat eggs with seasoning", "..."],
+  "macros_per_serving": {
+    "calories": 320,
+    "protein_g": 24,
+    "carbs_g": 4,
+    "fat_g": 22,
+    "fiber_g": 0
+  },
+  "tags": ["high-protein", "breakfast", "gluten-free"],
+  "score": {
+    "overall": 0.88,
+    "palatability": 0.91,
+    "nutrition_balance": 0.84,
+    "preference_match": 0.89,
+    "palatability_reason": "Well-balanced flavors with good protein content",
+    "iterations": 2
+  }
+}
+```
+
+### Score object
+
+| Field | Meaning |
+|-------|---------|
+| `overall` | Best combined score chosen by the refinement loop |
+| `palatability` | How appealing the recipe is expected to be to eat |
+| `nutrition_balance` | Macro and nutrition quality signal |
+| `preference_match` | Fit against dietary preferences and user context |
+| `palatability_reason` | Short explanation for the taste/appeal score |
+| `iterations` | How many generate/score/refine passes were needed |
+
+<Callout type="info">
+The server runs a **generate → score → refine** loop for up to 3 iterations and returns the best result. When `use_pantry` is `true`, pantry items are preferred and matching ingredients are flagged with `is_pantry_item: true`.
+</Callout>
