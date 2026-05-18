@@ -504,6 +504,25 @@ server.tool(
 );
 
 server.tool(
+  "vault_append",
+  "Append text to an existing vault note without overwriting it. REQUIRED for all log files: Errors/error-log.md, Learnings/learning-log.md, Changes/changelog.md. NEVER use vault_write for those.",
+  {
+    path: z.string().describe("Relative vault path, e.g. 'Errors/error-log.md'"),
+    content: z.string().describe("Text to append to the end of the file"),
+  },
+  async ({ path, content }) => {
+    const filePath = join(VAULT_DIR, path);
+    if (!existsSync(filePath)) {
+      return { content: [{ type: "text", text: `Note not found: ${path}. Create it first with vault_write.` }], isError: true };
+    }
+    const existing = await readFile(filePath, "utf-8");
+    const separator = existing.endsWith("\n") ? "" : "\n";
+    await writeFile(filePath, existing + separator + content, "utf-8");
+    return { content: [{ type: "text", text: `Appended ${content.length} chars to ${path}` }] };
+  }
+);
+
+server.tool(
   "vault_list",
   "List all notes in the Cookest project memory vault, optionally filtered by folder.",
   { folder: z.string().optional().describe("Folder to list, e.g. 'Sessions'. Omit for all notes.") },
