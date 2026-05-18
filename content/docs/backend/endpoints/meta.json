@@ -1,4 +1,16 @@
 {
   "title": "Endpoints",
-  "pages": ["index", "auth", "profile", "recipes", "meal-plans", "inventory", "shopping-list", "subscription", "stores", "ai-chat"]
+  "pages": [
+    "index",
+    "auth",
+    "profile",
+    "recipes",
+    "image-generation",
+    "meal-plans",
+    "inventory",
+    "shopping-list",
+    "subscription",
+    "stores",
+    "ai-chat"
+  ]
 }

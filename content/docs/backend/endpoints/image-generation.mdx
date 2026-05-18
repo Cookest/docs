@@ -1,0 +1,121 @@
+---
+title: Image Generation
+description: Async App API endpoints for generating recipe hero and step images through the Python image service
+---
+
+# Image Generation
+
+These endpoints live on the **App API** and require a JWT. The App API proxies requests to the Python image-generation microservice configured at `IMAGE_GEN_URL` and adds `IMAGE_GEN_TOKEN` server-side when present.
+
+<Callout type="warn">
+Image generation will not work unless the Python microservice is running and reachable at `IMAGE_GEN_URL`.
+</Callout>
+
+## POST /api/image-gen/recipes/:id/steps/batch
+
+Generate images for **all** recipe steps.
+
+| Method | Path | Auth |
+|--------|------|------|
+| POST | `/api/image-gen/recipes/:id/steps/batch` | JWT Bearer |
+
+### Request body
+
+```json
+{
+  "style": "watercolor"
+}
+```
+
+### Response `200 OK`
+
+```json
+{
+  "job_id": "img_batch_123",
+  "status": "pending"
+}
+```
+
+## POST /api/image-gen/recipes/:id/steps/:n
+
+Generate an image for a single recipe step.
+
+| Method | Path | Auth |
+|--------|------|------|
+| POST | `/api/image-gen/recipes/:id/steps/:n` | JWT Bearer |
+
+### Request body
+
+```json
+{
+  "step_index": 2,
+  "description": "Whisk the eggs with parmesan until smooth.",
+  "style": "editorial food photography"
+}
+```
+
+### Response `200 OK`
+
+```json
+{
+  "job_id": "img_step_456",
+  "status": "pending"
+}
+```
+
+## POST /api/image-gen/recipes/:id/hero
+
+Generate a hero image for the recipe.
+
+| Method | Path | Auth |
+|--------|------|------|
+| POST | `/api/image-gen/recipes/:id/hero` | JWT Bearer |
+
+### Request body
+
+```json
+{
+  "title": "Frittata al Parmigiano",
+  "description": "A fluffy baked egg dish with parmesan and herbs.",
+  "style": "bright studio lighting"
+}
+```
+
+### Response `200 OK`
+
+```json
+{
+  "job_id": "img_hero_789",
+  "status": "pending"
+}
+```
+
+## GET /api/image-gen/jobs/:job_id
+
+Poll an async image-generation job.
+
+| Method | Path | Auth |
+|--------|------|------|
+| GET | `/api/image-gen/jobs/:job_id` | JWT Bearer |
+
+### Response `200 OK`
+
+```json
+{
+  "job_id": "img_step_456",
+  "status": "done",
+  "result_url": "https://cdn.cookest.app/generated/img_step_456.png",
+  "error": null
+}
+```
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `job_id` | string | Stable job handle returned by the POST route |
+| `status` | `"pending" \| "running" \| "done" \| "failed"` | Current job state |
+| `result_url` | string \| null | Present once generation succeeds |
+| `error` | string \| null | Present when generation fails |
+
+<Callout type="info">
+All three POST routes are asynchronous. Start the job first, then poll `/api/image-gen/jobs/{job_id}` until it reaches `done` or `failed`.
+</Callout>
