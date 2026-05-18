@@ -1,6 +1,6 @@
 ---
 title: AI Chat
-description: Ollama-powered cooking assistant chat endpoint
+description: Agentic Ollama chat endpoint for cooking guidance, meal plan updates, and pantry-aware assistance
 ---
 
 # AI Chat
@@ -19,36 +19,51 @@ Free tier users are limited to **10 messages per day**. Pro and Family tier user
 
 ```json
 {
-  "session_id": "uuid",
   "message": "What can I make with chicken breast and pasta?",
-  "context": {
-    "include_pantry": true,
-    "include_preferences": true
-  }
+  "session_id": 42,
+  "recipe_id": 128
 }
 ```
 
-- `session_id`: Optional. If omitted, a new session is created. Pass the same `session_id` to continue a conversation.
-- `context.include_pantry`: If `true`, the assistant is given the user's current inventory as context.
-- `context.include_preferences`: If `true`, the assistant is given the user's dietary restrictions and preferences.
+- `message`: Required natural-language prompt.
+- `session_id`: Optional. Omit it to create a new chat session.
+- `recipe_id`: Optional. Pins a recipe so the assistant can switch into step-by-step cooking guidance for that recipe.
+
+<Callout type="info">
+The request body does **not** include a `context` object. The system prompt automatically includes the user's dietary restrictions, allergies, household size, and current pantry inventory.
+</Callout>
 
 ### Response `200 OK`
 
 ```json
 {
-  "session_id": "uuid",
-  "message_id": "uuid",
-  "role": "assistant",
-  "content": "With chicken breast and pasta you can make a classic Pasta al Pollo...",
-  "created_at": "2024-01-20T15:30:00Z",
-  "usage": {
-    "messages_today": 3,
-    "daily_limit": 10
-  }
+  "session_id": 42,
+  "message_id": 314,
+  "reply": "You could make a quick chicken pasta with garlic, spinach, and olive oil...",
+  "tokens_used": 893,
+  "actions_taken": ["search_recipes"]
 }
 ```
 
----
+- `reply`: Assistant text returned to the client.
+- `tokens_used`: Token count when provided by the underlying model.
+- `actions_taken`: Tool names the assistant actually called while producing the reply.
+
+## Agentic Capabilities
+
+Cookest AI uses Ollama's native tools API and can call tools over multiple rounds in a single response cycle (up to the configured max tool rounds).
+
+| Tool | Description |
+|------|-------------|
+| `search_recipes(query?, cuisine?, meal_type?, max_time_min?, limit?)` | Search the recipe catalog by keywords and structured filters. |
+| `get_meal_plan()` | Fetch the current weekly meal plan before suggesting changes. |
+| `update_meal_plan_slot(day_of_week, meal_type, recipe_id)` | Replace one meal-plan slot with a specific recipe. |
+| `mark_meal_completed(day_of_week, meal_type)` | Mark a meal as cooked or completed. |
+| `get_pantry()` | Read the current pantry and inventory state. |
+| `add_to_pantry(name, quantity, unit, storage_location?, expiry_date?)` | Add a pantry item on the user's behalf. |
+| `remove_from_pantry(item_id)` | Remove an inventory item by ID. |
+| `clear_meal_plan()` | Wipe the full weekly meal plan when the user explicitly asks for a reset. |
+| `get_recipe_details(recipe_id)` | Load full recipe details, including ingredients and steps. |
 
 ## GET /api/chat/sessions
 
@@ -63,20 +78,26 @@ List the user's chat sessions.
 ```json
 [
   {
-    "id": "uuid",
-    "title": "Chicken and pasta ideas",
-    "message_count": 6,
-    "last_message_at": "2024-01-20T15:30:00Z",
-    "created_at": "2024-01-20T15:28:00Z"
+    "id": 42,
+    "title": "Chicken pasta ideas",
+    "created_at": "2024-01-20T15:28:00Z",
+    "updated_at": "2024-01-20T15:30:00Z"
   }
 ]
 ```
 
----
+Each item is a `SessionListItem`:
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `id` | integer | Session ID |
+| `title` | string \| null | Optional auto-generated title |
+| `created_at` | string | ISO-8601 timestamp |
+| `updated_at` | string | ISO-8601 timestamp |
 
 ## GET /api/chat/sessions/:id/messages
 
-Get all messages in a chat session.
+Get all non-system messages in a chat session.
 
 | Method | Path | Auth | Tier |
 |--------|------|------|------|
@@ -85,30 +106,34 @@ Get all messages in a chat session.
 ### Response `200 OK`
 
 ```json
-{
-  "session_id": "uuid",
-  "messages": [
-    {
-      "id": "uuid",
-      "role": "user",
-      "content": "What can I make with chicken breast and pasta?",
-      "created_at": "2024-01-20T15:28:00Z"
-    },
-    {
-      "id": "uuid",
-      "role": "assistant",
-      "content": "With chicken breast and pasta you can make...",
-      "created_at": "2024-01-20T15:28:05Z"
-    }
-  ]
-}
+[
+  {
+    "id": 313,
+    "role": "user",
+    "content": "What can I make with chicken breast and pasta?",
+    "created_at": "2024-01-20T15:28:00Z"
+  },
+  {
+    "id": 314,
+    "role": "assistant",
+    "content": "You could make a quick chicken pasta with garlic, spinach, and olive oil...",
+    "created_at": "2024-01-20T15:28:05Z"
+  }
+]
 ```
 
----
+Each item is a `MessageItem`:
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `id` | integer | Message ID |
+| `role` | string | Usually `user` or `assistant` |
+| `content` | string | Message body |
+| `created_at` | string | ISO-8601 timestamp |
 
 ## DELETE /api/chat/sessions/:id
 
-Delete a chat session and all its messages.
+Delete a chat session and all of its messages.
 
 | Method | Path | Auth | Tier |
 |--------|------|------|------|
@@ -116,12 +141,10 @@ Delete a chat session and all its messages.
 
 ### Response `204 No Content`
 
----
-
 ## Model configuration
 
-The Ollama model used for chat is set via the `OLLAMA_MODEL` environment variable (default: `llava`). For general chat without image input, any Ollama model works. For PDF vision extraction, a multimodal model like `llava` is required.
+The chat model is configured via the `OLLAMA_MODEL` environment variable. Cookest typically uses `llama3.1:8b` for chat, but any Ollama-compatible text model can be substituted.
 
 <Callout type="info">
-The assistant is given a system prompt that establishes it as "Cookest AI", a cooking and nutrition assistant. It is instructed to always provide practical, actionable cooking advice and to respect the user's dietary restrictions.
+When `recipe_id` is set, the same `/api/chat` endpoint can move from general assistant chat into recipe-specific cooking help without changing routes.
 </Callout>
