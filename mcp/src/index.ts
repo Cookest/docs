@@ -1,6 +1,6 @@
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { readdir, readFile } from "fs/promises";
+import { readdir, readFile, writeFile, mkdir } from "fs/promises";
 import { join, relative, extname } from "path";
 import { existsSync } from "fs";
 import { z } from "zod";
@@ -13,6 +13,7 @@ const DOCS_ROOT = process.env.DOCS_ROOT || join(import.meta.dirname, "..", "..",
 const MESSAGES_ROOT = process.env.MESSAGES_ROOT || join(import.meta.dirname, "..", "..", "messages");
 const TOKENS_DIR = process.env.TOKENS_DIR || join(import.meta.dirname, "..", "..", "..", "cookest-ui-components-library", "tokens");
 const API_ROUTES_FILE = process.env.API_ROUTES_FILE || join(import.meta.dirname, "..", "..", "..", "api", "API_ROUTES.json");
+const VAULT_DIR = process.env.VAULT_DIR || join(import.meta.dirname, "..", "..", "..", "vault");
 
 const LOCALES = ["en", "pt", "fr", "de", "es"] as const;
 type Locale = (typeof LOCALES)[number];
@@ -428,6 +429,89 @@ server.tool(
     }
 
     return { content: [{ type: "text", text: JSON.stringify(context, null, 2) }] };
+  }
+);
+
+// ---------------------------------------------------------------------------
+// Vault tools (Obsidian memory)
+// ---------------------------------------------------------------------------
+
+async function walkVault(dir: string): Promise<string[]> {
+  const results: string[] = [];
+  if (!existsSync(dir)) return results;
+  const entries = await readdir(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.name.startsWith(".")) continue;
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) results.push(...(await walkVault(full)));
+    else if (entry.name.endsWith(".md")) results.push(full);
+  }
+  return results;
+}
+
+server.tool(
+  "vault_read",
+  "Read a note from the Cookest project memory vault (Obsidian). Use 'Agents/context.md' at session start.",
+  { path: z.string().describe("Relative path within the vault, e.g. 'Agents/context.md'") },
+  async ({ path }) => {
+    const filePath = join(VAULT_DIR, path);
+    if (!existsSync(filePath)) {
+      return { content: [{ type: "text", text: `Note not found: ${path}` }], isError: true };
+    }
+    const content = await readFile(filePath, "utf-8");
+    return { content: [{ type: "text", text: content }] };
+  }
+);
+
+server.tool(
+  "vault_write",
+  "Create or overwrite a note in the Cookest project memory vault. Always update Changes/changelog.md and Sessions/<date>-<topic>.md after significant work.",
+  {
+    path: z.string().describe("Relative path within the vault, e.g. 'Sessions/2026-05-19-topic.md'"),
+    content: z.string().describe("Full markdown content to write"),
+  },
+  async ({ path, content }) => {
+    const filePath = join(VAULT_DIR, path);
+    await mkdir(join(VAULT_DIR, path.split("/").slice(0, -1).join("/")), { recursive: true });
+    await writeFile(filePath, content, "utf-8");
+    return { content: [{ type: "text", text: `Written: ${path} (${content.length} chars)` }] };
+  }
+);
+
+server.tool(
+  "vault_search",
+  "Full-text search across all notes in the Cookest project memory vault.",
+  {
+    query: z.string().describe("Search query — matched against note content"),
+    folder: z.string().optional().describe("Limit search to a folder, e.g. 'Features'"),
+  },
+  async ({ query, folder }) => {
+    const searchRoot = folder ? join(VAULT_DIR, folder) : VAULT_DIR;
+    const files = await walkVault(searchRoot);
+    const q = query.toLowerCase();
+    const hits: Array<{ path: string; excerpt: string }> = [];
+    for (const file of files) {
+      const content = await readFile(file, "utf-8");
+      if (content.toLowerCase().includes(q)) {
+        const idx = content.toLowerCase().indexOf(q);
+        const start = Math.max(0, idx - 80);
+        const excerpt = content.substring(start, start + 200).replace(/\n/g, " ");
+        hits.push({ path: relative(VAULT_DIR, file), excerpt });
+      }
+    }
+    return { content: [{ type: "text", text: hits.length ? JSON.stringify(hits, null, 2) : "No matches found." }] };
+  }
+);
+
+server.tool(
+  "vault_list",
+  "List all notes in the Cookest project memory vault, optionally filtered by folder.",
+  { folder: z.string().optional().describe("Folder to list, e.g. 'Sessions'. Omit for all notes.") },
+  async ({ folder }) => {
+    const searchRoot = folder ? join(VAULT_DIR, folder) : VAULT_DIR;
+    const files = await walkVault(searchRoot);
+    const paths = files.map((f) => relative(VAULT_DIR, f));
+    return { content: [{ type: "text", text: paths.join("\n") || "No notes found." }] };
   }
 );
 
