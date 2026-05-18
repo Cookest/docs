@@ -1,4 +1,10 @@
 {
   "title": "Contributing",
-  "pages": ["guide", "best-practices", "translations", "docs-architecture"]
+  "pages": [
+    "guide",
+    "best-practices",
+    "translations",
+    "docs-architecture",
+    "docs-roadmap"
+  ]
 }

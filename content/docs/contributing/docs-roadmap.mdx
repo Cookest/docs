@@ -1,0 +1,122 @@
+---
+title: Documentation Roadmap
+description: Coverage snapshot, priorities, and contribution workflow for Cookest documentation
+---
+
+# Documentation Roadmap
+
+This page tracks current documentation coverage across the Cookest docs site and highlights what should be written next.
+
+<Callout type="info">
+**Legend:** ✅ Complete = current and usable, 🔄 Partial = exists but needs expansion or refresh, ❌ Missing = planned but not yet documented.
+</Callout>
+
+## Coverage matrix
+
+| Section | Page | Status | Notes |
+|--------|------|--------|-------|
+| Root | `index` | 🔄 Partial | Good landing page, but ecosystem summary can still be expanded. |
+| Root | `roadmap` | 🔄 Partial | Product roadmap exists, but it is separate from docs coverage planning. |
+| User Guide | `overview` | ✅ Complete | Solid entry page for end-user docs. |
+| User Guide | `registration` | ✅ Complete | Covers onboarding flow. |
+| User Guide | `meal-planning` | ✅ Complete | Core user journey is documented. |
+| User Guide | `pantry` | ✅ Complete | Pantry workflows are covered. |
+| User Guide | `shopping` | ✅ Complete | Shopping-list flow is documented. |
+| User Guide | `cooking-mode` | ✅ Complete | Detailed cooking walkthrough exists. |
+| Architecture | `overview` | ✅ Complete | Good system-level intro. |
+| Architecture | `repositories` | ✅ Complete | Updated for the multi-crate backend workspace and image-gen service. |
+| Backend | `getting-started` | ✅ Complete | Setup path is documented. |
+| Backend | `environment` | ✅ Complete | Includes App API image-gen configuration. |
+| Backend | `authentication` | ✅ Complete | Auth flow is covered. |
+| Backend | `food-api` | ✅ Complete | Now includes the App API browse proxy note. |
+| Backend | `database` | ✅ Complete | Schema coverage exists. |
+| Backend | `pdf-pipeline` | ✅ Complete | PDF ingestion pipeline is documented. |
+| Backend / Endpoints | `index` | ✅ Complete | Endpoint map includes image generation. |
+| Backend / Endpoints | `auth` | ✅ Complete | Stable and documented. |
+| Backend / Endpoints | `profile` | ✅ Complete | Stable and documented. |
+| Backend / Endpoints | `recipes` | 🔄 Partial | AI generation is now covered, but older recipe examples still need a full source-backed refresh. |
+| Backend / Endpoints | `image-generation` | ✅ Complete | New async image-generation page added. |
+| Backend / Endpoints | `meal-plans` | ✅ Complete | Stable and documented. |
+| Backend / Endpoints | `inventory` | ✅ Complete | Stable and documented. |
+| Backend / Endpoints | `shopping-list` | ✅ Complete | Stable and documented. |
+| Backend / Endpoints | `subscription` | ✅ Complete | Stable and documented. |
+| Backend / Endpoints | `stores` | ✅ Complete | Stable and documented. |
+| Backend / Endpoints | `ai-chat` | ✅ Complete | Request/response shapes and agentic tools are now source-aligned. |
+| Mobile | `overview` | ✅ Complete | High-level app documentation exists. |
+| Mobile | `architecture` | ✅ Complete | Screen/state layering is documented. |
+| Mobile | `screens` | ✅ Complete | Includes Generate Recipe and image-generation updates. |
+| Mobile | `theme` | ✅ Complete | Design system guidance is present. |
+| Mobile | `state-management` | ✅ Complete | Riverpod structure is documented. |
+| Mobile | `api-integration` | ✅ Complete | API wiring is documented. |
+| ETL | `overview` | ✅ Complete | Covers the pipeline clearly. |
+| CUCL | `overview` | ✅ Complete | Good library intro. |
+| CUCL | `design-tokens` | ✅ Complete | Token documentation exists. |
+| CUCL | `components` | ✅ Complete | Expanded to cover the full 50-component library. |
+| CUCL | `best-practices` | ✅ Complete | Usage guidance exists. |
+| CUCL | `contributing` | ✅ Complete | Contribution entry point exists. |
+| AI & Automation | `quick-setup` | ✅ Complete | Useful onboarding page. |
+| AI & Automation | `overview` | ✅ Complete | Good section overview. |
+| AI & Automation | `skills` | 🔄 Partial | Needs periodic refresh as skill inventory changes. |
+| AI & Automation | `instructions` | 🔄 Partial | Useful, but should stay aligned with active agent conventions. |
+| AI & Automation | `mcp-server` | 🔄 Partial | Should be revisited when tools or auth flows change. |
+| AI & Automation | `auto-docs` | ✅ Complete | Covers the automation workflow. |
+| Contributing | `guide` | ✅ Complete | Core authoring rules are documented. |
+| Contributing | `best-practices` | ✅ Complete | Writing best practices exist. |
+| Contributing | `translations` | 🔄 Partial | Process exists, but language coverage is still uneven. |
+| Contributing | `docs-architecture` | ✅ Complete | Technical docs-site structure is documented. |
+| Contributing | `docs-roadmap` | ✅ Complete | This coverage tracker page. |
+| Legacy UI Components | `overview` | 🔄 Partial | Older section overlaps with CUCL and should eventually be consolidated. |
+| Legacy UI Components | `design-tokens` | 🔄 Partial | Still useful, but duplicated by CUCL docs. |
+| Legacy UI Components | `react` | 🔄 Partial | Basic getting-started guide only. |
+| Legacy UI Components | `flutter` | 🔄 Partial | Basic getting-started guide only. |
+| Legacy UI Components | `cli` | 🔄 Partial | Useful but narrow. |
+| Legacy UI Components | `components` | 🔄 Partial | Legacy reference that overlaps with `cucl/components`. |
+| PT mirror | `pt/index` | ✅ Complete | Landing page exists. |
+| PT mirror | `pt/user-guide/*` | ✅ Complete | Core user-guide mirror exists. |
+| PT mirror | `pt/backend/*` | 🔄 Partial | Backend mirror exists, but recent endpoint updates are not fully mirrored yet. |
+| PT mirror | `pt/mobile/*` | ✅ Complete | Main mobile section is mirrored. |
+| PT mirror | `pt/cucl/*` | 🔄 Partial | Core pages exist, but the component reference now lags EN. |
+| PT mirror | `pt/contributing/*` | 🔄 Partial | Guide exists, but roadmap parity is missing. |
+| DE | `de/index` | 🔄 Partial | Only the landing page exists. |
+| ES | `es/index` | 🔄 Partial | Only the landing page exists. |
+| FR | `fr/index` | 🔄 Partial | Only the landing page exists. |
+| Planned | `pt/backend/endpoints/image-generation` | ❌ Missing | Portuguese mirror for the new image-generation page. |
+| Planned | `pt/backend/endpoints/ai-chat` refresh | ❌ Missing | Needs the corrected request/response schema and tool list. |
+| Planned | `pt/backend/endpoints/recipes` refresh | ❌ Missing | Needs the AI recipe generation section. |
+| Planned | `pt/contributing/docs-roadmap` | ❌ Missing | Portuguese roadmap parity. |
+| Planned | `mobile/demo-mode` | ❌ Missing | Demo mode deserves its own page or subsection. |
+| Planned | `backend/browse-proxy` | ❌ Missing | Could be broken out into a dedicated App API proxy page. |
+| Planned | `architecture/deployment` | ❌ Missing | Repo relationships are covered, but deployment topology is not. |
+
+## Priority tiers
+
+### P0 — Write next
+
+- Portuguese parity for the updated English backend endpoint pages
+- Portuguese mirror for `contributing/docs-roadmap`
+- English page for mobile demo mode and `MockApiInterceptor`
+
+### P1 — High-value follow-ups
+
+- Dedicated deployment/runtime architecture page
+- Dedicated browse-proxy page for App API ↔ Food API routing
+- Deeper image-gen microservice internals (queueing, job lifecycle, storage)
+
+### P2 — Nice-to-have improvements
+
+- Refresh diagrams with more runtime detail
+- Add screenshots or UI captures to high-traffic mobile pages
+- Consolidate or cross-link the legacy `ui-components/` section with CUCL
+
+## How to contribute docs
+
+1. Start with [Documentation Guide](/docs/contributing/guide).
+2. Verify every API field, component prop, or workflow against source code before writing.
+3. Keep pages in Fumadocs-style MDX and use callouts for important warnings/info.
+4. Update the relevant `meta.json` whenever you add a new page.
+5. If you add or update an English page, plan the Portuguese mirror as part of the same docs batch whenever possible.
+6. Re-scan edited files for stale examples, wrong field names, or leftover legacy terminology before opening a PR.
+
+<Callout type="warn">
+Do not guess request/response fields or component props. If a detail is uncertain, verify it in source first or mark it for follow-up in this roadmap.
+</Callout>
