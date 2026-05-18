@@ -11,6 +11,8 @@ import { z } from "zod";
 
 const DOCS_ROOT = process.env.DOCS_ROOT || join(import.meta.dirname, "..", "..", "content", "docs");
 const MESSAGES_ROOT = process.env.MESSAGES_ROOT || join(import.meta.dirname, "..", "..", "messages");
+const TOKENS_DIR = process.env.TOKENS_DIR || join(import.meta.dirname, "..", "..", "..", "cookest-ui-components-library", "tokens");
+const API_ROUTES_FILE = process.env.API_ROUTES_FILE || join(import.meta.dirname, "..", "..", "..", "api", "API_ROUTES.json");
 
 const LOCALES = ["en", "pt", "fr", "de", "es"] as const;
 type Locale = (typeof LOCALES)[number];
@@ -282,6 +284,150 @@ server.tool(
     };
 
     return { content: [{ type: "text", text: JSON.stringify(report, null, 2) }] };
+  }
+);
+
+// ---------------------------------------------------------------------------
+// New tools: list_endpoints, get_design_tokens, get_project_context
+// ---------------------------------------------------------------------------
+
+server.tool(
+  "list_endpoints",
+  "List all Cookest API endpoints. Filter by method, auth tier (free/pro/admin), or path substring.",
+  {
+    filter: z.string().optional().describe("Optional substring to filter by path or description"),
+    tier: z.string().optional().describe("Filter by auth tier: 'public', 'free', 'pro', 'admin'"),
+    method: z.string().optional().describe("Filter by HTTP method: GET, POST, PUT, PATCH, DELETE"),
+  },
+  async ({ filter, tier, method }) => {
+    if (!existsSync(API_ROUTES_FILE)) {
+      return { content: [{ type: "text", text: "API_ROUTES.json not found. Expected at: " + API_ROUTES_FILE }], isError: true };
+    }
+    const raw = await readFile(API_ROUTES_FILE, "utf-8");
+    const routes = JSON.parse(raw) as {
+      version: string;
+      public: Array<{ method: string; path: string; description: string; auth?: boolean; tier?: string; note?: string }>;
+      protected: Array<{ method: string; path: string; description: string; tier: string }>;
+      admin: Array<{ method: string; path: string; description: string; auth: string }>;
+    };
+
+    type RouteEntry = { method: string; path: string; description: string; scope: string; tier: string };
+    let all: RouteEntry[] = [
+      ...routes.public.map((r) => ({ ...r, scope: "public", tier: "public" })),
+      ...routes.protected.map((r) => ({ ...r, scope: "protected" })),
+      ...routes.admin.map((r) => ({ ...r, scope: "admin", tier: "admin" })),
+    ];
+
+    if (tier) {
+      const t = (tier as string).toLowerCase();
+      all = all.filter((r) => r.tier?.toLowerCase() === t || r.scope.toLowerCase() === t);
+    }
+    if (method) {
+      all = all.filter((r) => r.method.toUpperCase() === (method as string).toUpperCase());
+    }
+    if (filter) {
+      const q = (filter as string).toLowerCase();
+      all = all.filter((r) => r.path.toLowerCase().includes(q) || r.description.toLowerCase().includes(q));
+    }
+
+    const formatted = all.map((r) =>
+      `${r.method.padEnd(7)} ${r.path.padEnd(55)} [${r.tier ?? r.scope}] ${r.description}`
+    ).join("\n");
+
+    return { content: [{ type: "text", text: `${all.length} endpoints found:\n\n${formatted}` }] };
+  }
+);
+
+server.tool(
+  "get_design_tokens",
+  "Return Cookest design tokens (colors, typography, spacing, effects) from the component library source.",
+  {
+    type: z.string().optional().describe("Token type: 'colors', 'typography', 'spacing', 'effects', or 'all'"),
+  },
+  async ({ type }) => {
+    const tokenFiles: Record<string, string> = {
+      colors: join(TOKENS_DIR, "colors.json"),
+      typography: join(TOKENS_DIR, "typography.json"),
+      spacing: join(TOKENS_DIR, "spacing.json"),
+      effects: join(TOKENS_DIR, "effects.json"),
+    };
+
+    const target = (type as string | undefined)?.toLowerCase() ?? "all";
+
+    if (target === "all") {
+      const result: Record<string, unknown> = {};
+      for (const [name, filePath] of Object.entries(tokenFiles)) {
+        if (existsSync(filePath)) {
+          result[name] = JSON.parse(await readFile(filePath, "utf-8"));
+        }
+      }
+      return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+    }
+
+    const filePath = tokenFiles[target];
+    if (!filePath) {
+      return { content: [{ type: "text", text: `Unknown token type: ${target}. Use: colors, typography, spacing, effects, all` }], isError: true };
+    }
+    if (!existsSync(filePath)) {
+      return { content: [{ type: "text", text: `Token file not found: ${filePath}` }], isError: true };
+    }
+
+    const content = await readFile(filePath, "utf-8");
+    return { content: [{ type: "text", text: content }] };
+  }
+);
+
+server.tool(
+  "get_project_context",
+  "Return a complete structured summary of the Cookest project: repositories, API surface, design tokens snapshot, and database tables.",
+  {},
+  async () => {
+    const context: Record<string, unknown> = {
+      project: "Cookest",
+      repositories: [
+        { name: "UI", language: "Dart", framework: "Flutter 3 + Riverpod", purpose: "Mobile app (iOS/Android)" },
+        { name: "api", language: "Rust 1.78+", framework: "Actix-Web 4 + SeaORM", purpose: "REST API + PostgreSQL" },
+        { name: "web", language: "TypeScript", framework: "Next.js 16 + TailwindCSS 4", purpose: "Landing page (5 languages)" },
+        { name: "docs", language: "TypeScript", framework: "Next.js + Fumadocs", purpose: "Developer documentation" },
+        { name: "etl", language: "Python 3.12+", framework: "asyncio + psycopg2", purpose: "Recipe data pipeline" },
+        { name: "cookest-ui-components-library", language: "TypeScript", framework: "React + Storybook", purpose: "Design system + tokens" },
+        { name: "cookest-ui-showcase", language: "TypeScript", framework: "Next.js", purpose: "Component showcase" },
+        { name: "cookest-ad", language: "TypeScript", framework: "Remotion", purpose: "Video ad rendering" },
+      ],
+      docsUrl: "https://cookest-docs.vercel.app/docs",
+      database: {
+        tables: [
+          "users", "ingredients", "ingredient_nutrients", "portion_sizes",
+          "recipes", "recipe_ingredients", "recipe_steps", "recipe_images", "recipe_nutrition", "recipe_ratings",
+          "inventory_items", "meal_plans", "meal_plan_slots",
+          "shopping_list_items", "chat_sessions", "chat_messages",
+          "user_favorites", "user_preferences", "user_push_tokens", "cooking_history",
+          "stores", "store_promotions", "store_promotion_candidates", "pdf_processing_jobs",
+          "stripe_processed_events"
+        ],
+      },
+      subscriptionTiers: ["free", "pro", "family"],
+      locales: { tier1: ["en", "pt"], tier2: ["fr", "de", "es"] },
+      designTokensSummary: {
+        brandColor: "#7A9A65",
+        headingFont: "Playfair Display",
+        bodyFont: "Inter",
+        theme: "Material 3 light + dark",
+      },
+    };
+
+    // Inject live API route counts if available
+    if (existsSync(API_ROUTES_FILE)) {
+      const routes = JSON.parse(await readFile(API_ROUTES_FILE, "utf-8"));
+      context.apiEndpoints = {
+        public: routes.public?.length ?? 0,
+        protected: routes.protected?.length ?? 0,
+        admin: routes.admin?.length ?? 0,
+        total: (routes.public?.length ?? 0) + (routes.protected?.length ?? 0) + (routes.admin?.length ?? 0),
+      };
+    }
+
+    return { content: [{ type: "text", text: JSON.stringify(context, null, 2) }] };
   }
 );
 
