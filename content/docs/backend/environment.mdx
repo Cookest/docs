@@ -32,11 +32,13 @@ cp .env.example .env
 | `JWT_ACCESS_EXPIRY_SECONDS` | `900` | Access token TTL (15 minutes) |
 | `JWT_REFRESH_EXPIRY_SECONDS` | `604800` | Refresh token TTL (7 days) |
 | `OLLAMA_URL` | `http://localhost:11434` | Ollama API base URL |
-| `OLLAMA_MODEL` | `llava` | Vision model for PDF price extraction |
+| `OLLAMA_MODEL` | `llama3.1:8b` | Primary Ollama model for chat and recipe generation |
 | `PDF_UPLOAD_DIR` | `./cookest_pdfs` | Writable directory for uploaded PDFs |
 | `STRIPE_WEBHOOK_SECRET` | optional | Stripe webhook signing secret (`whsec_...`) |
 | `FOOD_API_URL` | `http://localhost:8081` | Food API base URL |
 | `FOOD_API_KEY` | optional | API key used for Food API write requests |
+| `IMAGE_GEN_URL` | required for image gen | URL of the Python image-gen microservice |
+| `IMAGE_GEN_TOKEN` | optional | Bearer token for image-gen service (added server-side) |
 | `RESEND_API_KEY` | optional | Resend email API key |
 | `RESEND_FROM_EMAIL` | `noreply@m.cookest.app` | From address for outbound email |
 
