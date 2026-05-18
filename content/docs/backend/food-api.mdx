@@ -44,6 +44,17 @@ curl -H "x-api-key: <key>" http://localhost:8081/api/v1/recipes
 | Ingredients | `/api/v1/ingredients` | No |
 | Recipes | `/api/v1/recipes` | Public reads, API key for writes |
 
+## Browse Proxy (App API)
+
+The mobile app does **not** call the Food API directly. Instead, it uses JWT-protected App API proxy routes:
+
+- `GET /api/browse/recipes`
+- `GET /api/browse/recipes/{id}`
+- `GET /api/browse/ingredients`
+- `GET /api/browse/ingredients/{id}`
+
+The App API validates the JWT first, then forwards the request to the Food API using `FOOD_API_URL`. This keeps the Food API behind the authenticated application boundary and avoids exposing internal service configuration to clients.
+
 ## Notes
 
 - The Food API uses `FOOD_DATABASE_URL`, `FOOD_HOST`, `FOOD_PORT`, and `FOOD_CORS_ORIGIN`.
