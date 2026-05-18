@@ -1,6 +1,6 @@
 ---
 title: Components
-description: API reference for all 12 CUCL components — props, variants, and usage examples
+description: API reference for all 50 CUCL components — props, variants, and usage examples
 ---
 
 # Components
@@ -9,17 +9,25 @@ All components are exported from `@cookest/ui`. Each one is fully typed, dark-mo
 
 ```tsx
 import {
-  Alert, Avatar, AvatarGroup, Badge, Button,
-  Card, CardHeader, CardBody, CardFooter,
-  Divider, Input, Modal, Select, Skeleton, SkeletonCard,
-  Toggle, Tooltip,
+  Accordion, Alert, AlertDialog, AspectRatio, Avatar, Badge, Breadcrumb, Button,
+  Calendar, Card, Carousel, ChartContainer, Checkbox, Collapsible, Command,
+  ContextMenu, Dialog, Divider, Drawer, DropdownMenu, Form, HoverCard, Input,
+  InputOTP, Label, Menubar, Modal, NavigationMenu, Pagination, Popover, Progress,
+  RadioGroup, ResizableHandle, ResizablePanel, ResizablePanelGroup, ScrollArea,
+  Separator, Sheet, Sidebar, Skeleton, Slider, SonnerToaster, Spinner, Switch,
+  Table, Tabs, Textarea, Toast, Toaster, Toggle, ToggleGroup, Tooltip,
 } from "@cookest/ui";
 import "@cookest/ui/styles.css";
 ```
 
+<Callout type="info">
+Compound APIs expose additional helpers such as `DialogContent`, `SheetTrigger`, `FormField`, `TableHead`, and `useToast`. Each section below calls out the extra exports that belong to that component family.
+</Callout>
+
 ---
 
 ## Button
+
 
 Animated button with four variants and a built-in loading spinner.
 
@@ -464,4 +472,1500 @@ Visual separator, horizontal or vertical.
   <Divider orientation="vertical" />
   <span>Option B</span>
 </div>
+```
+
+
+---
+
+## Accordion
+
+Data-driven accordion for FAQs, settings groups, and expandable content blocks.
+
+### Import
+
+```tsx
+import { Accordion } from "@cookest/ui";
+```
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `items` | `AccordionItem[]` | required | Array of sections to render |
+| `defaultOpen` | `string \| string[]` | — | Initially open item ID(s) |
+| `multiple` | `boolean` | `false` | Allow more than one open item |
+| `variant` | `"default" \| "bordered" \| "separated"` | `"default"` | Visual style |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Header/content sizing |
+| `className` | `string` | — | Wrapper classes |
+
+`AccordionItem` has the shape `{ id, title, subtitle?, icon?, content, disabled? }`.
+
+### Example
+
+```tsx
+<Accordion
+  items={[
+    {
+      id: "pantry",
+      title: "Pantry sync",
+      subtitle: "2 items expiring soon",
+      content: <p>Your pantry data syncs automatically.</p>,
+    },
+  ]}
+  defaultOpen="pantry"
+/>
+```
+
+---
+
+## AlertDialog
+
+Confirmation dialog for destructive or high-stakes actions.
+
+### Import
+
+```tsx
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `AlertDialog` | `React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Root>` | Root open-state container |
+| `AlertDialogContent` | `React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>` | Main dialog surface |
+| `AlertDialogTitle` | `React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Title>` | Title text |
+| `AlertDialogDescription` | `React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Description>` | Supporting copy |
+| `AlertDialogAction` | `React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action>` | Primary action button |
+| `AlertDialogCancel` | `React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Cancel>` | Secondary cancel button |
+
+### Example
+
+```tsx
+<AlertDialog>
+  <AlertDialogTrigger asChild>
+    <Button variant="danger">Delete recipe</Button>
+  </AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Delete this recipe?</AlertDialogTitle>
+      <AlertDialogDescription>
+        This action cannot be undone.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Cancel</AlertDialogCancel>
+      <AlertDialogAction>Delete</AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+```
+
+---
+
+## AspectRatio
+
+Keeps media, embeds, and cards locked to a specific ratio.
+
+### Import
+
+```tsx
+import { AspectRatio } from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `AspectRatio` | `React.ComponentPropsWithoutRef<typeof AspectRatioPrimitive.Root>` | Use the Radix `ratio` prop to control width/height proportion |
+
+### Example
+
+```tsx
+<AspectRatio ratio={16 / 9}>
+  <img src="/recipe.jpg" alt="Recipe" className="h-full w-full rounded-lg object-cover" />
+</AspectRatio>
+```
+
+---
+
+## Breadcrumb
+
+Hierarchical navigation trail for dashboards and deep flows.
+
+### Import
+
+```tsx
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `Breadcrumb` | `React.ComponentPropsWithoutRef<"nav"> & { separator?: React.ReactNode }` | Wraps the breadcrumb nav landmark |
+| `BreadcrumbLink` | `React.ComponentPropsWithoutRef<"a"> & { asChild?: boolean }` | Supports Radix `Slot` composition |
+| `BreadcrumbSeparator` | `React.ComponentProps<"li">` | Defaults to a chevron separator |
+| `BreadcrumbEllipsis` | `React.ComponentProps<"span">` | Compact overflow marker |
+
+### Example
+
+```tsx
+<Breadcrumb>
+  <BreadcrumbList>
+    <BreadcrumbItem>
+      <BreadcrumbLink href="/docs">Docs</BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbPage>Components</BreadcrumbPage>
+    </BreadcrumbItem>
+  </BreadcrumbList>
+</Breadcrumb>
+```
+
+---
+
+## Calendar
+
+Themed `react-day-picker` wrapper for single, range, or multi-date selection.
+
+### Import
+
+```tsx
+import { Calendar } from "@cookest/ui";
+```
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `showOutsideDays` | `boolean` | `true` | Show leading/trailing days from adjacent months |
+| `className` | `string` | — | Outer wrapper classes |
+| `classNames` | `CalendarProps["classNames"]` | — | Override internal DayPicker class mappings |
+| `...props` | `React.ComponentProps<typeof DayPicker>` | — | All native `react-day-picker` props are forwarded |
+
+### Example
+
+```tsx
+const [selected, setSelected] = useState<Date | undefined>(new Date());
+
+<Calendar mode="single" selected={selected} onSelect={setSelected} />
+```
+
+---
+
+## Carousel
+
+Embla-powered carousel with built-in navigation buttons and orientation support.
+
+### Import
+
+```tsx
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@cookest/ui";
+```
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `opts` | `CarouselOptions` | — | Embla carousel configuration |
+| `plugins` | `CarouselPlugin` | — | Embla plugins array |
+| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | Slide axis |
+| `setApi` | `(api: CarouselApi) => void` | — | Receive the Embla API instance |
+| `...props` | `React.HTMLAttributes<HTMLDivElement>` | — | Standard wrapper props |
+
+`CarouselPrevious` and `CarouselNext` also accept `Button` props (minus required children).
+
+### Example
+
+```tsx
+<Carousel className="w-full max-w-md">
+  <CarouselContent>
+    {[1, 2, 3].map((item) => (
+      <CarouselItem key={item}>
+        <Card>
+          <p>Slide {item}</p>
+        </Card>
+      </CarouselItem>
+    ))}
+  </CarouselContent>
+  <CarouselPrevious />
+  <CarouselNext />
+</Carousel>
+```
+
+---
+
+## Chart
+
+Recharts helpers for theme-aware chart containers, tooltips, and legends.
+
+### Import
+
+```tsx
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `ChartContainer` | `React.ComponentProps<"div"> & { config: ChartConfig; children: ResponsiveContainer["children"] }` | Provides chart theme/config context |
+| `ChartTooltip` | `typeof RechartsPrimitive.Tooltip` | Re-exported Recharts tooltip primitive |
+| `ChartTooltipContent` | `React.ComponentProps<typeof RechartsPrimitive.Tooltip> & React.ComponentProps<"div"> & { hideLabel?: boolean; hideIndicator?: boolean; indicator?: "line" \| "dot" \| "dashed"; nameKey?: string; labelKey?: string }` | Styled tooltip renderer |
+| `ChartLegend` | `typeof RechartsPrimitive.Legend` | Re-exported Recharts legend primitive |
+| `ChartLegendContent` | `React.ComponentProps<"div"> & Pick<LegendProps, "payload" \| "verticalAlign"> & { hideIcon?: boolean; nameKey?: string }` | Styled legend renderer |
+
+`ChartConfig` maps series keys to labels, icons, and colors/theme overrides.
+
+### Example
+
+```tsx
+import { Bar, BarChart, XAxis } from "recharts";
+
+const chartConfig = {
+  protein: { label: "Protein", color: "#7A9A65" },
+};
+
+<ChartContainer config={chartConfig} className="h-64">
+  <BarChart data={[{ day: "Mon", protein: 24 }]}>
+    <XAxis dataKey="day" />
+    <ChartTooltip content={<ChartTooltipContent />} />
+    <ChartLegend content={<ChartLegendContent />} />
+    <Bar dataKey="protein" fill="var(--color-protein)" />
+  </BarChart>
+</ChartContainer>
+```
+
+---
+
+## Checkbox
+
+Accessible checkbox built on Radix with checked and indeterminate support.
+
+### Import
+
+```tsx
+import { Checkbox } from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `Checkbox` | `React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>` | Supports `checked`, `defaultChecked`, `onCheckedChange`, `disabled`, and other Radix checkbox props |
+
+### Example
+
+```tsx
+<Checkbox checked={checked} onCheckedChange={setChecked} aria-label="Select ingredient" />
+```
+
+---
+
+## Collapsible
+
+Lightweight expandable container for inline disclosure UI.
+
+### Import
+
+```tsx
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `Collapsible` | `React.ComponentPropsWithoutRef<typeof CollapsiblePrimitive.Root>` | Controls open state |
+| `CollapsibleTrigger` | `React.ComponentPropsWithoutRef<typeof CollapsiblePrimitive.CollapsibleTrigger>` | Toggle control |
+| `CollapsibleContent` | `React.ComponentPropsWithoutRef<typeof CollapsiblePrimitive.CollapsibleContent>` | Expandable body |
+
+### Example
+
+```tsx
+<Collapsible>
+  <CollapsibleTrigger asChild>
+    <Button variant="ghost">Show nutrition notes</Button>
+  </CollapsibleTrigger>
+  <CollapsibleContent>
+    <p>Extra nutritional guidance goes here.</p>
+  </CollapsibleContent>
+</Collapsible>
+```
+
+---
+
+## Command
+
+Command palette and searchable action list powered by `cmdk`.
+
+### Import
+
+```tsx
+import {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandShortcut,
+} from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `Command` | `React.ComponentPropsWithoutRef<typeof CommandPrimitive>` | Root command surface |
+| `CommandDialog` | `React.ComponentPropsWithoutRef<typeof Dialog>` | Wraps the command list inside the CUCL `Dialog` |
+| `CommandInput` | `React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>` | Search field |
+| `CommandItem` | `React.ComponentPropsWithoutRef<typeof CommandPrimitive.Item>` | Selectable result row |
+| `CommandShortcut` | `React.HTMLAttributes<HTMLSpanElement>` | Right-aligned shortcut text |
+
+### Example
+
+```tsx
+<CommandDialog open={open} onOpenChange={setOpen}>
+  <CommandInput placeholder="Search actions..." />
+  <CommandList>
+    <CommandEmpty>No results.</CommandEmpty>
+    <CommandGroup heading="Recipes">
+      <CommandItem>
+        Generate recipe
+        <CommandShortcut>⌘K</CommandShortcut>
+      </CommandItem>
+    </CommandGroup>
+  </CommandList>
+</CommandDialog>
+```
+
+---
+
+## ContextMenu
+
+Right-click or long-press menu for contextual actions.
+
+### Import
+
+```tsx
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuRadioGroup,
+  ContextMenuRadioItem,
+  ContextMenuTrigger,
+} from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `ContextMenu` | `React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Root>` | Root state container |
+| `ContextMenuContent` | `React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Content>` | Floating menu surface |
+| `ContextMenuItem` | `React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Item> & { inset?: boolean }` | Optional inset padding |
+| `ContextMenuSubTrigger` | `React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.SubTrigger> & { inset?: boolean }` | Opens a submenu |
+| `ContextMenuLabel` | `React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Label> & { inset?: boolean }` | Section label |
+| `ContextMenuShortcut` | `React.HTMLAttributes<HTMLSpanElement>` | Keyboard shortcut label |
+
+### Example
+
+```tsx
+<ContextMenu>
+  <ContextMenuTrigger asChild>
+    <Card>
+      <p>Right-click this card</p>
+    </Card>
+  </ContextMenuTrigger>
+  <ContextMenuContent>
+    <ContextMenuItem>Rename</ContextMenuItem>
+    <ContextMenuItem>Duplicate</ContextMenuItem>
+  </ContextMenuContent>
+</ContextMenu>
+```
+
+---
+
+## Dialog
+
+Radix-based modal dialog for fully custom overlays.
+
+### Import
+
+```tsx
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `Dialog` | `React.ComponentPropsWithoutRef<typeof DialogPrimitive.Root>` | Root open-state container |
+| `DialogContent` | `React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>` | Main dialog surface |
+| `DialogHeader` | `React.HTMLAttributes<HTMLDivElement>` | Header layout helper |
+| `DialogFooter` | `React.HTMLAttributes<HTMLDivElement>` | Footer action row |
+| `DialogTitle` | `React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>` | Title text |
+| `DialogDescription` | `React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>` | Description text |
+
+### Example
+
+```tsx
+<Dialog>
+  <DialogTrigger asChild>
+    <Button>Open dialog</Button>
+  </DialogTrigger>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Share recipe</DialogTitle>
+      <DialogDescription>Copy a link or invite collaborators.</DialogDescription>
+    </DialogHeader>
+    <DialogFooter>
+      <Button>Done</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+```
+
+---
+
+## Drawer
+
+Bottom-sheet style panel powered by `vaul`.
+
+### Import
+
+```tsx
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `Drawer` | `React.ComponentProps<typeof DrawerPrimitive.Root>` | `shouldScaleBackground` defaults to `true` |
+| `DrawerContent` | `React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>` | Bottom sheet surface |
+| `DrawerHeader` | `React.HTMLAttributes<HTMLDivElement>` | Header layout helper |
+| `DrawerFooter` | `React.HTMLAttributes<HTMLDivElement>` | Footer action stack |
+| `DrawerTitle` | `React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Title>` | Title text |
+| `DrawerDescription` | `React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Description>` | Supporting copy |
+
+### Example
+
+```tsx
+<Drawer>
+  <DrawerTrigger asChild>
+    <Button>Open drawer</Button>
+  </DrawerTrigger>
+  <DrawerContent>
+    <DrawerHeader>
+      <DrawerTitle>Quick actions</DrawerTitle>
+      <DrawerDescription>Choose the next step.</DrawerDescription>
+    </DrawerHeader>
+    <DrawerFooter>
+      <Button>Continue</Button>
+    </DrawerFooter>
+  </DrawerContent>
+</Drawer>
+```
+
+---
+
+## DropdownMenu
+
+Button-triggered action menu with checkbox, radio, and submenu support.
+
+### Import
+
+```tsx
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `DropdownMenu` | `React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Root>` | Root menu state |
+| `DropdownMenuContent` | `React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>` | `sideOffset` defaults to `4` |
+| `DropdownMenuItem` | `React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & { inset?: boolean }` | Optional inset padding |
+| `DropdownMenuSubTrigger` | `React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> & { inset?: boolean }` | Opens nested menus |
+| `DropdownMenuLabel` | `React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Label> & { inset?: boolean }` | Section label |
+| `DropdownMenuShortcut` | `React.HTMLAttributes<HTMLSpanElement>` | Shortcut text slot |
+
+### Example
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button variant="ghost">Open menu</Button>
+  </DropdownMenuTrigger>
+  <DropdownMenuContent>
+    <DropdownMenuItem>Edit</DropdownMenuItem>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem>Delete</DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+---
+
+## Form
+
+Helpers for pairing `react-hook-form` with CUCL inputs and accessible field messaging.
+
+### Import
+
+```tsx
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `Form` | `typeof FormProvider` | Wraps the React Hook Form context |
+| `FormField` | `ControllerProps<TFieldValues, TName>` | Connects a single controlled field |
+| `FormItem` | `React.HTMLAttributes<HTMLDivElement>` | Provides IDs for label/description/message wiring |
+| `FormLabel` | `React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>` | Label tied to the current `FormField` |
+| `FormControl` | `React.ComponentPropsWithoutRef<typeof Slot>` | Injects ARIA attributes into the control |
+| `FormDescription` | `React.HTMLAttributes<HTMLParagraphElement>` | Help text |
+| `FormMessage` | `React.HTMLAttributes<HTMLParagraphElement>` | Validation error text |
+
+### Example
+
+```tsx
+const form = useForm({ defaultValues: { email: "" } });
+
+<Form {...form}>
+  <form onSubmit={form.handleSubmit(console.log)}>
+    <FormField
+      control={form.control}
+      name="email"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Email</FormLabel>
+          <FormControl>
+            <Input type="email" {...field} />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  </form>
+</Form>
+```
+
+---
+
+## HoverCard
+
+Preview card that appears on hover or focus.
+
+### Import
+
+```tsx
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `HoverCard` | `React.ComponentPropsWithoutRef<typeof HoverCardPrimitive.Root>` | Root state container |
+| `HoverCardTrigger` | `React.ComponentPropsWithoutRef<typeof HoverCardPrimitive.Trigger>` | Trigger element |
+| `HoverCardContent` | `React.ComponentPropsWithoutRef<typeof HoverCardPrimitive.Content>` | `align="center"` and `sideOffset={4}` by default |
+
+### Example
+
+```tsx
+<HoverCard>
+  <HoverCardTrigger asChild>
+    <Button variant="ghost">Hover for preview</Button>
+  </HoverCardTrigger>
+  <HoverCardContent>
+    <p>Quick recipe summary.</p>
+  </HoverCardContent>
+</HoverCard>
+```
+
+---
+
+## InputOTP
+
+Segmented one-time-password input built on `input-otp`.
+
+### Import
+
+```tsx
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `InputOTP` | `React.ComponentPropsWithoutRef<typeof OTPInput>` | Also supports `containerClassName` styling |
+| `InputOTPGroup` | `React.ComponentPropsWithoutRef<"div">` | Groups slots visually |
+| `InputOTPSlot` | `React.ComponentPropsWithoutRef<"div"> & { index: number }` | Slot renderer for a specific position |
+| `InputOTPSeparator` | `React.ComponentPropsWithoutRef<"div">` | Visual separator between groups |
+
+### Example
+
+```tsx
+<InputOTP maxLength={6} value={code} onChange={setCode}>
+  <InputOTPGroup>
+    <InputOTPSlot index={0} />
+    <InputOTPSlot index={1} />
+    <InputOTPSlot index={2} />
+  </InputOTPGroup>
+  <InputOTPSeparator />
+  <InputOTPGroup>
+    <InputOTPSlot index={3} />
+    <InputOTPSlot index={4} />
+    <InputOTPSlot index={5} />
+  </InputOTPGroup>
+</InputOTP>
+```
+
+---
+
+## Label
+
+Form label primitive with disabled-peer styling.
+
+### Import
+
+```tsx
+import { Label } from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `Label` | `React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>` | Forwarded Radix label props |
+
+### Example
+
+```tsx
+<Label htmlFor="servings">Servings</Label>
+```
+
+---
+
+## Menubar
+
+Desktop-style menubar with submenus, checkbox items, and radio groups.
+
+### Import
+
+```tsx
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarTrigger,
+} from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `Menubar` | `React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Root>` | Top-level menubar container |
+| `MenubarContent` | `React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Content>` | Defaults: `align="start"`, `alignOffset={-4}`, `sideOffset={8}` |
+| `MenubarItem` | `React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Item> & { inset?: boolean }` | Menu row with optional inset |
+| `MenubarSubTrigger` | `React.ComponentPropsWithoutRef<typeof MenubarPrimitive.SubTrigger> & { inset?: boolean }` | Opens a submenu |
+| `MenubarLabel` | `React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Label> & { inset?: boolean }` | Group label |
+| `MenubarShortcut` | `React.HTMLAttributes<HTMLSpanElement>` | Shortcut text slot |
+
+### Example
+
+```tsx
+<Menubar>
+  <MenubarMenu>
+    <MenubarTrigger>File</MenubarTrigger>
+    <MenubarContent>
+      <MenubarItem>New recipe</MenubarItem>
+      <MenubarItem>Export</MenubarItem>
+    </MenubarContent>
+  </MenubarMenu>
+</Menubar>
+```
+
+---
+
+## NavigationMenu
+
+Navigation bar primitive for multi-level site or dashboard menus.
+
+### Import
+
+```tsx
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `NavigationMenu` | `React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Root>` | Root wrapper that also renders the viewport |
+| `NavigationMenuList` | `React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.List>` | Horizontal item list |
+| `NavigationMenuTrigger` | `React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Trigger>` | Trigger button for content |
+| `NavigationMenuContent` | `React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Content>` | Dropdown content panel |
+| `navigationMenuTriggerStyle` | `string` | Shared trigger class string for custom link implementations |
+
+### Example
+
+```tsx
+<NavigationMenu>
+  <NavigationMenuList>
+    <NavigationMenuItem>
+      <NavigationMenuTrigger>Docs</NavigationMenuTrigger>
+      <NavigationMenuContent>
+        <NavigationMenuLink href="/docs/backend">Backend</NavigationMenuLink>
+      </NavigationMenuContent>
+    </NavigationMenuItem>
+  </NavigationMenuList>
+</NavigationMenu>
+```
+
+---
+
+## Pagination
+
+Composable pagination navigation with previous/next links and ellipsis helpers.
+
+### Import
+
+```tsx
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `Pagination` | `React.ComponentProps<"nav">` | Root nav landmark |
+| `PaginationContent` | `React.ComponentProps<"ul">` | Inner list wrapper |
+| `PaginationItem` | `React.ComponentProps<"li">` | Single list item |
+| `PaginationLink` | `React.ComponentProps<"a"> & Pick<ButtonProps, "size"> & { isActive?: boolean }` | Page link styled like a button |
+| `PaginationPrevious` | `React.ComponentProps<typeof PaginationLink>` | Previous shortcut |
+| `PaginationNext` | `React.ComponentProps<typeof PaginationLink>` | Next shortcut |
+
+### Example
+
+```tsx
+<Pagination>
+  <PaginationContent>
+    <PaginationItem>
+      <PaginationPrevious href="?page=1" />
+    </PaginationItem>
+    <PaginationItem>
+      <PaginationLink href="?page=2" isActive>
+        2
+      </PaginationLink>
+    </PaginationItem>
+    <PaginationItem>
+      <PaginationNext href="?page=3" />
+    </PaginationItem>
+  </PaginationContent>
+</Pagination>
+```
+
+---
+
+## Popover
+
+Floating panel anchored to a trigger or custom anchor.
+
+### Import
+
+```tsx
+import { Popover, PopoverContent, PopoverTrigger } from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `Popover` | `React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Root>` | Root state container |
+| `PopoverTrigger` | `React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Trigger>` | Trigger element |
+| `PopoverAnchor` | `React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Anchor>` | Optional custom anchor |
+| `PopoverContent` | `React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>` | Defaults: `align="center"`, `sideOffset={4}` |
+
+### Example
+
+```tsx
+<Popover>
+  <PopoverTrigger asChild>
+    <Button variant="ghost">Open popover</Button>
+  </PopoverTrigger>
+  <PopoverContent>
+    <p>Popover content</p>
+  </PopoverContent>
+</Popover>
+```
+
+---
+
+## Progress
+
+Linear progress indicator with labels, variants, and optional animation.
+
+### Import
+
+```tsx
+import { Progress } from "@cookest/ui";
+```
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `value` | `number` | — | Current progress value |
+| `label` | `string` | — | Optional label above the bar |
+| `showValue` | `boolean` | `false` | Display the numeric value |
+| `size` | `"xs" \| "sm" \| "md" \| "lg"` | `"md"` | Track height |
+| `color` | `"primary" \| "success" \| "warning" \| "error"` | `"primary"` | Bar color |
+| `striped` | `boolean` | `false` | Apply striped fill styling |
+| `animated` | `boolean` | `false` | Animate stripes |
+| `rounded` | `boolean` | `true` | Round the bar corners |
+| `className` | `string` | — | Wrapper classes |
+
+### Example
+
+```tsx
+<Progress value={72} label="Meal plan completion" showValue color="success" />
+```
+
+---
+
+## RadioGroup
+
+Single-selection option group built on Radix radio primitives.
+
+### Import
+
+```tsx
+import { RadioGroup, RadioGroupItem } from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `RadioGroup` | `React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>` | Supports controlled and uncontrolled selection |
+| `RadioGroupItem` | `React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>` | Individual option |
+
+### Example
+
+```tsx
+<RadioGroup value={planType} onValueChange={setPlanType}>
+  <div className="flex items-center gap-2">
+    <RadioGroupItem value="balanced" id="balanced" />
+    <Label htmlFor="balanced">Balanced</Label>
+  </div>
+</RadioGroup>
+```
+
+---
+
+## Resizable
+
+Composable panel layout powered by `react-resizable-panels`.
+
+### Import
+
+```tsx
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `ResizablePanelGroup` | `React.ComponentProps<typeof Group>` | `orientation` defaults to `"horizontal"` |
+| `ResizablePanel` | `typeof Panel` | Individual resizable panel |
+| `ResizableHandle` | `React.ComponentProps<typeof Separator> & { withHandle?: boolean }` | Divider between panels; optional visible grab handle |
+
+### Example
+
+```tsx
+<ResizablePanelGroup className="min-h-[320px] rounded-lg border">
+  <ResizablePanel defaultSize={35}>Filters</ResizablePanel>
+  <ResizableHandle withHandle />
+  <ResizablePanel defaultSize={65}>Results</ResizablePanel>
+</ResizablePanelGroup>
+```
+
+---
+
+## ScrollArea
+
+Custom scroll container with themed scrollbars.
+
+### Import
+
+```tsx
+import { ScrollArea, ScrollBar } from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `ScrollArea` | `React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root>` | Root scroll viewport |
+| `ScrollBar` | `React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>` | Custom scrollbar |
+
+### Example
+
+```tsx
+<ScrollArea className="h-48 rounded-md border p-4">
+  <div className="space-y-2">...</div>
+  <ScrollBar orientation="vertical" />
+</ScrollArea>
+```
+
+---
+
+## Separator
+
+Minimal separator primitive for layout composition.
+
+### Import
+
+```tsx
+import { Separator } from "@cookest/ui";
+```
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | Axis |
+| `decorative` | `boolean` | `true` | Marks the separator as presentational |
+| `className` | `string` | — | Additional classes |
+| `...props` | `React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>` | — | Forwarded Radix separator props |
+
+### Example
+
+```tsx
+<div className="flex h-8 items-center gap-4">
+  <span>Left</span>
+  <Separator orientation="vertical" />
+  <span>Right</span>
+</div>
+```
+
+---
+
+## Sheet
+
+Side panel built on the Radix dialog primitives.
+
+### Import
+
+```tsx
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `Sheet` | `React.ComponentPropsWithoutRef<typeof SheetPrimitive.Root>` | Root open-state container |
+| `SheetContent` | `React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content> & { side?: "top" \| "right" \| "bottom" \| "left" }` | `side` defaults to `"right"` |
+| `SheetHeader` | `React.HTMLAttributes<HTMLDivElement>` | Header layout helper |
+| `SheetFooter` | `React.HTMLAttributes<HTMLDivElement>` | Footer action row |
+| `SheetTitle` | `React.ComponentPropsWithoutRef<typeof SheetPrimitive.Title>` | Title text |
+| `SheetDescription` | `React.ComponentPropsWithoutRef<typeof SheetPrimitive.Description>` | Supporting copy |
+
+### Example
+
+```tsx
+<Sheet>
+  <SheetTrigger asChild>
+    <Button>Open sheet</Button>
+  </SheetTrigger>
+  <SheetContent side="right">
+    <SheetHeader>
+      <SheetTitle>Recipe filters</SheetTitle>
+      <SheetDescription>Adjust cuisine and time limits.</SheetDescription>
+    </SheetHeader>
+  </SheetContent>
+</Sheet>
+```
+
+---
+
+## Sidebar
+
+Responsive application sidebar with mobile-sheet fallback and rich menu helpers.
+
+### Import
+
+```tsx
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `SidebarProvider` | `React.ComponentProps<"div"> & { defaultOpen?: boolean; open?: boolean; onOpenChange?: (open: boolean) => void }` | Also wires the ⌘/Ctrl+`b` toggle shortcut |
+| `Sidebar` | `React.ComponentProps<"div"> & { side?: "left" \| "right"; variant?: "sidebar" \| "floating" \| "inset"; collapsible?: "offcanvas" \| "icon" \| "none" }` | Main sidebar surface |
+| `SidebarMenuButton` | `React.ComponentProps<"button"> & { asChild?: boolean; isActive?: boolean; tooltip?: string \| React.ComponentProps<typeof TooltipContent> }` | Primary menu action |
+| `SidebarMenuAction` | `React.ComponentProps<"button"> & { asChild?: boolean; showOnHover?: boolean }` | Secondary per-item action |
+| `SidebarGroupLabel` | `React.ComponentProps<"div"> & { asChild?: boolean }` | Group heading |
+| `SidebarMenuSubButton` | `React.ComponentProps<"a"> & { asChild?: boolean; isActive?: boolean }` | Nested link button |
+
+### Example
+
+```tsx
+<SidebarProvider>
+  <Sidebar>
+    <SidebarContent>
+      <SidebarGroup>
+        <SidebarGroupLabel>Cookest</SidebarGroupLabel>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton isActive>Recipes</SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarGroup>
+    </SidebarContent>
+  </Sidebar>
+  <SidebarInset>
+    <SidebarTrigger />
+  </SidebarInset>
+</SidebarProvider>
+```
+
+---
+
+## Slider
+
+Single-value slider with labels, marks, sizes, and color variants.
+
+### Import
+
+```tsx
+import { Slider } from "@cookest/ui";
+```
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `value` | `number` | — | Controlled value |
+| `defaultValue` | `number` | — | Uncontrolled starting value |
+| `min` | `number` | `0` | Minimum value |
+| `max` | `number` | `100` | Maximum value |
+| `step` | `number` | `1` | Step size |
+| `label` | `string` | — | Label above the control |
+| `showValue` | `boolean` | `false` | Show current numeric value |
+| `disabled` | `boolean` | `false` | Disable interaction |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Track/thumb size |
+| `color` | `"primary" \| "success" \| "warning" \| "error"` | `"primary"` | Active track color |
+| `marks` | `SliderMark[]` | — | Tick labels `{ value, label? }` |
+| `onChange` | `(value: number) => void` | — | Value change callback |
+| `className` | `string` | — | Wrapper classes |
+
+### Example
+
+```tsx
+<Slider
+  min={0}
+  max={60}
+  value={minutes}
+  onChange={setMinutes}
+  showValue
+  marks={[{ value: 15 }, { value: 30 }, { value: 45 }]}
+/>
+```
+
+---
+
+## Sonner
+
+Thin wrapper around `sonner` for app-wide toast notifications.
+
+### Import
+
+```tsx
+import { SonnerToaster } from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `SonnerToaster` | `React.ComponentProps<typeof Sonner>` | Re-exported as `SonnerToaster` from `@cookest/ui` |
+
+### Example
+
+```tsx
+<>
+  <SonnerToaster richColors closeButton />
+</>
+```
+
+---
+
+## Spinner
+
+Loading spinner with size, color, and accessible label support.
+
+### Import
+
+```tsx
+import { Spinner } from "@cookest/ui";
+```
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `"md"` | Spinner size |
+| `color` | `"primary" \| "white" \| "current"` | `"primary"` | Stroke color |
+| `label` | `string` | — | Screen-reader label |
+| `className` | `string` | — | Additional classes |
+
+### Example
+
+```tsx
+<Spinner size="lg" label="Loading recipes" />
+```
+
+---
+
+## Switch
+
+Binary on/off switch using Radix switch primitives.
+
+### Import
+
+```tsx
+import { Switch } from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `Switch` | `React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>` | Supports `checked`, `defaultChecked`, `onCheckedChange`, and `disabled` |
+
+### Example
+
+```tsx
+<Switch checked={usePantry} onCheckedChange={setUsePantry} aria-label="Use pantry" />
+```
+
+---
+
+## Table
+
+Composable table primitives with styled headers, rows, and captions.
+
+### Import
+
+```tsx
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `Table` | `React.HTMLAttributes<HTMLTableElement>` | Wrapped in an overflow container |
+| `TableHeader` | `React.HTMLAttributes<HTMLTableSectionElement>` | `<thead>` helper |
+| `TableBody` | `React.HTMLAttributes<HTMLTableSectionElement>` | `<tbody>` helper |
+| `TableFooter` | `React.HTMLAttributes<HTMLTableSectionElement>` | `<tfoot>` helper |
+| `TableHead` | `React.ThHTMLAttributes<HTMLTableCellElement>` | Header cell |
+| `TableCell` | `React.TdHTMLAttributes<HTMLTableCellElement>` | Data cell |
+| `TableCaption` | `React.HTMLAttributes<HTMLTableCaptionElement>` | Caption text |
+
+### Example
+
+```tsx
+<Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Ingredient</TableHead>
+      <TableHead>Qty</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell>Eggs</TableCell>
+      <TableCell>4</TableCell>
+    </TableRow>
+  </TableBody>
+</Table>
+```
+
+---
+
+## Tabs
+
+Data-driven tabs component with underline, pill, and boxed variants.
+
+### Import
+
+```tsx
+import { Tabs } from "@cookest/ui";
+```
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `items` | `TabItem[]` | required | Tab definitions to render |
+| `defaultTab` | `string` | — | Initially selected tab ID |
+| `value` | `string` | — | Controlled tab ID |
+| `onChange` | `(id: string) => void` | — | Tab change callback |
+| `variant` | `"underline" \| "pills" \| "boxed"` | `"underline"` | Visual style |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Trigger sizing |
+| `fullWidth` | `boolean` | `false` | Stretch triggers to fill width |
+| `className` | `string` | — | Wrapper classes |
+
+`TabItem` has the shape `{ id, label, icon?, disabled?, badge?, content }`.
+
+### Example
+
+```tsx
+<Tabs
+  items={[
+    { id: "ingredients", label: "Ingredients", content: <p>List</p> },
+    { id: "steps", label: "Steps", content: <p>Steps</p> },
+  ]}
+/>
+```
+
+---
+
+## Textarea
+
+Multi-line text input with labels, helper/error text, character counts, and auto-resize.
+
+### Import
+
+```tsx
+import { Textarea } from "@cookest/ui";
+```
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | `string` | — | Label text above the field |
+| `helperText` | `string` | — | Help text below the field |
+| `error` | `string` | — | Error message below the field |
+| `maxLength` | `number` | — | Native maximum length |
+| `showCount` | `boolean` | `false` | Show current character count |
+| `resize` | `"none" \| "vertical" \| "horizontal" \| "both"` | `"vertical"` | CSS resize behavior |
+| `autoResize` | `boolean` | `false` | Grow the textarea with content |
+| `inputSize` | `"sm" \| "md" \| "lg"` | `"md"` | Control sizing |
+| `fullWidth` | `boolean` | `false` | Stretch to container width |
+| `className` | `string` | — | Wrapper classes |
+| `...props` | `TextareaHTMLAttributes<HTMLTextAreaElement>` | — | Native textarea props are forwarded |
+
+### Example
+
+```tsx
+<Textarea
+  label="Notes"
+  helperText="Add substitutions or serving tips"
+  showCount
+  maxLength={280}
+  autoResize
+/>
+```
+
+---
+
+## Toast
+
+Low-level toast primitives plus an imperative toast store.
+
+### Import
+
+```tsx
+import {
+  Toast,
+  ToastAction,
+  ToastDescription,
+  ToastTitle,
+  Toaster,
+  toast,
+  useToast,
+} from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props / return type | Notes |
+|--------|----------------------|-------|
+| `Toast` | `React.ComponentPropsWithoutRef<typeof Toast>` | Low-level toast primitive |
+| `ToastAction` | `React.ReactElement<typeof ToastAction>` | Optional inline action button |
+| `Toaster` | none | Mount once near the app root |
+| `toast` | `(options: Omit<ToasterToast, "id">) => { id, dismiss, update }` | Imperative helper from `use-toast.ts` |
+| `useToast` | `() => { toasts, toast, dismiss }` | Hook exposing current toast state and helpers |
+
+### Example
+
+```tsx
+<>
+  <Button
+    onClick={() =>
+      toast({
+        title: "Saved",
+        description: "Recipe updated successfully.",
+      })
+    }
+  >
+    Show toast
+  </Button>
+  <Toaster />
+</>
+```
+
+---
+
+## ToggleGroup
+
+Grouped toggle buttons for single or multiple selection.
+
+### Import
+
+```tsx
+import { ToggleGroup, ToggleGroupItem } from "@cookest/ui";
+```
+
+### Props
+
+| Export | Props type | Notes |
+|--------|------------|-------|
+| `ToggleGroup` | `React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root> & { size?: "sm" \| "md" \| "lg" }` | Group-level size defaults to `"md"` |
+| `ToggleGroupItem` | `React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Item> & { size?: "sm" \| "md" \| "lg" }` | Item can override the inherited size |
+
+### Example
+
+```tsx
+<ToggleGroup type="single" value={view} onValueChange={setView}>
+  <ToggleGroupItem value="list">List</ToggleGroupItem>
+  <ToggleGroupItem value="grid">Grid</ToggleGroupItem>
+</ToggleGroup>
 ```
