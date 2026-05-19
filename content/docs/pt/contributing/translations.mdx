@@ -1,0 +1,188 @@
+---
+title: Guia de Tradução
+description: Como contribuir com traduções para a documentação do Cookest
+---
+
+# Guia de Tradução
+
+A documentação do Cookest suporta múltiplos idiomas. Este guia explica como traduzir conteúdo existente, adicionar traduções de strings de UI e adicionar novos idiomas.
+
+## Visão Geral
+
+A documentação usa dois sistemas de tradução:
+
+1. **Ficheiros de conteúdo MDX** — traduções de página completa em `content/docs/<locale>/`
+2. **Strings de UI em JSON** — navegação, botões e etiquetas em `messages/<locale>.json`
+
+Ambos devem ser atualizados ao adicionar ou melhorar traduções.
+
+## Tiers de Tradução
+
+| Tier | Idiomas | Expectativa |
+|------|---------|-------------|
+| **Tier 1** | Inglês, Português | Paridade total — todas as páginas devem ter tradução |
+| **Tier 2** | Francês, Alemão, Espanhol | Parcial — páginas de índice + conteúdo de alto tráfego |
+
+## Traduzir uma Página Existente
+
+### Passo 1: Encontrar a fonte em inglês
+
+Todo o conteúdo em inglês encontra-se em `content/docs/`. Encontre a página que quer traduzir:
+
+```
+content/docs/backend/getting-started.mdx    ← fonte em inglês
+```
+
+### Passo 2: Criar ou atualizar a tradução
+
+Criar o ficheiro equivalente na pasta do idioma, espelhando o caminho exatamente:
+
+```
+content/docs/fr/backend/getting-started.mdx  ← tradução francesa
+```
+
+### Passo 3: Traduzir o conteúdo
+
+Regras para traduzir conteúdo:
+
+- **Traduzir** toda a prosa, títulos, cabeçalhos de tabelas, texto de callout e frontmatter (`title`, `description`)
+- **Manter em inglês**: blocos de código, exemplos JSON, caminhos de endpoints, caminhos de ficheiros, termos técnicos (JWT, Bearer, webhook, API)
+- **Manter os nomes de ficheiros idênticos** — apenas o conteúdo dentro muda
+- **Manter a estrutura de títulos** — mesma hierarquia H1/H2/H3 que a página em inglês
+- **Adicionar o `meta.json`** na pasta da secção se ainda não existir
+
+### Passo 4: Adicionar à navegação
+
+Garantir que o `meta.json` do idioma inclui a nova página. Cada pasta de secção precisa do seu próprio `meta.json`:
+
+```json
+{
+  "title": "Backend APIs",
+  "pages": ["getting-started", "environment", "authentication"]
+}
+```
+
+## Traduzir Strings de UI
+
+As strings de UI (navegação, botões, etiquetas) encontram-se em `messages/<locale>.json`. A estrutura espelha `messages/en.json`:
+
+```json
+{
+  "nav": {
+    "docs": "Documentação",
+    "api": "API",
+    "mobile": "Aplicação Móvel"
+  },
+  "common": {
+    "editOnGithub": "Editar no GitHub",
+    "nextPage": "Seguinte",
+    "previousPage": "Anterior"
+  }
+}
+```
+
+### Referência de Chaves JSON
+
+| Caminho da Chave | Valor em Inglês | Descrição |
+|-----------------|----------------|-----------|
+| `nav.docs` | "Docs" | Link de navegação superior |
+| `nav.api` | "API" | Link de navegação superior |
+| `nav.mobile` | "Mobile" | Link de navegação superior |
+| `languageSwitcher.label` | "Language" | Etiqueta do dropdown de idioma |
+| `search.placeholder` | "Search documentation..." | Placeholder do campo de pesquisa |
+| `common.editOnGithub` | "Edit on GitHub" | Botão de ação da página |
+| `common.translationNotice` | "This page has been translated..." | Banner de tradução comunitária |
+| `common.translationMissing` | "This page is not yet available..." | Fallback de tradução em falta |
+| `common.contributeTranslation` | "Help us translate this page" | Link CTA |
+| `sections.*` | Nomes de secções | Títulos de secções da barra lateral |
+| `footer.*` | Texto do rodapé | Conteúdo do rodapé da página |
+
+## Adicionar um Novo Idioma
+
+Adicionar um novo idioma requer alterações em 4 lugares:
+
+### 1. Atualizar o registo de idiomas
+
+Em `lib/i18n.ts`, adicionar o novo idioma ao objeto `locales` e ao tipo `Locale`:
+
+```typescript
+export type Locale = 'en' | 'pt' | 'fr' | 'de' | 'es' | 'ja'; // ← adicionar aqui
+
+export const locales: Record<Locale, LocaleConfig> = {
+  // ... idiomas existentes ...
+  ja: { code: 'ja', label: '日本語', flag: '🇯🇵', searchLanguage: 'japanese', tier: 2 },
+};
+```
+
+### 2. Criar o ficheiro de mensagens JSON
+
+Copiar `messages/en.json` → `messages/ja.json` e traduzir todos os valores.
+
+Depois importá-lo em `lib/i18n.ts`:
+
+```typescript
+import ja from '@/messages/ja.json';
+const messages: Record<Locale, Messages> = { en, pt, fr, de, es, ja };
+```
+
+### 3. Criar conteúdo
+
+Criar `content/docs/ja/` com no mínimo:
+- `meta.json` — estrutura de navegação
+- `index.mdx` — página de entrada com um banner de tradução comunitária
+
+### 4. Criar a rota
+
+Criar `app/docs/ja/layout.tsx` e `app/docs/ja/[[...slug]]/page.tsx`. Copiar de uma rota de idioma existente (ex.: `fr/`) e alterar a string do idioma.
+
+## Guias de Estilo por Idioma
+
+### Português (PT-PT)
+
+- Usar Português Europeu, não Português do Brasil
+- "palavra-passe" e não "senha"
+- "subscrição" e não "assinatura" (para subscription)
+- "autenticação" e não "autentificação"
+
+### Francês
+
+- Usar o formal "vous" (não "tu") ao dirigir-se ao leitor
+- "mot de passe" para password
+- "abonnement" para subscription
+- Os termos técnicos mantêm-se em inglês (API, JWT, webhook)
+
+### Alemão
+
+- Usar o formal "Sie" ao dirigir-se ao leitor
+- Substantivos compostos seguem as regras do alemão (ex.: "Datenbankschema")
+- "Passwort" para password
+- "Abonnement" para subscription
+
+### Espanhol
+
+- Usar espanhol neutro/formal
+- "contraseña" para password
+- "suscripción" para subscription
+- Evitar calão regional — manter universal
+
+## Padrões de Qualidade
+
+1. **Sem tradução automática sem revisão.** As traduções geradas por IA devem ser revistas por um falante nativo antes de fazer merge
+2. **Consistência.** Usar a mesma terminologia em todo o texto — consultar o guia de estilo acima
+3. **Exatidão.** A informação técnica deve corresponder exatamente à fonte em inglês
+4. **Completude.** Não deixar frases meio traduzidas. Se não conseguir terminar uma página, indicar o que está feito na descrição do PR
+5. **Atualidade.** Quando a fonte em inglês muda, as traduções devem ser atualizadas. Traduções desatualizadas devem mostrar um aviso
+
+## Convenções de PR para Traduções
+
+```
+docs(fr): translate backend getting-started page
+docs(de): add German index page
+docs(i18n): add Japanese locale support
+docs(i18n): update UI strings for all locales
+```
+
+Incluir na descrição do PR:
+- Qual idioma e páginas foram traduzidos
+- Se a tradução é gerada por IA, revista por humano ou escrita por nativo
+- Quaisquer termos sobre os quais não tinha certeza

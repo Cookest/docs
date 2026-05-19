@@ -1,0 +1,121 @@
+---
+title: Geração de Imagens
+description: Endpoints assíncronos da App API para geração de imagens de receitas e passos através do serviço Python de imagens
+---
+
+# Geração de Imagens
+
+Estes endpoints estão na **App API** e requerem um JWT. A App API reencaminha os pedidos para o microserviço Python de geração de imagens configurado em `IMAGE_GEN_URL` e adiciona `IMAGE_GEN_TOKEN` do lado do servidor quando presente.
+
+<Callout type="warn">
+A geração de imagens não funcionará a menos que o microserviço Python esteja em execução e acessível em `IMAGE_GEN_URL`.
+</Callout>
+
+## POST /api/image-gen/recipes/:id/steps/batch
+
+Gera imagens para **todos** os passos de uma receita.
+
+| Método | Caminho | Auth |
+|--------|---------|------|
+| POST | `/api/image-gen/recipes/:id/steps/batch` | JWT Bearer |
+
+### Corpo do pedido
+
+```json
+{
+  "style": "watercolor"
+}
+```
+
+### Resposta `200 OK`
+
+```json
+{
+  "job_id": "img_batch_123",
+  "status": "pending"
+}
+```
+
+## POST /api/image-gen/recipes/:id/steps/:n
+
+Gera uma imagem para um único passo de uma receita.
+
+| Método | Caminho | Auth |
+|--------|---------|------|
+| POST | `/api/image-gen/recipes/:id/steps/:n` | JWT Bearer |
+
+### Corpo do pedido
+
+```json
+{
+  "step_index": 2,
+  "description": "Whisk the eggs with parmesan until smooth.",
+  "style": "editorial food photography"
+}
+```
+
+### Resposta `200 OK`
+
+```json
+{
+  "job_id": "img_step_456",
+  "status": "pending"
+}
+```
+
+## POST /api/image-gen/recipes/:id/hero
+
+Gera uma imagem principal (hero) para a receita.
+
+| Método | Caminho | Auth |
+|--------|---------|------|
+| POST | `/api/image-gen/recipes/:id/hero` | JWT Bearer |
+
+### Corpo do pedido
+
+```json
+{
+  "title": "Frittata al Parmigiano",
+  "description": "A fluffy baked egg dish with parmesan and herbs.",
+  "style": "bright studio lighting"
+}
+```
+
+### Resposta `200 OK`
+
+```json
+{
+  "job_id": "img_hero_789",
+  "status": "pending"
+}
+```
+
+## GET /api/image-gen/jobs/:job_id
+
+Consulta o estado de um job de geração de imagem assíncrono.
+
+| Método | Caminho | Auth |
+|--------|---------|------|
+| GET | `/api/image-gen/jobs/:job_id` | JWT Bearer |
+
+### Resposta `200 OK`
+
+```json
+{
+  "job_id": "img_step_456",
+  "status": "done",
+  "result_url": "https://cdn.cookest.app/generated/img_step_456.png",
+  "error": null
+}
+```
+
+| Campo | Tipo | Notas |
+|-------|------|-------|
+| `job_id` | string | Identificador estável do job devolvido pela rota POST |
+| `status` | `"pending" \| "running" \| "done" \| "failed"` | Estado atual do job |
+| `result_url` | string \| null | Presente após geração bem-sucedida |
+| `error` | string \| null | Presente quando a geração falha |
+
+<Callout type="info">
+As três rotas POST são assíncronas. Inicie o job primeiro e depois consulte `/api/image-gen/jobs/{job_id}` até atingir `done` ou `failed`.
+</Callout>

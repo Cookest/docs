@@ -1,0 +1,187 @@
+---
+title: CLI — cookest-ui
+description: Adiciona componentes Cookest UI a qualquer projeto React ou Flutter com um único comando. Não é necessária ligação de pacotes.
+---
+
+# CLI — `cookest-ui`
+
+`@cookest/ui-cli` é uma **ferramenta de linha de comando estilo shadcn** que copia os ficheiros de código fonte dos componentes Cookest UI diretamente para o teu projeto React ou Flutter. São teus os ficheiros — sem symlinks, sem configuração de monorepo necessária.
+
+```bash
+npx @cookest/ui-cli add button
+```
+
+---
+
+## Instalação
+
+**Usar sem instalar (recomendado):**
+
+```bash
+npx @cookest/ui-cli <comando>
+```
+
+**Instalar globalmente:**
+
+```bash
+npm install -g @cookest/ui-cli
+# ou
+bun add -g @cookest/ui-cli
+```
+
+---
+
+## Início Rápido
+
+### Projeto React
+
+```bash
+# 1. Inicializar (deteta automaticamente React a partir do package.json)
+npx @cookest/ui-cli init
+
+# 2. Adicionar componentes
+npx @cookest/ui-cli add button input card
+```
+
+Os ficheiros são copiados para `src/components/ui/`. Instala as dependências apresentadas e importa:
+
+```tsx
+import { Button } from "@/components/ui/Button";
+```
+
+### Projeto Flutter
+
+```bash
+# Detetado automaticamente a partir de pubspec.yaml, ou usa --flutter
+npx @cookest/ui-cli add button --flutter
+```
+
+Os ficheiros são copiados para `lib/ui/`. O CLI apresenta o fragmento `pubspec.yaml` para quaisquer dependências em falta:
+
+```yaml
+dependencies:
+  google_fonts: ^8.0.0
+```
+
+```bash
+flutter pub get
+```
+
+```dart
+import 'lib/ui/ck_button.dart';
+```
+
+---
+
+## Comandos
+
+### `init`
+
+Deteta o teu framework, localiza o código fonte Cookest UI e cria um ficheiro de configuração `.cookestrc` na raiz do teu projeto.
+
+```bash
+npx @cookest/ui-cli init
+npx @cookest/ui-cli init --yes   # ignorar confirmações
+```
+
+**`.cookestrc` gerado:**
+
+```json
+{
+  "framework": "react",
+  "sourceRoot": "../../ui-components",
+  "componentsDir": "src/components/ui"
+}
+```
+
+| Campo | Descrição |
+|-------|-----------|
+| `framework` | `"react"` ou `"flutter"` |
+| `sourceRoot` | Caminho para `ui-components/` relativo ao `.cookestrc` |
+| `componentsDir` | React: onde os ficheiros `.tsx` são copiados |
+| `libDir` | Flutter: onde os ficheiros `.dart` são copiados |
+
+---
+
+### `list`
+
+Mostra todos os componentes disponíveis com disponibilidade React/Flutter e descrições.
+
+```bash
+npx @cookest/ui-cli list
+
+# Filtrar por nome, tag ou descrição
+npx @cookest/ui-cli list --filter form
+npx @cookest/ui-cli list --filter loading
+```
+
+---
+
+### `add`
+
+Copia os ficheiros de código fonte do componente para o teu projeto e apresenta a instrução de importação.
+
+```bash
+# Adicionar um componente
+npx @cookest/ui-cli add button
+
+# Adicionar vários
+npx @cookest/ui-cli add button input card badge
+
+# Seletor interativo (sem argumentos — abre um prompt de seleção múltipla)
+npx @cookest/ui-cli add
+
+# Adicionar todos os 18 componentes
+npx @cookest/ui-cli add --all
+
+# Forçar React ou Flutter (substitui deteção automática)
+npx @cookest/ui-cli add tabs --react
+npx @cookest/ui-cli add tabs --flutter
+
+# Substituir ficheiros existentes
+npx @cookest/ui-cli add button --overwrite
+```
+
+---
+
+### `diff`
+
+Compara os ficheiros de componentes instalados localmente com o código fonte do registo. Útil após atualizar `@cookest/ui-cli` para encontrar componentes que foram atualizados.
+
+```bash
+# Verificar todos os componentes instalados
+npx @cookest/ui-cli diff
+
+# Verificar componentes específicos
+npx @cookest/ui-cli diff button card tabs
+
+# Verificar widgets Flutter
+npx @cookest/ui-cli diff --flutter
+```
+
+---
+
+## Componentes Disponíveis
+
+Todos os 18 componentes estão disponíveis em React e Flutter:
+
+| Componente | Tags | Importação React | Widget Flutter |
+|------------|------|------------------|----------------|
+| `button` | action, form | `Button` | `CkButton` |
+| `input` | form, text | `Input` | `CkInput` |
+| `textarea` | form, multiline | `Textarea` | `CkTextarea` |
+| `card` | layout, container | `Card` | `CkCard` |
+| `badge` | label, status | `Badge` | `CkBadge` |
+| `avatar` | user, profile | `Avatar` | `CkAvatar` |
+| `modal` | overlay, dialog | `Modal` | `CkModal` |
+| `tooltip` | overlay, info | `Tooltip` | `CkTooltip` |
+| `toggle` | form, switch | `Toggle` | `CkToggle` |
+| `select` | form, dropdown | `Select` | `CkSelect` |
+| `skeleton` | loading, state | `Skeleton` | `CkSkeleton` |
+| `alert` | feedback, banner | `Alert` | `CkAlert` |
+| `divider` | layout | `Divider` | `CkDivider` |
+| `slider` | form, range | `Slider` | `CkSlider` |
+| `progress` | loading, feedback | `Progress` | `CkProgress` |
+| `spinner` | loading, animation | `Spinner` | `CkSpinner` |
+| `tabs` | navigation | `Tabs` | `CkTabs` |
+| `accordion` | layout, collapsible | `Accordion` | `CkAccordion` |

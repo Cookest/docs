@@ -1,0 +1,200 @@
+---
+title: Flutter — Introdução
+description: Como instalar e usar o pacote Flutter cookest_ui na tua app.
+---
+
+# Flutter — Introdução
+
+`cookest_ui` é uma biblioteca de widgets Flutter que fornece o **mesmo sistema de design e componentes** que o pacote React `@cookest/ui` para web. Todos os widgets usam os tokens de design partilhados gerados pelo Style Dictionary.
+
+## Instalação
+
+Adiciona o pacote como dependência de caminho no teu `pubspec.yaml`:
+
+```yaml
+dependencies:
+  cookest_ui:
+    path: ../ui-components/flutter
+```
+
+Depois executa:
+
+```bash
+flutter pub get
+```
+
+### Alternativa: instalação via CLI
+
+Copia ficheiros de código fonte de widgets individuais diretamente para o teu projeto:
+
+```bash
+npx @cookest/ui-cli add button --flutter
+npx @cookest/ui-cli add tabs accordion --flutter
+```
+
+Consulta a [documentação do CLI](/docs/ui-components/cli) para referência completa.
+
+## Configuração
+
+Aplica o tema Cookest no teu `MaterialApp`:
+
+```dart
+import 'package:cookest_ui/cookest_ui.dart';
+
+MaterialApp(
+  theme: CookestTheme.light,
+  darkTheme: CookestTheme.dark,
+  themeMode: ThemeMode.system,
+  home: const MyHomePage(),
+);
+```
+
+Isto configura o Material 3 com o esquema de cores Cookest, tipografia (Playfair Display + Inter) e estilos de componentes.
+
+## Widgets
+
+### CkButton
+
+```dart
+CkButton(
+  onPressed: () {},
+  variant: CkButtonVariant.primary,  // primary, secondary, ghost, danger
+  size: CkButtonSize.md,             // sm, md, lg
+  loading: false,
+  fullWidth: false,
+  iconLeft: Icon(Icons.download, size: 16),
+  child: Text('Transferir'),
+)
+```
+
+### CkInput
+
+```dart
+CkInput(
+  label: 'Email',
+  placeholder: 'tu@exemplo.com',
+  helperText: 'Nunca partilharemos o teu email',
+  error: 'Email inválido',
+  inputSize: CkInputSize.md,  // sm, md, lg
+  iconLeft: Icon(Icons.email, size: 20),
+  onChanged: (value) => print(value),
+)
+```
+
+### CkCard
+
+```dart
+CkCard(
+  variant: CkCardVariant.interactive,
+  padding: CkCardPadding.md,
+  onTap: () {},
+  child: Column(
+    children: [
+      CkCardHeader(child: Text('Receita')),
+      CkCardBody(child: Text('Uma refeição deliciosa')),
+      CkCardFooter(
+        child: CkButton(
+          onPressed: () {},
+          size: CkButtonSize.sm,
+          child: Text('Cozinhar'),
+        ),
+      ),
+    ],
+  ),
+)
+```
+
+### CkBadge
+
+```dart
+CkBadge(
+  variant: CkBadgeVariant.success,
+  dot: true,
+  child: Text('Ativo'),
+)
+
+CkBadge(
+  removable: true,
+  onRemove: () {},
+  child: Text('Sem glúten'),
+)
+```
+
+### CkAvatar
+
+```dart
+// Com imagem
+CkAvatar(
+  imageUrl: 'https://example.com/photo.jpg',
+  alt: 'João Silva',
+  size: CkAvatarSize.lg,
+)
+
+// Com iniciais de substituição
+CkAvatar(alt: 'João Silva', size: CkAvatarSize.md)
+
+// Grupo com overflow
+CkAvatarGroup(
+  max: 3,
+  children: [
+    CkAvatar(alt: 'Alice'),
+    CkAvatar(alt: 'Bruno'),
+    CkAvatar(alt: 'Carla'),
+    CkAvatar(alt: 'Diana'),
+  ],
+)
+```
+
+### CkModal
+
+```dart
+// Mostrar um diálogo modal
+CkModal.show(
+  context: context,
+  title: 'Confirmar Ação',
+  size: CkModalSize.md,
+  builder: (ctx) => Text('Tens a certeza que queres eliminar esta receita?'),
+  footer: Row(
+    mainAxisAlignment: MainAxisAlignment.end,
+    children: [
+      CkButton(
+        variant: CkButtonVariant.ghost,
+        onPressed: () => Navigator.pop(context),
+        child: Text('Cancelar'),
+      ),
+      SizedBox(width: 12),
+      CkButton(
+        variant: CkButtonVariant.danger,
+        onPressed: () { /* eliminar */ },
+        child: Text('Eliminar'),
+      ),
+    ],
+  ),
+);
+```
+
+### CkToggle
+
+```dart
+CkToggle(
+  value: isDarkMode,
+  onChanged: (v) => setState(() => isDarkMode = v),
+  label: 'Modo Escuro',
+  description: 'Ativar esquema de cores escuro',
+  toggleSize: CkToggleSize.md,
+)
+```
+
+### CkAlert
+
+O Alert usa um fundo colorido translúcido com uma barra de acento esquerda.
+
+```dart
+CkAlert(
+  variant: CkAlertVariant.warning,
+  title: 'Stock Baixo',
+  dismissible: true,
+  onDismiss: () {},
+  child: Text('Alguns ingredientes na tua dispensa estão a acabar.'),
+)
+```

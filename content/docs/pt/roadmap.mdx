@@ -1,0 +1,143 @@
+---
+title: Roteiro
+description: Para onde o Cookest está a crescer — da biblioteca de componentes à plataforma empresarial e CLI
+---
+
+# Roteiro
+
+Este documento traça a direção de crescimento do Cookest. É um documento vivo — as prioridades mudam à medida que aprendemos com o uso.
+
+---
+
+## O que existe hoje
+
+| Camada | Estado |
+|--------|--------|
+| `@cookest/ui` — biblioteca de componentes React | v0.1.3 · ativo |
+| Cookest UI Showcase — site de documentação interativa | Disponível em cookest.app |
+| Backend Rust | Food API + App API, auth, receitas, planeamento de refeições, Stripe |
+| App móvel Flutter | iOS · Android · Riverpod |
+| Pipeline ETL Python | Ingestão USDA + TheMealDB |
+
+---
+
+## Fase 1 — Maturidade da Biblioteca (agora → Q3 2026)
+
+A biblioteca de componentes precisa de atingir uma v1.0 estável antes de expandirmos para o território aplicacional.
+
+### Componentes a adicionar
+
+- `DataTable` — ordenável, filtrável, paginado
+- `DatePicker` — seleção simples e de intervalo, navegação por teclado acessível
+- `Command` — primitiva de paleta ⌘K (já usada internamente)
+- `Combobox` — select com pesquisa e carregamento assíncrono
+- `Toast` — pilha de notificações, gestão de fila
+- `Drawer` — folha lateral mobile-first
+- `NumberInput` — passo, mínimo/máximo, moeda e quantidade formatadas
+- `FileUpload` — arrastar e largar, miniaturas de pré-visualização, progresso
+
+### Sistema de design
+- Documentar todos os mais de 80 tokens de design com amostras visuais
+- Publicar ficheiro Figma comunitário com a biblioteca de componentes
+- Adicionar testes de regressão visual Storybook Chromatic
+- Escrever auditoria de acessibilidade para cada componente (WCAG 2.1 AA)
+
+---
+
+## Fase 2 — Plataforma de Menu Empresarial (Q3–Q4 2026)
+
+A ideia central: restaurantes e empresas do setor alimentar precisam exatamente do tipo de interface que estamos a construir — menus, fluxos de pedidos, ecrãs de cozinha, dashboards de nutrição. Podemos disponibilizá-los como produto hospedado.
+
+### O que é
+
+Uma plataforma white-label onde uma empresa se regista, configura a sua marca (cores, logótipo, fontes — tudo via tokens de design do Cookest) e obtém:
+
+- Um **menu digital** hospedado — legível por QR code, otimizado para mobile, categorias + etiquetas de alergénios
+- Um **painel de gestão de pedidos** — sistema de ecrã de cozinha (já construímos o exemplo KDS), encaminhamento de pedidos, integração com impressora
+- Um **dashboard de análise** — artigos populares, horas de pico, mapas de calor de nutrição
+- Uma **camada de inventário** — rastreamento de stock de ingredientes, alertas de stock baixo, custo por prato
+
+### Abordagem técnica
+
+```
+Empresa → config (tokens de marca, menu JSON, horários)
+        → API da plataforma Cookest
+        → renderiza menu usando componentes @cookest/ui
+        → hospedado em {slug}.cookest.app
+```
+
+Todas as páginas de menu são rotas Next.js renderizadas no servidor usando a mesma biblioteca de componentes. A empresa personaliza via dashboard sem código; os programadores podem também usar a API diretamente.
+
+### Modelo de monetização
+
+| Nível | Preço | Incluído |
+|-------|-------|----------|
+| Free | $0 | 1 local, 30 artigos de menu, branding Cookest |
+| Pro | $19/mês | 3 locais, artigos ilimitados, domínio personalizado, análise |
+| Business | $79/mês | 10 locais, acesso API, white-label, suporte prioritário |
+
+---
+
+## Fase 3 — Cookest CLI (2027)
+
+Uma interface terminal-first para utilizadores avançados, programadores e equipas de operações que preferem não sair da sua shell.
+
+### Visão
+
+```bash
+# Ver o teu menu
+cookest menu list --location lisbon
+
+# Adicionar um artigo
+cookest menu add "Pataniscas de Bacalhau" --price 12.50 --allergens gluten,fish
+
+# Ver a fila de cozinha em tempo real
+cookest kds watch --location lisbon
+
+# Obter dados nutricionais de um ingrediente
+cookest nutrition lookup "bacalhau" --per 100g
+
+# Exportar menu para PDF
+cookest menu export --format pdf --output menu.pdf
+```
+
+### Abordagem técnica
+
+- Escrito em **Rust** (consistente com o código da API existente)
+- Comunica com a REST API do Cookest via autenticação JWT
+- Configuração guardada em `~/.cookest/config.toml`
+- Autocompletar para bash, zsh, fish
+- Distribuído via Homebrew tap + download direto de binário
+
+### Comandos MVP
+
+```
+cookest auth login / logout / whoami
+cookest menu list / add / remove / export
+cookest orders list / watch (stream em tempo real)
+cookest kds watch
+cookest nutrition lookup <ingrediente>
+cookest config set / get
+```
+
+---
+
+## Não-objetivos (por agora)
+
+- App nativa para desktop (Flutter web cobre isto suficientemente)
+- Mercado / ecossistema de plugins de terceiros (demasiado cedo)
+- Geração de receitas por IA na CLI (disponível na app móvel)
+
+---
+
+## Contribuir
+
+Se estás a construir sobre o Cookest e tens um pedido de funcionalidade, abre uma issue no repositório relevante:
+
+- Biblioteca de componentes → [`cookest-ui-components-library`](https://github.com/Cookest/cookest-ui-components-library)
+- API → `api/` no monorepo
+- CLI → estará em `cli/` quando for criado o scaffolding
+
+---
+
+*Última atualização: maio de 2026*

@@ -1,0 +1,254 @@
+---
+title: Boas Práticas
+description: Convenções de commits, fluxos de PR, estilo de código e padrões de desenvolvimento para o ecossistema Cookest
+---
+
+# Boas Práticas
+
+Esta página define os padrões de desenvolvimento para todos os repositórios Cookest. Siga estas convenções para contribuições consistentes, revisáveis e de fácil manutenção.
+
+## Formato das Mensagens de Commit
+
+Todos os commits seguem o [Conventional Commits](https://www.conventionalcommits.org/). O formato é:
+
+```
+<tipo>(<âmbito>): <descrição>
+
+[corpo opcional]
+
+[rodapé(s) opcional/is]
+```
+
+### Tipos
+
+| Tipo | Quando usar |
+|------|-------------|
+| `feat` | Nova funcionalidade ou capacidade |
+| `fix` | Correção de erros |
+| `docs` | Apenas alterações na documentação |
+| `style` | Formatação, ponto e vírgula em falta (sem alteração de lógica) |
+| `refactor` | Reestruturação de código sem alterar comportamento |
+| `perf` | Melhoria de performance |
+| `test` | Adicionar ou corrigir testes |
+| `build` | Sistema de build ou alterações de dependências |
+| `ci` | Alterações na configuração CI/CD |
+| `chore` | Tarefas de manutenção (atualização de deps, alterações de config) |
+
+### Âmbitos
+
+Usar o nome do componente ou módulo como âmbito:
+
+| Repositório | Âmbitos de Exemplo |
+|-------------|-------------------|
+| `api` | `auth`, `recipe`, `meal-plan`, `chat`, `store`, `subscription`, `middleware` |
+| `UI` | `auth`, `home`, `recipes`, `pantry`, `shopping`, `chat`, `theme`, `navigation` |
+| `web` | `hero`, `features`, `nav`, `i18n`, `seo` |
+| `cucl` | `button`, `input`, `card`, `modal`, `tokens`, `styles`, `storybook`, `build` |
+| `docs` | `backend`, `mobile`, `etl`, `i18n`, `architecture`, `contributing`, `ai`, `cucl` |
+| `etl` | `extract`, `transform`, `load`, `usda`, `mealdb` |
+
+### Granularidade dos Commits
+
+Cada commit deve representar **uma alteração lógica**. Uma alteração lógica é uma entity, service, handler, componente ou configuração — não um lote de ficheiros vagamente relacionados.
+
+**Regras:**
+
+1. **Um conceito de domínio por commit** — adicionar uma entity de ingrediente é um commit, adicionar uma entity de receita é outro
+2. **Não agrupar ficheiros só porque foram criados ao mesmo tempo** — "adicionar 7 ficheiros de modelo" é demasiado abrangente; cada modelo deve ter o seu próprio commit
+3. **Ficheiros fortemente acoplados podem partilhar um commit** — um handler e o seu registo de rota, ou um service e o seu re-export de módulo, estão bem juntos
+4. **Alterações de infraestrutura têm os seus próprios commits** — Cargo.toml, Dockerfile, docker-compose, config CI têm commits separados
+5. **A mensagem de commit deve descrever especificamente o que mudou** — não apenas a categoria de alteração
+
+**Bom — específico e atómico:**
+
+```bash
+feat(recipe): add recipe entity with dietary flags and slug-based lookup
+feat(recipe): add ingredient allergen entity with 17 allergen types
+refactor(auth): add JWT token service with access and refresh encoding
+refactor(meal-plan): add meal plan service with AI-scored weekly generation
+build: add multi-stage Dockerfile for food-api
+```
+
+**Mau — demasiado abrangente ou vago:**
+
+```bash
+feat(recipe): add food-api entities           # quais entities? demasiados ficheiros
+refactor(auth): add app-api services          # quais services? o que fazem?
+refactor: add request/response models         # sem sentido sem especificidade
+feat: update various files                    # completamente inútil
+```
+
+### Sem Trailers de Co-autoria de IA
+
+**Não** adicionar trailers `Co-authored-by` para ferramentas de IA (GitHub Copilot, Claude, ChatGPT, etc.) nas mensagens de commit. As ferramentas de IA são assistentes, não co-autores. Todos os commits são da autoria do programador humano que revê e aprova as alterações.
+
+```bash
+# ❌ Errado — não adicionar trailers de co-autoria de IA
+feat(auth): add refresh token rotation
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+
+# ✅ Correto — apenas a mensagem de commit
+feat(auth): add refresh token rotation
+```
+
+### Exemplos
+
+```bash
+feat(auth): add refresh token rotation on reuse detection
+fix(recipe): correct dietary tag filtering for vegan+gluten-free
+docs(backend): add PDF pipeline endpoint documentation
+refactor(meal-plan): extract scoring logic into separate service
+ci(api): add Rust clippy lint step to CI workflow
+docs(i18n): add French translation for architecture overview
+```
+
+### Alterações com Quebra de Compatibilidade
+
+Para alterações com quebra de compatibilidade, adicionar `!` após o tipo/âmbito e explicar no rodapé:
+
+```
+feat(auth)!: replace cookie-based refresh with rotating tokens
+
+BREAKING CHANGE: Existing refresh tokens are invalidated.
+Clients must re-authenticate after this update.
+```
+
+## Nomenclatura de Branches
+
+```
+<tipo>/<descrição-curta>
+```
+
+Exemplos:
+- `feat/recipe-search-filters`
+- `fix/auth-token-refresh-loop`
+- `docs/add-architecture-diagrams`
+- `refactor/extract-meal-plan-scoring`
+
+## Padrões de Pull Request
+
+### Título do PR
+
+Mesmo formato que as mensagens de commit:
+
+```
+feat(recipe): add cuisine-based search filtering
+```
+
+### Template de Descrição do PR
+
+```markdown
+## O quê
+Breve descrição da alteração.
+
+## Porquê
+Link para a issue ou explique a motivação.
+
+## Como
+Principais detalhes de implementação ou decisões arquiteturais.
+
+## Testes
+Como verificou que a alteração funciona.
+
+## Capturas de ecrã
+Se existirem alterações de UI.
+```
+
+### Lista de Verificação de Revisão
+
+Antes de pedir revisão:
+
+- [ ] Código compila/constrói sem avisos
+- [ ] Todos os testes existentes passam
+- [ ] Novas funcionalidades têm testes
+- [ ] Documentação atualizada (se o comportamento mudou)
+- [ ] Traduções atualizadas (se os docs mudaram)
+- [ ] Sem segredos ou credenciais no código
+- [ ] Alterações com quebra de compatibilidade documentadas
+
+## Estilo de Código por Linguagem
+
+### Rust (API)
+
+- Seguir os padrões `rustfmt`
+- Executar `cargo clippy` antes de fazer commit — sem avisos permitidos
+- Usar `thiserror` para tipos de erro, não erros em string
+- Preferir `?` sobre `.unwrap()` em código de produção
+- Agrupar imports: std → crates externas → módulos internos
+- Documentar funções públicas com comentários `///`
+- Manter handlers thin — lógica de negócio vai em `services/`
+
+### Dart (Flutter / UI)
+
+- Seguir `dart format` e `flutter analyze`
+- Usar construtores `const` sempre que possível
+- Providers Riverpod em ficheiros dedicados (um provider por ficheiro)
+- Decomposição de widgets: máx. ~150 linhas por ficheiro de widget
+- Nomear ficheiros em `snake_case`, classes em `PascalCase`
+- Usar `final` para todas as variáveis locais que não mudam
+
+### TypeScript (Web / Docs)
+
+- Seguir a configuração ESLint/Prettier do projeto
+- Preferir `const` sobre `let`, nunca usar `var`
+- Usar TypeScript strict mode — sem `any` a não ser inevitável
+- Componentes React: um componente por ficheiro, nomes de ficheiro PascalCase
+- Usar `interface` para contratos públicos, `type` para unions/intersections
+
+### TypeScript / React (CUCL)
+
+- Todos os estilos via propriedades CSS `var(--ck-*)` — sem valores hex fixos
+- Usar `cn()` (clsx + tailwind-merge) para toda a composição de classes — nunca interpolação de strings
+- Usar `forwardRef` para todos os componentes que envolvem um elemento DOM nativo
+- Cada componente deve ter um ficheiro `.test.tsx` e um `.stories.tsx`
+- Cada novo componente deve ser adicionado a `src/index.ts` e exportado por nome
+- Executar `bun run format:check` antes de fazer commit — usa Prettier com `prettier-plugin-tailwindcss`
+
+### Python (ETL)
+
+- Seguir PEP 8 (usar o formatador `black`)
+- Type hints para todas as assinaturas de funções
+- Docstrings para funções públicas (estilo Google)
+- Usar o módulo `logging`, não `print()`
+- Variáveis de ambiente via `python-dotenv`
+
+## Gestão de Ambiente
+
+### Ferramentas Necessárias
+
+| Ferramenta | Versão | Repositório |
+|------------|--------|-------------|
+| Rust | 1.78+ | `api` |
+| PostgreSQL | 15+ | `api`, `etl` |
+| Flutter | 3.x | `UI` |
+| Dart | 3.x | `UI` |
+| Node.js | 20+ | `web`, `docs` |
+| Bun | 1.x | `cucl`, `docs` |
+| Python | 3.10+ | `etl` |
+
+### Variáveis de Ambiente
+
+Cada repositório que necessita de variáveis de ambiente inclui um ficheiro `.env.example`. Copiá-lo para `.env` e preencher os valores:
+
+```bash
+cp .env.example .env
+```
+
+**Nunca fazer commit de ficheiros `.env`.** Estão no gitignore.
+
+## Práticas de Segurança
+
+1. **Sem segredos no código.** Usar variáveis de ambiente para todas as credenciais
+2. **Fazer hash de palavras-passe com Argon2id** (API) — nunca armazenar em texto simples
+3. **Tokens de atualização com SHA-256** — os tokens em bruto só existem em cookies httpOnly
+4. **Verificar admin na BD** — nunca confiar apenas nas claims do JWT para acesso de admin
+5. **Verificar webhooks por HMAC** — os payloads de webhook do Stripe são verificados com HMAC SHA-256
+6. **Limitar taxa em todos os endpoints** — middleware governor na API, limites RPS no ETL
+
+## Gestão de Dependências
+
+- **Rust**: Fixar versões principais em `Cargo.toml`, usar `cargo update` regularmente
+- **Flutter**: Fixar versões em `pubspec.yaml`, executar `flutter pub upgrade --major-versions` trimestralmente
+- **Node.js**: Usar lockfiles (`bun.lock`), rever alterações com quebra antes de atualizar
+- **Python**: Fixar versões em `requirements.txt`, testar atualizações num venv

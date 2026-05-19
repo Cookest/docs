@@ -1,0 +1,120 @@
+---
+title: Configuração Rápida
+description: Configuração em um clique para as ferramentas de IA do Cookest — servidor MCP, VS Code e Claude Desktop
+---
+
+# Configuração Rápida
+
+Coloque as ferramentas de IA do Cookest a funcionar em menos de um minuto. Não é necessária configuração manual.
+
+## Configuração em Um Clique
+
+Execute a partir do diretório `docs/`:
+
+```bash
+bun scripts/setup-ai.mjs
+```
+
+Este script interativo irá:
+1. **Instalar as dependências do servidor MCP** automaticamente
+2. **Configurar o VS Code / GitHub Copilot** — adiciona o servidor MCP às definições do VS Code
+3. **Configurar o Claude Desktop** — adiciona o servidor MCP à configuração do Claude
+4. **Verificar os ficheiros AGENTS.md** — confirma que cada repositório tem instruções para agentes
+
+### Modos Não Interativos
+
+```bash
+# Configurar tudo sem prompts
+bun scripts/setup-ai.mjs --all
+
+# Configurar apenas o VS Code
+bun scripts/setup-ai.mjs --vscode
+
+# Configurar apenas o Claude Desktop
+bun scripts/setup-ai.mjs --claude
+
+# Apenas verificar os ficheiros AGENTS.md
+bun scripts/setup-ai.mjs --agents
+```
+
+## O que é Configurado
+
+### VS Code / GitHub Copilot
+
+O script de configuração adiciona isto ao seu `.vscode/settings.json`:
+
+```json
+{
+  "github.copilot.chat.mcpServers": {
+    "cookest-docs": {
+      "command": "npx",
+      "args": ["tsx", "docs/mcp/src/index.ts"],
+      "env": {
+        "DOCS_ROOT": "docs/content/docs",
+        "MESSAGES_ROOT": "docs/messages"
+      }
+    }
+  }
+}
+```
+
+Após a configuração, o GitHub Copilot pode:
+- Pesquisar toda a documentação do Cookest
+- Ler qualquer página em qualquer idioma
+- Verificar a cobertura de traduções
+- Compreender a estrutura do repositório
+
+### Claude Desktop
+
+O script de configuração adiciona isto à configuração do Claude Desktop:
+
+| Plataforma | Localização da Configuração |
+|------------|-----------------------------|
+| macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| Windows | `%APPDATA%/Claude/claude_desktop_config.json` |
+| Linux | `~/.config/claude/claude_desktop_config.json` |
+
+Após a configuração, o Claude pode aceder às mesmas ferramentas e recursos.
+
+### Ficheiros AGENTS.md
+
+Cada repositório tem um ficheiro `AGENTS.md` que dá aos agentes de IA contexto imediato:
+
+| Repositório | O que Diz ao Agente |
+|-------------|---------------------|
+| `docs/AGENTS.md` | Regras do site de docs, i18n, paridade de docs, convenções de commits |
+| `api/AGENTS.md` | Arquitetura Rust, padrão handler→service→entity, regras de autenticação |
+| `UI/AGENTS.md` | Arquitetura Flutter, padrões Riverpod, sistema de design |
+| `web/AGENTS.md` | Estrutura Next.js, sistema i18n, convenções de componentes |
+| `etl/AGENTS.md` | Fases do pipeline, regras de idempotência, limitação de taxa |
+
+Estes ficheiros são lidos automaticamente pelo GitHub Copilot e Claude ao trabalhar num repositório.
+
+## O que Pode Fazer Após a Configuração
+
+Uma vez configurado, pergunte ao seu assistente de IA coisas como:
+
+**Desenvolvimento:**
+> "Pesquisa nos docs como funciona a autenticação"
+> "Mostra-me o esquema da base de dados para receitas"
+> "Qual é a convenção de commits para este projeto?"
+
+**Documentação:**
+> "Verifica quais páginas não têm tradução francesa"
+> "Que secções existem na documentação backend?"
+> "Lê a documentação do endpoint de planeamento de refeições"
+
+**Arquitetura:**
+> "Mostra-me a estrutura do repositório"
+> "Como comunicam a API e a aplicação Flutter?"
+> "Que níveis de subscrição existem?"
+
+## Resolução de Problemas
+
+### Servidor MCP não responde
+
+```bash
+# Testar o servidor MCP diretamente
+cd docs/mcp
+npx tsx src/index.ts
+```

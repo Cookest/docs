@@ -1,0 +1,53 @@
+---
+title: Visão Geral de IA e Automação
+description: Como os agentes de IA se integram no ecossistema Cookest para desenvolvimento, documentação e operações
+---
+
+# IA e Automação
+
+O Cookest abraça o desenvolvimento assistido por IA como uma preocupação de primeira ordem. Esta secção documenta como os agentes de IA trabalham com a base de código, que ferramentas e contexto têm disponíveis, e como a automação mantém a documentação sincronizada com o código.
+
+## Filosofia
+
+1. **A IA é um colaborador, não um substituto.** Os agentes de IA seguem os mesmos padrões que os colaboradores humanos — mesmo formato de commits, mesmo processo de PR, mesmo nível de qualidade
+2. **O contexto é tudo.** Os agentes funcionam melhor com contexto explícito e estruturado. Cada repositório fornece um `AGENTS.md` que diz aos agentes o que precisam de saber
+3. **A documentação orienta o desenvolvimento.** O site de docs é a fonte única de verdade. Os agentes leem-na antes de fazer alterações e atualizam-na depois
+4. **A automação reduz a divergência.** O GitHub Actions deteta quando o código e a documentação divergem e abre PRs para corrigir
+
+## Componentes
+
+```mermaid
+graph TD
+    subgraph Context["📋 Camada de Contexto"]
+        Agents["AGENTS.md\n(instruções por repositório)"]
+        Docs["site docs/\n(documentação completa)"]
+        MCP["Servidor MCP\n(acesso programático)"]
+    end
+
+    subgraph AI["🤖 Agentes de IA"]
+        Copilot["GitHub Copilot"]
+        Claude["Claude / ChatGPT"]
+        Custom["Agentes Personalizados"]
+    end
+
+    subgraph Automation["⚡ Automação"]
+        Actions["GitHub Actions\n(fluxo auto-docs)"]
+        Checker["Verificador de Traduções\n(relatórios de cobertura)"]
+    end
+
+    Agents --> AI
+    Docs --> MCP
+    MCP --> AI
+    AI -->|"PRs"| Docs
+    Actions -->|"PRs automáticos"| Docs
+    Checker -->|"relatórios"| Actions
+```
+
+## O que Existe Nesta Secção
+
+| Página | Descrição |
+|--------|-----------|
+| [Competências Agênticas](/docs/ai/skills) | Conjunto completo de competências, capacidades e padrões para agentes de IA a trabalhar no Cookest |
+| [Instruções de Agente](/docs/ai/instructions) | Instruções detalhadas que cada agente recebe ao trabalhar em qualquer repositório Cookest |
+| [Servidor MCP](/docs/ai/mcp-server) | Servidor Model Context Protocol que fornece contexto de documentação às ferramentas de IA |
+| [Auto-Documentação](/docs/ai/auto-docs) | Fluxo de trabalho GitHub Actions que mantém os docs sincronizados com as alterações de código |

@@ -1,0 +1,158 @@
+---
+title: React — Introdução
+description: Como instalar e usar os componentes React @cookest/ui no teu projeto.
+---
+
+# React — Introdução
+
+`@cookest/ui` é uma biblioteca de componentes React construída com **React 19**, **TailwindCSS 4** e **Framer Motion**. É publicada no npm, completamente tipada, tree-shakeable e inclui output dual ESM/CJS.
+
+## Instalação
+
+```bash
+npm install @cookest/ui
+# ou
+bun add @cookest/ui
+# ou
+pnpm add @cookest/ui
+```
+
+## Configuração
+
+Importa a folha de estilos no ponto de entrada da tua app:
+
+```tsx
+import "@cookest/ui/styles.css";
+```
+
+Isto carrega as CSS custom properties (tokens de design) e Google Fonts (Playfair Display + Inter).
+
+### Projetos TailwindCSS v4
+
+Se o teu projeto usar TailwindCSS v4, adiciona uma diretiva `@source` para que o Tailwind analise as classes de utilidade da biblioteca de componentes:
+
+```css
+/* globals.css */
+@import "tailwindcss";
+@import "@cookest/ui/src/styles.css";
+@source "../node_modules/@cookest/ui/src";
+```
+
+## Alternativa: instalação via CLI (estilo shadcn)
+
+Em vez de instalar como dependência de pacote, copia o código fonte dos componentes diretamente para o teu projeto:
+
+```bash
+npx @cookest/ui-cli add button input card
+```
+
+Consulta a [documentação do CLI](/docs/ui-components/cli) para referência completa.
+
+## Utilização
+
+```tsx
+import { Button, Card, CardHeader, CardBody, Input, Badge } from "@cookest/ui";
+
+export function RecipeCard() {
+  return (
+    <Card variant="interactive">
+      <CardHeader>
+        <Badge variant="success" dot>Ativo</Badge>
+        Massa à Carbonara
+      </CardHeader>
+      <CardBody>
+        <Input label="Doses" type="number" placeholder="4" />
+        <Button variant="primary" className="mt-4">
+          Começar a Cozinhar
+        </Button>
+      </CardBody>
+    </Card>
+  );
+}
+```
+
+## API dos Componentes
+
+### Button
+
+```tsx
+<Button
+  variant="primary"   // "primary" | "secondary" | "ghost" | "danger"
+  size="md"           // "sm" | "md" | "lg"
+  loading={false}
+  disabled={false}
+  fullWidth={false}
+  iconLeft={<Icon />}
+  iconRight={<Icon />}
+>
+  Etiqueta
+</Button>
+```
+
+### Input
+
+```tsx
+<Input
+  label="Email"
+  placeholder="tu@exemplo.com"
+  helperText="Nunca partilharemos o teu email"
+  error="Email inválido"
+  inputSize="md"              // "sm" | "md" | "lg"
+  iconLeft={<MailIcon />}
+  fullWidth
+/>
+```
+
+### Alert
+
+O Alert usa um design glassmorfismo com uma barra de acento colorida e sombra ambiente.
+
+```tsx
+<Alert
+  variant="info"       // "info" | "success" | "warning" | "error"
+  size="md"            // "sm" | "md" | "lg"
+  title="Atenção"
+  dismissible
+  onDismiss={() => {}}
+>
+  O teu plano de refeições foi atualizado.
+</Alert>
+```
+
+### Select
+
+```tsx
+<Select
+  label="Cozinha"
+  options={[
+    { value: "italian", label: "Italiana" },
+    { value: "japanese", label: "Japonesa" },
+  ]}
+  value={selected}
+  onChange={setSelected}
+  searchable
+  placeholder="Escolhe uma cozinha..."
+/>
+```
+
+### Tabs
+
+```tsx
+<Tabs
+  variant="underline"    // "underline" | "pills" | "boxed"
+  defaultTab="overview"
+  items={[
+    {
+      id: "overview",
+      label: "Visão Geral",
+      content: <OverviewPanel />,
+    },
+    {
+      id: "details",
+      label: "Detalhes",
+      badge: "3",
+      content: <DetailsPanel />,
+    },
+  ]}
+/>
+```

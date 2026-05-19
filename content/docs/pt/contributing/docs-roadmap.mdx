@@ -1,0 +1,99 @@
+---
+title: Roteiro da Documentação
+description: Instantâneo de cobertura, prioridades e fluxo de contribuição para a documentação do Cookest
+---
+
+# Roteiro da Documentação
+
+Esta página acompanha a cobertura atual da documentação no site de docs do Cookest e destaca o que deve ser escrito a seguir.
+
+<Callout type="info">
+**Legenda:** ✅ Completo = atual e utilizável, 🔄 Parcial = existe mas precisa de expansão ou atualização, ❌ Em falta = planeado mas ainda não documentado.
+</Callout>
+
+## Matriz de cobertura
+
+| Secção | Página | Estado | Notas |
+|--------|--------|--------|-------|
+| Raiz | `index` | 🔄 Parcial | Boa página de entrada, mas o resumo do ecossistema ainda pode ser expandido. |
+| Raiz | `roadmap` | 🔄 Parcial | O roteiro do produto existe, mas está separado do planeamento de cobertura da documentação. |
+| Guia do Utilizador | `overview` | ✅ Completo | Página de entrada sólida para docs de utilizador final. |
+| Guia do Utilizador | `registration` | ✅ Completo | Cobre o fluxo de integração. |
+| Guia do Utilizador | `meal-planning` | ✅ Completo | A jornada central do utilizador está documentada. |
+| Guia do Utilizador | `pantry` | ✅ Completo | Os fluxos de trabalho de despensa estão cobertos. |
+| Guia do Utilizador | `shopping` | ✅ Completo | O fluxo de lista de compras está documentado. |
+| Guia do Utilizador | `cooking-mode` | ✅ Completo | Existe um guia detalhado de confeção. |
+| Arquitetura | `overview` | ✅ Completo | Boa introdução ao nível do sistema. |
+| Arquitetura | `repositories` | ✅ Completo | Atualizado para o workspace backend multi-crate e o serviço image-gen. |
+| Backend | `getting-started` | ✅ Completo | O caminho de configuração está documentado. |
+| Backend | `environment` | ✅ Completo | Inclui configuração de image-gen da App API. |
+| Backend | `authentication` | ✅ Completo | O fluxo de autenticação está coberto. |
+| Backend | `food-api` | ✅ Completo | Agora inclui a nota de proxy de navegação da App API. |
+| Backend | `database` | ✅ Completo | Existe cobertura do esquema. |
+| Backend | `pdf-pipeline` | ✅ Completo | O pipeline de ingestão PDF está documentado. |
+| Backend / Endpoints | `index` | ✅ Completo | O mapa de endpoints inclui geração de imagens. |
+| Backend / Endpoints | `auth` | ✅ Completo | Estável e documentado. |
+| Backend / Endpoints | `profile` | ✅ Completo | Estável e documentado. |
+| Backend / Endpoints | `recipes` | 🔄 Parcial | A geração com IA está coberta, mas exemplos de receitas mais antigos ainda precisam de uma atualização completa baseada na fonte. |
+| Backend / Endpoints | `image-generation` | ✅ Completo | Nova página de geração de imagens assíncrona adicionada. |
+| Backend / Endpoints | `meal-plans` | ✅ Completo | Estável e documentado. |
+| Backend / Endpoints | `inventory` | ✅ Completo | Estável e documentado. |
+| Backend / Endpoints | `shopping-list` | ✅ Completo | Estável e documentado. |
+| Backend / Endpoints | `subscription` | ✅ Completo | Estável e documentado. |
+| Backend / Endpoints | `stores` | ✅ Completo | Estável e documentado. |
+| Backend / Endpoints | `ai-chat` | ✅ Completo | As formas de pedido/resposta e ferramentas agênticas estão agora alinhadas com a fonte. |
+| Mobile | `overview` | ✅ Completo | Existe documentação de alto nível da aplicação. |
+| Mobile | `architecture` | ✅ Completo | A estratificação de ecrã/estado está documentada. |
+| Mobile | `screens` | ✅ Completo | Inclui Generate Recipe e atualizações de image-generation. |
+| Mobile | `theme` | ✅ Completo | Existe orientação sobre o sistema de design. |
+| Mobile | `state-management` | ✅ Completo | A estrutura Riverpod está documentada. |
+| Mobile | `api-integration` | ✅ Completo | A ligação à API está documentada. |
+| ETL | `overview` | ✅ Completo | Cobre o pipeline claramente. |
+| CUCL | `overview` | ✅ Completo | Boa introdução à biblioteca. |
+| CUCL | `design-tokens` | ✅ Completo | Existe documentação de tokens. |
+| CUCL | `components` | ✅ Completo | Expandido para cobrir a biblioteca completa de 50 componentes. |
+| CUCL | `best-practices` | ✅ Completo | Existe orientação de utilização. |
+| CUCL | `contributing` | ✅ Completo | Existe ponto de entrada de contribuição. |
+| IA & Automação | `quick-setup` | ✅ Completo | Página de integração útil. |
+| IA & Automação | `overview` | ✅ Completo | Boa visão geral da secção. |
+| IA & Automação | `skills` | 🔄 Parcial | Precisa de atualização periódica à medida que o inventário de competências muda. |
+| IA & Automação | `instructions` | 🔄 Parcial | Útil, mas deve manter-se alinhado com as convenções de agente ativas. |
+| IA & Automação | `mcp-server` | 🔄 Parcial | Deve ser revisitado quando ferramentas ou fluxos de autenticação mudarem. |
+| IA & Automação | `auto-docs` | ✅ Completo | Cobre o fluxo de automação. |
+| Contribuição | `guide` | ✅ Completo | As regras de autoria principais estão documentadas. |
+| Contribuição | `best-practices` | ✅ Completo | Existem boas práticas de escrita. |
+| Contribuição | `translations` | 🔄 Parcial | O processo existe, mas a cobertura de idiomas ainda é desigual. |
+| Contribuição | `docs-architecture` | ✅ Completo | A estrutura técnica do site de docs está documentada. |
+| Contribuição | `docs-roadmap` | ✅ Completo | Esta página de rastreamento de cobertura. |
+| Componentes UI Legados | `overview` | 🔄 Parcial | A secção mais antiga sobrepõe-se ao CUCL e deve eventualmente ser consolidada. |
+| Componentes UI Legados | `design-tokens` | 🔄 Parcial | Ainda útil, mas duplicado pelos docs CUCL. |
+| Componentes UI Legados | `react` | 🔄 Parcial | Apenas guia básico de início. |
+| Componentes UI Legados | `flutter` | 🔄 Parcial | Apenas guia básico de início. |
+| Componentes UI Legados | `cli` | 🔄 Parcial | Útil mas limitado. |
+| Componentes UI Legados | `components` | 🔄 Parcial | Referência legada que se sobrepõe a `cucl/components`. |
+| Espelho PT | `pt/index` | ✅ Completo | A página de entrada existe. |
+| Espelho PT | `pt/user-guide/*` | ✅ Completo | O espelho principal do guia do utilizador existe. |
+| Espelho PT | `pt/backend/*` | 🔄 Parcial | O espelho backend existe, mas as atualizações recentes dos endpoints ainda não estão totalmente espelhadas. |
+| Espelho PT | `pt/mobile/*` | ✅ Completo | A secção mobile principal está espelhada. |
+| Espelho PT | `pt/cucl/*` | 🔄 Parcial | As páginas principais existem, mas a referência de componentes está desatualizada face ao EN. |
+| Espelho PT | `pt/contributing/*` | 🔄 Parcial | O guia existe, mas a paridade do roteiro está em falta. |
+| DE | `de/index` | 🔄 Parcial | Apenas a página de entrada existe. |
+| ES | `es/index` | 🔄 Parcial | Apenas a página de entrada existe. |
+| FR | `fr/index` | 🔄 Parcial | Apenas a página de entrada existe. |
+| Planeado | `pt/backend/endpoints/image-generation` | ❌ Em falta | Espelho português para a nova página de geração de imagens. |
+| Planeado | `pt/backend/endpoints/ai-chat` atualização | ❌ Em falta | Precisa do esquema de pedido/resposta corrigido e da lista de ferramentas. |
+| Planeado | `pt/backend/endpoints/recipes` atualização | ❌ Em falta | Precisa da secção de geração de receitas com IA. |
+| Planeado | `pt/contributing/docs-roadmap` | ❌ Em falta | Paridade do roteiro em português. |
+| Planeado | `mobile/demo-mode` | ❌ Em falta | O modo de demonstração merece a sua própria página ou subsecção. |
+| Planeado | `backend/browse-proxy` | ❌ Em falta | Poderia ser separado numa página dedicada ao proxy da App API. |
+| Planeado | `architecture/deployment` | ❌ Em falta | As relações entre repositórios estão cobertas, mas a topologia de deployment não. |
+
+## Níveis de prioridade
+
+### P0 — Escrever a seguir
+
+- Paridade portuguesa para as páginas de endpoints backend em inglês atualizadas
+- Espelho português para `contributing/docs-roadmap`
+- Página em inglês para o modo de demonstração mobile e `MockApiInterceptor`
+
+### P1 — Seguimentos de alto valor
