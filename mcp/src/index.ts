@@ -22,6 +22,10 @@ type Locale = (typeof LOCALES)[number];
 // Helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * Recursively walks a directory and collects all `.mdx` file paths.
+ * @returns Array of absolute file paths to `.mdx` files found.
+ */
 async function walkMdx(dir: string): Promise<string[]> {
   const results: string[] = [];
   try {
@@ -40,6 +44,10 @@ async function walkMdx(dir: string): Promise<string[]> {
   return results;
 }
 
+/**
+ * Parses YAML frontmatter from an MDX file's content string.
+ * @returns Object with optional `title`, `description`, and the remaining `body`.
+ */
 function extractFrontmatter(content: string): { title?: string; description?: string; body: string } {
   const match = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
   if (!match) return { body: content };
@@ -51,6 +59,10 @@ function extractFrontmatter(content: string): { title?: string; description?: st
   return { title: meta.title, description: meta.description, body: match[2] };
 }
 
+/**
+ * Scores a document's content against a search query by counting term matches.
+ * @returns Integer score — number of query terms found in the content.
+ */
 function simpleSearch(content: string, query: string): number {
   const lower = content.toLowerCase();
   const terms = query.toLowerCase().split(/\s+/);
@@ -135,6 +147,7 @@ server.resource(
 
 // --- Tools ---
 
+/** Full-text search across all MDX docs pages; returns scored excerpts ordered by relevance. */
 server.tool(
   "search_docs",
   "Full-text search across all documentation pages",
@@ -175,6 +188,7 @@ server.tool(
   }
 );
 
+/** Retrieves the raw MDX content of a single documentation page by locale and path. */
 server.tool(
   "get_page",
   "Retrieve a specific documentation page by path",
@@ -194,6 +208,7 @@ server.tool(
   }
 );
 
+/** Lists all documentation sections (top-level directories) and their contained page slugs. */
 server.tool(
   "list_sections",
   "List all documentation sections and their pages",
@@ -221,6 +236,7 @@ server.tool(
   }
 );
 
+/** Reports translation coverage (pages + UI strings) for a given locale against the English source. */
 server.tool(
   "check_translations",
   "Check translation coverage for a locale",
@@ -292,6 +308,7 @@ server.tool(
 // New tools: list_endpoints, get_design_tokens, get_project_context
 // ---------------------------------------------------------------------------
 
+/** Lists all Cookest API endpoints from `API_ROUTES.json`; supports filtering by method, tier, and path. */
 server.tool(
   "list_endpoints",
   "List all Cookest API endpoints. Filter by method, auth tier (free/pro/admin), or path substring.",
@@ -339,6 +356,7 @@ server.tool(
   }
 );
 
+/** Returns Cookest design tokens (colors, typography, spacing, or effects) from the component library. */
 server.tool(
   "get_design_tokens",
   "Return Cookest design tokens (colors, typography, spacing, effects) from the component library source.",
@@ -378,6 +396,7 @@ server.tool(
   }
 );
 
+/** Returns a full structured snapshot of the Cookest project: repos, DB tables, API counts, and token summary. */
 server.tool(
   "get_project_context",
   "Return a complete structured summary of the Cookest project: repositories, API surface, design tokens snapshot, and database tables.",
@@ -436,6 +455,10 @@ server.tool(
 // Vault tools (Obsidian memory)
 // ---------------------------------------------------------------------------
 
+/**
+ * Recursively walks the vault directory and collects all `.md` note paths.
+ * @returns Array of absolute paths to markdown notes, excluding hidden files.
+ */
 async function walkVault(dir: string): Promise<string[]> {
   const results: string[] = [];
   if (!existsSync(dir)) return results;
@@ -449,6 +472,7 @@ async function walkVault(dir: string): Promise<string[]> {
   return results;
 }
 
+/** Reads a note from the project memory vault by its relative path. */
 server.tool(
   "vault_read",
   "Read a note from the Cookest project memory vault (Obsidian). Use 'Agents/context.md' at session start.",
@@ -463,6 +487,7 @@ server.tool(
   }
 );
 
+/** Creates or overwrites a note in the project memory vault at the given path. */
 server.tool(
   "vault_write",
   "Create or overwrite a note in the Cookest project memory vault. Always update Changes/changelog.md and Sessions/<date>-<topic>.md after significant work.",
@@ -478,6 +503,7 @@ server.tool(
   }
 );
 
+/** Full-text searches all vault notes for a query string, returning matched excerpts. */
 server.tool(
   "vault_search",
   "Full-text search across all notes in the Cookest project memory vault.",
@@ -503,6 +529,7 @@ server.tool(
   }
 );
 
+/** Appends text to an existing vault note without overwriting; required for all log files. */
 server.tool(
   "vault_append",
   "Append text to an existing vault note without overwriting it. REQUIRED for all log files: Errors/error-log.md, Learnings/learning-log.md, Changes/changelog.md. NEVER use vault_write for those.",
@@ -522,6 +549,7 @@ server.tool(
   }
 );
 
+/** Lists all vault note paths, optionally scoped to a folder. */
 server.tool(
   "vault_list",
   "List all notes in the Cookest project memory vault, optionally filtered by folder.",
@@ -538,6 +566,9 @@ server.tool(
 // Start
 // ---------------------------------------------------------------------------
 
+/**
+ * Bootstraps and starts the Cookest Docs MCP server over the stdio transport.
+ */
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
