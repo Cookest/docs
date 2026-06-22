@@ -1,0 +1,568 @@
+---
+title: Self-Hosting Guide
+description: Deploy and run Cookest completely on your own server using open-source tools, local AI, and custom datasets.
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+# Self-Hosting Cookest
+
+Cookest is built to be fully self-hostable. By running it on your own hardware you keep complete ownership of your data, use local AI models (Ollama) for meal planning and receipt scanning, and unlock all Pro features without a Stripe subscription.
+
+<Callout type="info">
+Looking for Proxmox VE / LXC instructions? See the dedicated **[Proxmox LXC Guide](./self-hosting-proxmox-lxc)**.
+</Callout>
+
+---
+
+## Architecture Overview
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                      Your Network                        │
+│                                                          │
+│   Flutter App / Web  ──► Nginx / Caddy (reverse proxy)  │
+│   Cookest Admin      ──►  :80 / :443                    │
+│                              │                           │
+│                    ┌─────────┴─────────┐                 │
+│                    │                   │                 │
+│               app-api :8080    admin :3000               │
+│                    │                                     │
+│               food-api :8081                             │
+│                    │                                     │
+│         ┌──────────┴──────────┐                          │
+│         │                     │                          │
+│  app-db (pgvector:16)  food-db (postgres:16)             │
+│         │                                                │
+│    Ollama :11434 (optional, can be on host)              │
+└──────────────────────────────────────────────────────────┘
+```
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| `app-api` | 8080 | Auth, meal plans, shopping lists, AI chat, subscriptions |
+| `food-api` | 8081 | Recipe catalog, ingredient DB, barcode lookups, import |
+| `app-db` | 5433 | User data (pgvector-enabled PostgreSQL 16) |
+| `food-db` | 5432 | Food/recipe data (PostgreSQL 16) |
+| `cookest-admin` | 3000 | Admin dashboard (Next.js) |
+| `ollama` | 11434 | Local LLM + Vision inference (optional) |
+
+---
+
+## Prerequisites
+
+| Tier | CPU | RAM | Disk | Use case |
+|------|-----|-----|------|----------|
+| **Minimal** | 2 vCPU | 4 GB | 20 GB | No AI features |
+| **Standard** | 4 vCPU | 8 GB | 40 GB | AI on a separate host |
+| **Full AI** | 8+ vCPU | 32 GB | 80 GB | Ollama running alongside |
+
+**Software requirements:**
+- Linux (Ubuntu 22.04+ recommended) or macOS
+- Docker Engine 24.0+ and Docker Compose v2.20+
+- `openssl` (for generating secrets)
+
+---
+
+## Step-by-Step Deployment
+
+<Steps>
+
+### Create the directory structure
+
+```bash
+mkdir -p cookest/{app-db,food-db,pdfs,imports,ollama}
+cd cookest
+```
+
+Put any recipe/ingredient CSV or JSON datasets into `./imports/`. The container maps this to `/data/imports`.
+
+### Generate secrets
+
+```bash
+# JWT signing key — paste into .env below
+openssl rand -hex 32
+```
+
+### Create the `.env` file
+
+```ini
+# ─── SYSTEM ──────────────────────────────────────────────
+SELF_HOSTED=true
+
+# ─── SECURITY ────────────────────────────────────────────
+# Paste the output of: openssl rand -hex 32
+JWT_SECRET=<your-64-char-hex-secret>
+
+# ─── DATA SOURCES ────────────────────────────────────────
+# local   → use only local PostgreSQL (no external APIs)
+# hybrid  → query local first, fall back to FatSecret if you have keys
+# fatsecret → use FatSecret exclusively (requires FS_CLIENT_ID / FS_CLIENT_SECRET)
+FOOD_DATA_SOURCE=local
+
+# Optional: FatSecret API keys (only needed for hybrid/fatsecret mode)
+# FS_CLIENT_ID=
+# FS_CLIENT_SECRET=
+
+# ─── NETWORKING ──────────────────────────────────────────
+# Set this to your domain or LAN address so CORS is correct
+CORS_ORIGIN=http://localhost:3000
+
+# ─── LOCAL AI (OLLAMA) ───────────────────────────────────
+# If Ollama runs in a separate container (docker-compose handles it below):
+OLLAMA_URL=http://ollama:11434
+# If Ollama runs on the Docker host machine:
+# OLLAMA_URL=http://host.docker.internal:11434
+OLLAMA_MODEL=llama3.1:8b
+OLLAMA_VISION_MODEL=qwen2.5vl:7b
+# Increase if receipt scanning times out on slow hardware
+OLLAMA_VISION_TIMEOUT_SECS=120
+
+# ─── OPTIONAL FEATURES ───────────────────────────────────
+# RESEND_API_KEY=          # email delivery (registration confirmations)
+# RESEND_FROM_EMAIL=noreply@yourdomain.com
+# IMAGE_GEN_URL=           # AI image generation microservice
+```
+
+### Create `docker-compose.yml`
+
+```yaml
+name: cookest
+
+services:
+  # ── Databases ────────────────────────────────────────────
+  app-db:
+    image: pgvector/pgvector:pg16
+    container_name: cookest_app_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cookest_app
+    volumes:
+      - ./app-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cookest_app"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  food-db:
+    image: postgres:16-alpine
+    container_name: cookest_food_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cookest_food
+    volumes:
+      - ./food-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cookest_food"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Food API ──────────────────────────────────────────────
+  food-api:
+    image: ghcr.io/cookest/food-api:latest
+    container_name: cookest_food_api
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      FOOD_DATABASE_URL: postgresql://postgres:postgres@food-db:5432/cookest_food
+      FOOD_HOST: 0.0.0.0
+      FOOD_PORT: 8081
+      FOOD_CORS_ORIGIN: "*"
+      FOOD_DATA_SOURCE: ${FOOD_DATA_SOURCE:-local}
+    volumes:
+      - ./imports:/data/imports:ro
+    depends_on:
+      food-db:
+        condition: service_healthy
+
+  # ── App API ───────────────────────────────────────────────
+  app-api:
+    image: ghcr.io/cookest/app-api:latest
+    container_name: cookest_app_api
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      APP_DATABASE_URL: postgresql://postgres:postgres@app-db:5432/cookest_app
+      HOST: 0.0.0.0
+      PORT: 8080
+      FOOD_API_URL: http://food-api:8081
+      PDF_UPLOAD_DIR: /data/pdfs
+      SELF_HOSTED: "true"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./pdfs:/data/pdfs
+      - ./imports:/data/imports:ro
+    depends_on:
+      app-db:
+        condition: service_healthy
+      food-api:
+        condition: service_started
+
+  # ── Admin Panel ───────────────────────────────────────────
+  admin:
+    image: ghcr.io/cookest/admin:latest
+    container_name: cookest_admin
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_APP_API_URL: http://app-api:8080
+      APP_API_INTERNAL_URL: http://app-api:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - app-api
+
+  # ── Ollama (Local AI) ─────────────────────────────────────
+  # Remove this service if you run Ollama on the host or a separate machine
+  ollama:
+    image: ollama/ollama:latest
+    container_name: cookest_ollama
+    restart: unless-stopped
+    volumes:
+      - ./ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+    # Uncomment to enable NVIDIA GPU passthrough:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+```
+
+### Start the stack
+
+```bash
+docker compose up -d
+```
+
+Watch the logs until all services are healthy:
+
+```bash
+docker compose logs -f --tail=50
+```
+
+### Pull AI models (if using Ollama)
+
+```bash
+# Wait for Ollama to start, then pull models
+docker compose exec ollama ollama pull llama3.1:8b
+docker compose exec ollama ollama pull qwen2.5vl:7b
+```
+
+Or use the provided tuning script for bare-metal Ollama:
+
+```bash
+chmod +x deploy/setup-ollama.sh
+sudo ./deploy/setup-ollama.sh
+```
+
+</Steps>
+
+---
+
+## Environment Variable Reference
+
+### `food-api` variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FOOD_DATABASE_URL` | required | PostgreSQL connection string |
+| `FOOD_HOST` | `0.0.0.0` | Bind address |
+| `FOOD_PORT` | `8081` | HTTP port |
+| `FOOD_CORS_ORIGIN` | `*` | Allowed CORS origin |
+| `FOOD_DATA_SOURCE` | auto | `local`, `fatsecret`, or `hybrid` |
+| `FS_CLIENT_ID` | optional | FatSecret OAuth client ID |
+| `FS_CLIENT_SECRET` | optional | FatSecret OAuth client secret |
+
+**`FOOD_DATA_SOURCE` logic:**
+- If both `FS_CLIENT_ID` and `FS_CLIENT_SECRET` are set and no explicit value is given → **`hybrid`** (local first, FatSecret fallback)
+- If FS credentials are absent and no value is given → **`local`**
+- `fatsecret` or `hybrid` with missing credentials → startup error
+
+### `app-api` variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `APP_DATABASE_URL` | required | PostgreSQL connection string |
+| `JWT_SECRET` | required | Min 32 chars; sign with `openssl rand -hex 32` |
+| `SELF_HOSTED` | `false` | `true` unlocks all Pro features & registers users as Pro |
+| `HOST` | `127.0.0.1` | Bind address |
+| `PORT` | `8080` | HTTP port |
+| `CORS_ORIGIN` | `http://localhost:3000` | Allowed CORS origin |
+| `JWT_ACCESS_EXPIRY_SECONDS` | `900` | Access token TTL (15 min) |
+| `JWT_REFRESH_EXPIRY_SECONDS` | `604800` | Refresh token TTL (7 days) |
+| `OLLAMA_URL` | `http://localhost:11434` | Ollama endpoint |
+| `OLLAMA_MODEL` | `llama3.1:8b` | Chat / recipe generation model |
+| `OLLAMA_VISION_MODEL` | `qwen2.5vl:7b` | Receipt / barcode OCR model |
+| `OLLAMA_VISION_TIMEOUT_SECS` | `120` | Receipt scan timeout (increase for CPU) |
+| `OLLAMA_EMBED_MODEL` | `nomic-embed-text` | RAG embeddings model |
+| `FOOD_API_URL` | `http://localhost:8081` | Food API endpoint (internal) |
+| `FOOD_API_KEY` | optional | API key for food-api write endpoints |
+| `PDF_UPLOAD_DIR` | `./cookest_pdfs` | Writable path for PDF uploads |
+| `RESEND_API_KEY` | optional | Email delivery (Resend) |
+| `RESEND_FROM_EMAIL` | `noreply@m.cookest.app` | Sender address |
+| `IMAGE_GEN_URL` | optional | AI image generation service URL |
+| `OVERPASS_URL` | OSM default | OpenStreetMap Overpass API for nearby stores |
+| `RAG_TOP_K` | `5` | Knowledge chunks retrieved per RAG query |
+| `STRIPE_WEBHOOK_SECRET` | optional | Stripe webhook secret (`whsec_...`) |
+
+<Callout type="warn">
+`SELF_HOSTED=true` grants all users Pro-tier access permanently. Do not expose the admin panel to the public internet without authentication if you set this flag.
+</Callout>
+
+---
+
+## Reverse Proxy Setup (Recommended)
+
+Running Cookest behind a reverse proxy lets you expose it on standard ports (80/443) with TLS, and keeps the APIs from being directly internet-facing.
+
+<Tabs items={['Nginx', 'Caddy']}>
+<Tab value="Nginx">
+
+**Install Nginx + Certbot:**
+
+```bash
+sudo apt install -y nginx certbot python3-certbot-nginx
+```
+
+**`/etc/nginx/sites-available/cookest`:**
+
+```nginx
+# Redirect HTTP to HTTPS
+server {
+    listen 80;
+    server_name cookest.yourdomain.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name cookest.yourdomain.com;
+
+    ssl_certificate     /etc/letsencrypt/live/cookest.yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/cookest.yourdomain.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+
+    # App API
+    location /api/ {
+        proxy_pass         http://127.0.0.1:8080;
+        proxy_set_header   Host $host;
+        proxy_set_header   X-Real-IP $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+        proxy_read_timeout 300s;    # allow long AI requests
+        client_max_body_size 50M;   # for PDF uploads
+    }
+
+    # Health check passthrough
+    location = /health {
+        proxy_pass http://127.0.0.1:8080;
+    }
+
+    # Admin panel (restrict to LAN or add basic auth)
+    location /admin/ {
+        # allow 192.168.0.0/16;
+        # deny all;
+        proxy_pass       http://127.0.0.1:3000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+
+**Enable and obtain certificate:**
+
+```bash
+sudo ln -s /etc/nginx/sites-available/cookest /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot --nginx -d cookest.yourdomain.com
+```
+
+</Tab>
+<Tab value="Caddy">
+
+**Install Caddy:**
+
+```bash
+sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+sudo apt update && sudo apt install caddy
+```
+
+**`/etc/caddy/Caddyfile`:**
+
+```caddy
+cookest.yourdomain.com {
+    # App API
+    handle /api/* {
+        reverse_proxy localhost:8080 {
+            header_up X-Real-IP {remote_host}
+        }
+    }
+
+    handle /health {
+        reverse_proxy localhost:8080
+    }
+
+    # Admin panel
+    handle /admin/* {
+        uri strip_prefix /admin
+        reverse_proxy localhost:3000
+    }
+}
+```
+
+Caddy automatically provisions and renews Let's Encrypt certificates. Reload:
+
+```bash
+sudo systemctl reload caddy
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Connecting the Mobile App
+
+The Flutter app detects a custom server via the login screen:
+
+1. Open the app and tap **Connect to a custom server** on the login screen.
+2. Enter your server address:
+   - LAN: `http://192.168.1.15:8080`
+   - Domain: `https://cookest.yourdomain.com`
+3. Tap **Test & Connect** — the app pings `/health` and persists the URL on success.
+4. All subsequent requests use your private server.
+
+The URL is stored in `SharedPreferences` and automatically loaded on next app launch.
+
+---
+
+## Importing Recipe Data
+
+A fresh deployment has empty food databases. Use the admin panel's built-in importer or the ETL pipeline.
+
+### Admin Panel Importer (recommended)
+
+1. Copy CSV or JSON recipe files into `./imports/` on the host.
+2. Open the admin panel at `http://<host>:3000`.
+3. Navigate to **Database → Dataset Import**.
+4. Enter `/data/imports` as the folder path and click **Scan Folder**.
+5. Select a file, choose the format, and click **Import Dataset**.
+
+The importer automatically:
+- Calculates missing `prep_time_min` / `cook_time_min` from step text using the time estimator
+- Classifies recipes without a `cuisine` field using the ingredient-keyword region classifier
+- Skips duplicate names and reports the import count
+
+### ETL Pipeline (bulk)
+
+```bash
+docker compose exec etl python main.py
+```
+
+The ETL pipeline fetches from USDA FoodData Central and TheMealDB and loads directly into `food-db`.
+
+---
+
+## Updating
+
+```bash
+# Pull latest images
+docker compose pull
+
+# Restart services with zero downtime (rolling)
+docker compose up -d --no-deps --build app-api food-api admin
+
+# Or restart everything
+docker compose down && docker compose up -d
+```
+
+Database migrations run automatically on startup via embedded `IF NOT EXISTS` SQL — no manual migration steps.
+
+---
+
+## Backup & Restore
+
+```bash
+# Backup both databases
+docker compose exec app-db pg_dump -U postgres cookest_app | gzip > backup_app_$(date +%F).sql.gz
+docker compose exec food-db pg_dump -U postgres cookest_food | gzip > backup_food_$(date +%F).sql.gz
+
+# Restore
+gunzip -c backup_app_2025-01-01.sql.gz | docker compose exec -T app-db psql -U postgres cookest_app
+gunzip -c backup_food_2025-01-01.sql.gz | docker compose exec -T food-db psql -U postgres cookest_food
+```
+
+Add a cron job to automate daily backups:
+
+```bash
+crontab -e
+# Add:
+0 3 * * * cd /opt/cookest && docker compose exec app-db pg_dump -U postgres cookest_app | gzip > backups/app_$(date +\%F).sql.gz
+```
+
+---
+
+## Troubleshooting
+
+**Services fail to start / can't connect to DB:**
+
+```bash
+docker compose ps
+docker compose logs app-api --tail=50
+docker compose logs food-db --tail=20
+```
+
+**JWT_SECRET error on startup:**
+
+The secret must be at least 32 characters. Generate one:
+
+```bash
+openssl rand -hex 32
+```
+
+**`FOOD_DATA_SOURCE=fatsecret` but no results:**
+
+Verify credentials are set and not empty:
+
+```bash
+docker compose exec food-api env | grep FS_
+```
+
+**Receipt scanning times out:**
+
+Increase `OLLAMA_VISION_TIMEOUT_SECS` to `240` or higher. On CPU-only hardware, the 7B vision model takes 30–90 seconds per image.
+
+**Admin panel shows "Unauthorized":**
+
+Make sure you are logged in with an account that has `is_admin = true`. Set this via SQL:
+
+```sql
+UPDATE users SET is_admin = true WHERE email = 'you@example.com';
+```
+
+Connect via: `docker compose exec app-db psql -U postgres cookest_app`
+
+**Barcode scan returns "not found" even for known products:**
+
+With `FOOD_DATA_SOURCE=local`, the database must be pre-populated. Switch to `hybrid` to enable live OpenFoodFacts fallback:
+
+```bash
+# In .env
+FOOD_DATA_SOURCE=hybrid
+docker compose up -d app-api food-api
+```
