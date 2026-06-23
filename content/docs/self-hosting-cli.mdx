@@ -1,0 +1,143 @@
+---
+title: Self-Hosting with Cookest CLI
+description: Deploy and manage your self-hosted Cookest instance interactively using the custom rust command-line tool.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+# Self-Hosting with Cookest CLI
+
+The `cookest` command-line interface (CLI) is a Rust-based tool designed to automate the deployment, configuration, and management of a self-hosted Cookest stack. It packages all manual setup steps into an interactive wizard.
+
+<Callout type="info">
+The CLI wraps Docker Compose commands under the hood. You must have Docker running on your system to use the CLI.
+</Callout>
+
+---
+
+## Installation
+
+You can run the Cookest CLI either by compiling it from source or running it as a container.
+
+### Building from Source
+
+If you have the Rust toolchain installed, compile the binary directly:
+
+```bash
+# Clone the repository and navigate to the CLI directory
+cd cookest-cli
+cargo build --release
+```
+
+The compiled binary will be placed at `target/release/cookest`. Copy it to a directory in your system `$PATH` for easy access:
+
+```bash
+sudo cp target/release/cookest /usr/local/bin/
+```
+
+### Running with Docker
+
+Alternatively, build and execute the CLI using Docker:
+
+```bash
+docker build -t cookest-cli .
+```
+
+To run commands, mount your Docker socket and the target configuration directory:
+
+```bash
+docker run --rm -it \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v $(pwd):/work \
+  -w /work \
+  cookest-cli init
+```
+
+---
+
+## Step-by-Step Initialization
+
+<Steps>
+
+### Run the Init Command
+
+Create a new directory for your self-hosted instance and run the initialization wizard:
+
+```bash
+mkdir -p my-cookest-instance
+cd my-cookest-instance
+cookest init
+```
+
+### Complete the Wizard Prompts
+
+The CLI will check for Docker prerequisites and prompt you to configure:
+1. **Instance Name**: Used to prefix your container names (default: `cookest`).
+2. **Domain**: Domain name for routing (e.g. `localhost` or `cookest.example.com`).
+3. **HTTPS**: Toggles automated SSL provisioning via Let's Encrypt using Caddy.
+4. **Admin Account**: Email and password for the initial admin login.
+5. **AI Features**: Selects Ollama model combinations for chat and recipe/receipt processing.
+6. **Optional Services**: Enables AI image generation, Stripe payments, and the PDF supermarket promotions parser.
+
+### Verify Generated Configs
+
+Once completed, the CLI creates the following files in your active folder:
+* `cookest.toml`: The master configuration file.
+* `docker-compose.yml`: Standard services setup.
+* `.env`: Environment variables with auto-generated secure secrets (like `JWT_SECRET`).
+* `Caddyfile`: (If HTTPS enabled) Caddy reverse proxy routing.
+* `data/` and `backups/`: Folders for databases, PDFs, and database snapshots.
+
+</Steps>
+
+---
+
+## Lifecycle Commands
+
+Once initialized, manage the Cookest stack using these commands:
+
+| Command | Action | Description |
+|---|---|---|
+| `cookest up` | Start Services | Starts all backend, database, and admin dashboard containers |
+| `cookest down` | Stop Services | Stops running containers and releases resources |
+| `cookest status` | Check Health | Displays system statuses, active ports, and database connectivity |
+| `cookest logs` | Tail Logs | Outputs and tracks log streams from active containers |
+| `cookest update` | Upgrade Stack | Pulls the newest images from GHCR and performs a rolling restart |
+| `cookest config` | Modify Settings | Inspects or edits keys in the `cookest.toml` configuration |
+
+### Modifying Configuration
+
+You can inspect or write variables directly to the `cookest.toml` configuration:
+
+```bash
+# Read a config value
+cookest config network.admin_port
+
+# Disable AI features
+cookest config ai.enabled false
+```
+
+After modifying settings, restart your services using `cookest down` and `cookest up` to apply changes.
+
+---
+
+## Backing Up and Restoring
+
+The CLI manages automated database operations for database recovery.
+
+### Backing Up
+
+Run the backup command to write gzipped SQL dumps of the database volumes to `./backups/`:
+
+```bash
+cookest backup
+```
+
+### Restoring
+
+To restore your database volumes from a snapshot, specify the backup file:
+
+```bash
+cookest restore backups/backup_app_2026-06-23.sql.gz
+```

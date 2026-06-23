@@ -1,0 +1,88 @@
+---
+title: Admin Panel Guide
+description: Manage users, import datasets, monitor system performance, and diagnose AI features using the Cookest admin dashboard.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Admin Panel Guide
+
+The Cookest Admin Panel is a Next.js web application that provides a unified dashboard for system administrators. It allows you to oversee system performance, manage user registries, run dataset imports, and inspect AI service diagnostics.
+
+<Callout type="warn">
+If you run Cookest with the `SELF_HOSTED=true` flag, any newly registered user receives Pro features. Securing access to the Admin Panel is critical.
+</Callout>
+
+---
+
+## Core Features
+
+The dashboard is structured into dedicated views:
+
+### Dashboard Summary
+Provides high-level cards showing the total number of registered users, recipe catalog size, database connection health, and current memory and CPU load of the Docker host.
+
+### User Management
+Enables administrators to:
+* Search the user database by name or email.
+* Toggle administrative status (`is_admin`).
+* Overrule subscription levels (e.g. manually granting Pro licenses).
+
+### Database Imports
+Contains the recipe and ingredient CSV/JSON parser:
+* **Directory Scanner**: Scans `/data/imports` inside the container for valid files.
+* **Auto-estimation**: Runs the execution time estimator if prep/cook times are missing.
+* **Keyword Classifier**: Categorizes recipes into culinary regions based on ingredient keywords.
+
+### System & AI Diagnostics
+Provides real-time inspection for troubleshooting:
+* **Docker Status**: Lists CPU and RAM usage for all running Cookest containers.
+* **Ollama Connection**: Confirms if the LLM backend is accessible and lists loaded model families (e.g., `llama3.1`, `qwen2.5vl`).
+* **API logs**: Streams logs from `app-api` and `food-api` directly to the dashboard interface.
+
+---
+
+## Configuration Variables
+
+The Admin Panel container accepts two core parameters:
+
+| Variable | Default | Description |
+|---|---|---|
+| `NEXT_PUBLIC_APP_API_URL` | `http://localhost:8080` | Endpoint address used by browser-side client connections. |
+| `APP_API_INTERNAL_URL` | `http://localhost:8080` | Endpoint address used by server-side rendering (SSR) functions. |
+
+---
+
+## Securing the Dashboard
+
+By default, the Admin Panel runs on port `3000`. To prevent unauthorized access, restrict exposure at the reverse proxy layer.
+
+### Nginx IP Restriction
+
+Add IP restrictions to your server blocks to limit access to your Local Area Network (LAN):
+
+```nginx
+# /etc/nginx/sites-available/cookest
+location /admin/ {
+    allow 192.168.1.0/24;  # Replace with your LAN subnet
+    deny all;
+    
+    proxy_pass http://127.0.0.1:3000/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+}
+```
+
+### Basic Authentication
+
+Alternatively, generate a `.htpasswd` file and prompt for credentials before routing:
+
+```nginx
+location /admin/ {
+    auth_basic "Administrators Only";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+    
+    proxy_pass http://127.0.0.1:3000/;
+    proxy_set_header Host $host;
+}
+```
