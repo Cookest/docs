@@ -1,0 +1,143 @@
+---
+title: Auto-Alojamento com CLI do Cookest
+description: Aloje e gira a sua instância do Cookest de forma interativa utilizando a ferramenta de linha de comandos personalizada em Rust.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+# Auto-Alojamento com CLI do Cookest
+
+A interface de linha de comandos (CLI) `cookest` é uma ferramenta escrita em Rust concebida para automatizar a implementação, configuração e gestão de uma infraestrutura Cookest auto-alojada. Reúne todos os passos de configuração manual num assistente interativo.
+
+<Callout type="info">
+A CLI executa comandos de Docker Compose internamente. É necessário ter o Docker a correr no seu sistema para utilizar a CLI.
+</Callout>
+
+---
+
+## Instalação
+
+Pode executar a CLI do Cookest compilando-a a partir do código fonte ou executando-a como um contentor.
+
+### Compilação a partir do Código Fonte
+
+Se tiver a ferramenta de desenvolvimento de Rust instalada, compile o binário diretamente:
+
+```bash
+# Clone o repositório e navegue para a diretoria da CLI
+cd cookest-cli
+cargo build --release
+```
+
+O binário compilado será colocado em `target/release/cookest`. Copie-o para uma diretoria no `$PATH` do seu sistema para facilitar o acesso:
+
+```bash
+sudo cp target/release/cookest /usr/local/bin/
+```
+
+### Execução com o Docker
+
+Alternativamente, compile e execute a CLI utilizando o Docker:
+
+```bash
+docker build -t cookest-cli .
+```
+
+Para executar comandos, monte o socket do Docker e a diretoria de configuração de destino:
+
+```bash
+docker run --rm -it \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v $(pwd):/work \
+  -w /work \
+  cookest-cli init
+```
+
+---
+
+## Inicialização Passo a Passo
+
+<Steps>
+
+### Executar o Comando de Inicialização
+
+Crie uma nova diretoria para a sua instância auto-alojada e execute o assistente de inicialização:
+
+```bash
+mkdir -p my-cookest-instance
+cd my-cookest-instance
+cookest init
+```
+
+### Responder às Perguntas do Assistente
+
+A CLI irá verificar os pré-requisitos do Docker e solicitar a configuração de:
+1. **Nome da Instância (Instance Name)**: Utilizado como prefixo dos nomes dos seus contentores (padrão: `cookest`).
+2. **Domínio (Domain)**: Nome de domínio para encaminhamento (ex: `localhost` ou `cookest.example.com`).
+3. **HTTPS**: Ativa o aprovisionamento automático de SSL via Let's Encrypt através do Caddy.
+4. **Conta de Administrador (Admin Account)**: Endereço de email e palavra-passe para o primeiro acesso administrativo.
+5. **Funcionalidades de IA (AI Features)**: Seleciona as combinações de modelos do Ollama para chat e processamento de receitas/faturas.
+6. **Serviços Opcionais (Optional Services)**: Ativa a geração de imagens por IA, pagamentos Stripe e o analisador PDF de promoções de supermercados.
+
+### Verificar Ficheiros Gerados
+
+Assim que o assistente terminar, a CLI cria os seguintes ficheiros na sua pasta atual:
+* `cookest.toml`: O ficheiro principal de configuração.
+* `docker-compose.yml`: Definição padrão dos serviços.
+* `.env`: Variáveis de ambiente com chaves de segurança geradas automaticamente (como `JWT_SECRET`).
+* `Caddyfile`: (Se o HTTPS estiver ativo) Encaminhamento do proxy inverso Caddy.
+* `data/` e `backups/`: Pastas para base de dados, PDFs e cópias de segurança da base de dados.
+
+</Steps>
+
+---
+
+## Comandos de Ciclo de Vida
+
+Após a inicialização, gira a infraestrutura do Cookest através dos seguintes comandos:
+
+| Comando | Ação | Descrição |
+|---|---|---|
+| `cookest up` | Iniciar Serviços | Inicia todos os contentores do backend, bases de dados e painel de administração |
+| `cookest down` | Parar Serviços | Para os contentores em execução e liberta os recursos |
+| `cookest status` | Verificar Estado | Mostra o estado do sistema, portas ativas e conectividade da base de dados |
+| `cookest logs` | Ver Registos | Apresenta os registos (logs) em tempo real dos contentores ativos |
+| `cookest update` | Atualizar Infraestrutura | Descarrega as imagens mais recentes do GHCR e reinicia os contentores |
+| `cookest config` | Alterar Definições | Inspeciona ou edita chaves no ficheiro de configuração `cookest.toml` |
+
+### Alterar a Configuração
+
+Pode inspecionar ou alterar variáveis diretamente no ficheiro `cookest.toml`:
+
+```bash
+# Ler um valor da configuração
+cookest config network.admin_port
+
+# Desativar as funcionalidades de IA
+cookest config ai.enabled false
+```
+
+Depois de modificar as definições, reinicie os seus serviços utilizando `cookest down` e `cookest up` para aplicar as alterações.
+
+---
+
+## Cópia de Segurança e Restauro
+
+A CLI permite gerir operações de cópia de segurança e restauro da base de dados.
+
+### Criar Cópia de Segurança (Backup)
+
+Execute o comando de backup para escrever cópias compactadas SQL das bases de dados na diretoria `./backups/`:
+
+```bash
+cookest backup
+```
+
+### Restaurar (Restore)
+
+Para restaurar as suas bases de dados a partir de um ficheiro de cópia de segurança, especifique o ficheiro de origem:
+
+```bash
+cookest restore backups/backup_app_2026-06-23.sql.gz
+```

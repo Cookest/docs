@@ -1,0 +1,88 @@
+---
+title: Guia do Painel de Administração
+description: Gira utilizadores, importe conjuntos de dados, monitorize o desempenho do sistema e diagnostique funcionalidades de IA utilizando o painel de administração do Cookest.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Guia do Painel de Administração
+
+O Painel de Administração do Cookest é uma aplicação web em Next.js que disponibiliza um painel unificado para administradores do sistema. Permite supervisionar o desempenho do sistema, gerir registos de utilizadores, executar importações de conjuntos de dados e inspecionar diagnósticos dos serviços de IA.
+
+<Callout type="warn">
+Se executar o Cookest com a variável `SELF_HOSTED=true`, qualquer novo utilizador registado terá acesso automático às funcionalidades Pro. É crítico garantir a segurança de acesso a este painel.
+</Callout>
+
+---
+
+## Funcionalidades Principais
+
+O painel de administração está estruturado em vistas dedicadas:
+
+### Resumo do Painel
+Apresenta cartões de informação geral com o número total de utilizadores registados, o tamanho do catálogo de receitas, a integridade da ligação às bases de dados e a utilização atual de CPU e memória do sistema anfitrião de Docker.
+
+### Gestão de Utilizadores
+Permite aos administradores:
+* Procurar utilizadores na base de dados por nome ou email.
+* Alterar o estatuto de administrador (`is_admin`).
+* Substituir manualmente níveis de subscrição (ex: conceder manualmente licenças Pro).
+
+### Importação de Bases de Dados
+Contém o analisador de receitas e ingredientes em formatos CSV/JSON:
+* **Leitor de Diretoria**: Procura ficheiros válidos na diretoria `/data/imports` dentro do contentor.
+* **Estimativa Automática**: Calcula os tempos de preparação e cozedura em falta com base no texto dos passos da receita.
+* **Classificador por Palavras-Chave**: Categoriza receitas em regiões culinárias com base nos ingredientes detetados.
+
+### Diagnósticos do Sistema e IA
+Disponibiliza informações detalhadas em tempo real para resolução de problemas:
+* **Estado do Docker**: Apresenta a utilização de CPU e memória RAM de todos os contentores em execução do Cookest.
+* **Ligação ao Ollama**: Confirma se o backend de modelos de linguagem está acessível e lista os modelos disponíveis (ex: `llama3.1`, `qwen2.5vl`).
+* **Registos da API (Logs)**: Transmite os registos de eventos do `app-api` e `food-api` diretamente para a interface do painel.
+
+---
+
+## Variáveis de Configuração
+
+O contentor do Painel de Administração aceita dois parâmetros principais:
+
+| Variável | Padrão | Descrição |
+|---|---|---|
+| `NEXT_PUBLIC_APP_API_URL` | `http://localhost:8080` | Endereço do endpoint utilizado pelas ligações dos clientes a partir do navegador. |
+| `APP_API_INTERNAL_URL` | `http://localhost:8080` | Endereço do endpoint utilizado pelas funções de renderização no servidor (SSR). |
+
+---
+
+## Proteger o Painel de Administração
+
+Por padrão, o painel de administração corre na porta `3000`. Para evitar acessos não autorizados, deve limitar a exposição do serviço na camada de proxy inverso.
+
+### Restrição por Endereço IP em Nginx
+
+Adicione regras de restrição de IP no bloco de configuração do seu servidor para limitar o acesso apenas à sua rede local (LAN):
+
+```nginx
+# /etc/nginx/sites-available/cookest
+location /admin/ {
+    allow 192.168.1.0/24;  # Substitua pelo intervalo da sua rede local
+    deny all;
+    
+    proxy_pass http://127.0.0.1:3000/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+}
+```
+
+### Autenticação Básica (Basic Auth)
+
+Alternativamente, crie um ficheiro `.htpasswd` e exija credenciais de acesso antes do encaminhamento de tráfego:
+
+```nginx
+location /admin/ {
+    auth_basic "Administrators Only";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+    
+    proxy_pass http://127.0.0.1:3000/;
+    proxy_set_header Host $host;
+}
+```

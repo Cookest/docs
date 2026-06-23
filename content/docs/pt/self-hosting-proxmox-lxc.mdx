@@ -1,0 +1,310 @@
+---
+title: Implementação em Proxmox VE / LXC
+description: Implemente o Cookest dentro de um Contentor Linux (LXC) no Proxmox VE — scripts automáticos e passo a passo manual.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+# Cookest em Proxmox VE (LXC)
+
+Os Contentores Linux (LXC) em Proxmox VE são ideais para o Cookest: iniciam em segundos, consomem 10-20% menos memória RAM do que uma máquina virtual completa e suportam snapshots ou migrações em tempo real. Este guia explica como criar um contentor e implementar o Cookest lá dentro, utilizando scripts automatizados ou comandos manuais.
+
+---
+
+## Dimensionamento do Contentor
+
+Escolha os recursos com base no seu caso de uso:
+
+| Nível | vCPUs | RAM | Disco | Inclui Ollama? |
+|------|-------|-----|------|-----------------|
+| **Mínimo** | 2 | 4 GB | 20 GB | Não (IA desativada) |
+| **Padrão** | 4 | 8 GB | 40 GB | Não (Ollama noutro servidor) |
+| **IA Completa (CPU)** | 8 | 32 GB | 80 GB | Sim (inferência em CPU) |
+| **IA Completa (GPU PT)** | 8 | 32 GB | 80 GB + GPU | Sim (passagem direta de GPU) |
+
+<Callout type="warn">
+A passagem direta (passthrough) de GPU para contentores LXC requer configurações específicas no anfitrião Proxmox e **só é suportada em contentores privilegiados**. Para configurações com GPU, corra o Ollama diretamente no anfitrião ou numa máquina virtual separada e aponte a variável `OLLAMA_URL` para o endereço correspondente.
+</Callout>
+
+---
+
+## Configuração Automatizada (Recomendado)
+
+Dois scripts tratam de todo o processo de instalação:
+
+| Script | Executado em | Finalidade |
+|--------|-------------|------------|
+| `deploy/pve-create-lxc.sh` | **Anfitrião Proxmox** | Cria e configura o contentor LXC |
+| `deploy/install-cookest.sh` | **Dentro do LXC** | Instala o Docker, o Cookest e um Nginx opcional |
+
+<Steps>
+
+### Executar o criador de contentores no anfitrião Proxmox
+
+```bash
+# Copie os scripts de deploy do cookest-backend para o seu anfitrião PVE
+scp -r cookest-backend/deploy/ root@pve-host:/tmp/cookest-deploy/
+
+# No anfitrião Proxmox
+cd /tmp/cookest-deploy
+chmod +x pve-create-lxc.sh
+bash pve-create-lxc.sh
+```
+
+O script irá solicitar interativamente:
+- ID do Contentor (CTID)
+- Nome do anfitrião (Hostname)
+- Nível de Recursos (Mínimo / Padrão / IA Completa)
+- Espaço de armazenamento (Storage pool)
+- Ponte de rede e IP (DHCP ou estático)
+- Palavra-passe de root
+
+O script cria o contentor, aplica as definições de compatibilidade para Docker, inicia o contentor e oferece-se para correr o instalador do Cookest automaticamente.
+
+### Executar o instalador dentro do LXC
+
+Se optar por não correr o instalador diretamente do script anterior, entre no contentor e execute-o manualmente:
+
+```bash
+# A partir do anfitrião PVE
+pct enter <CTID>
+
+# Agora dentro do LXC
+bash /tmp/install-cookest.sh
+```
+
+O instalador irá pedir o seu domínio/IP, gerar as chaves secretas, criar o ficheiro `docker-compose.yml`, descarregar as imagens e iniciar todos os serviços.
+
+### Verificar a instalação
+
+```bash
+# A partir do interior do LXC ou via ligação SSH
+docker compose -f /opt/cookest/docker-compose.yml ps
+curl http://localhost:8080/health
+```
+
+</Steps>
+
+---
+
+## Configuração Manual
+
+Se preferir manter o controlo total do processo, siga os passos abaixo.
+
+### 1. Descarregar o modelo (template) Ubuntu 22.04
+
+No anfitrião Proxmox:
+
+```bash
+# Listar modelos Ubuntu disponíveis
+pveam available | grep ubuntu-22.04
+
+# Descarregar (substitua pelo nome exato do modelo listado acima)
+pveam download local ubuntu-22.04-standard_22.04-1_amd64.tar.zst
+```
+
+### 2. Criar o contentor LXC
+
+```bash
+# Altere os valores conforme necessário
+CTID=200
+TEMPLATE="local:vztmpl/ubuntu-22.04-standard_22.04-1_amd64.tar.zst"
+STORAGE="local-lvm"
+HOSTNAME="cookest"
+CORES=4
+MEMORY=8192    # MB
+SWAP=2048      # MB
+DISK=40        # GB
+BRIDGE="vmbr0"
+
+pct create $CTID $TEMPLATE \
+  --hostname $HOSTNAME \
+  --cores $CORES \
+  --memory $MEMORY \
+  --swap $SWAP \
+  --rootfs ${STORAGE}:${DISK} \
+  --net0 name=eth0,bridge=${BRIDGE},firewall=1,ip=dhcp \
+  --unprivileged 1 \
+  --features nesting=1,keyctl=1 \
+  --ostype ubuntu \
+  --start 0
+```
+
+### 3. Aplicar configuração de compatibilidade com Docker
+
+O Docker exige algumas permissões adicionais para funcionar dentro de um contentor LXC não privilegiado. Adicione estas linhas à configuração do contentor **antes** de o iniciar:
+
+```bash
+# Adicionar ao ficheiro de configuração do LXC
+cat >> /etc/pve/lxc/${CTID}.conf <<'EOF'
+lxc.apparmor.profile: unconfined
+lxc.cgroup2.devices.allow: a
+lxc.cap.drop:
+EOF
+```
+
+<Callout type="info">
+Estas definições permitem que o driver de armazenamento `overlay2` do Docker e a gestão de cgroups funcionem no interior do contentor. São seguras para redes privadas de confiança. Para servidores expostos diretamente à internet, considere utilizar uma máquina virtual.
+</Callout>
+
+### 4. Iniciar o contentor
+
+```bash
+pct start $CTID
+
+# Aguarde que inicialize e aceda à consola
+pct enter $CTID
+```
+
+### 5. Instalar o Docker no interior do LXC
+
+```bash
+apt update && apt install -y ca-certificates curl gnupg
+
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+chmod a+r /etc/apt/keyrings/docker.gpg
+
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+  | tee /etc/apt/sources.list.d/docker.list
+
+apt update && apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+# Verificar funcionamento
+docker run --rm hello-world
+```
+
+### 6. Implementar o Cookest
+
+Siga o [Guia de Auto-Alojamento](./self-hosting) principal a partir do **Passo 1 — Criar a estrutura de diretórias**.
+
+---
+
+## Configuração de IP Estático
+
+Para garantir um endereço estável na sua rede local, defina um IP estático na criação do contentor:
+
+```bash
+# Exemplo de IP estático (ajuste a subrede/gateway à sua rede)
+pct create $CTID $TEMPLATE \
+  ... \
+  --net0 name=eth0,bridge=vmbr0,firewall=1,ip=192.168.1.50/24,gw=192.168.1.1
+```
+
+Ou atualize um contentor já existente:
+
+```bash
+pct set $CTID --net0 name=eth0,bridge=vmbr0,ip=192.168.1.50/24,gw=192.168.1.1
+pct reboot $CTID
+```
+
+---
+
+## Ollama num LXC Separado
+
+No nível **Padrão**, recomenda-se correr o Ollama no seu próprio contentor para o manter isolado e poder reiniciá-lo de forma independente:
+
+```bash
+# Criar um LXC dedicado para o Ollama (privilegiado para melhor desempenho)
+OLLAMA_CTID=201
+
+pct create $OLLAMA_CTID $TEMPLATE \
+  --hostname ollama \
+  --cores 8 \
+  --memory 24576 \
+  --swap 4096 \
+  --rootfs local-lvm:60 \
+  --net0 name=eth0,bridge=vmbr0,ip=192.168.1.51/24,gw=192.168.1.1 \
+  --unprivileged 0 \
+  --features nesting=1 \
+  --start 1
+
+pct enter $OLLAMA_CTID
+# No interior: corra deploy/setup-ollama.sh
+```
+
+Depois, configure o Cookest para comunicar com este contentor:
+
+```ini
+# No ficheiro .env no LXC do Cookest
+OLLAMA_URL=http://192.168.1.51:11434
+```
+
+---
+
+## Regras de Firewall no Proxmox
+
+Se utilizar a firewall do Proxmox, adicione estas regras de entrada para o contentor (`Datacenter → <Node> → <CT> → Firewall`):
+
+| Direção | Protocolo | Porta | Origem | Descrição |
+|-----------|----------|------|--------|-------------|
+| IN | TCP | 8080 | Rede local | App API |
+| IN | TCP | 3000 | Rede local | Painel de administração |
+| IN | TCP | 8081 | Interna CT | Food API (opcional externo) |
+| IN | TCP | 22 | IP do admin | Acesso SSH |
+
+O proxy inverso Nginx/Caddy tratará depois de encaminhar o tráfego externo para estas portas.
+
+---
+
+## Snapshots e Cópias de Segurança (Backup)
+
+Utilize as ferramentas nativas do Proxmox para proteger o seu contentor:
+
+```bash
+# Snapshot em tempo real (sem paragem de serviço — requer ZFS ou LVM-thin)
+pct snapshot $CTID snap-before-update --description "pre-update $(date +%F)"
+
+# Restaurar estado (Rollback)
+pct rollsnapshot $CTID snap-before-update
+```
+
+Para cópias de segurança ao nível da base de dados, consulte a secção [Cópias de Segurança e Restauro](./self-hosting#cópias-de-segurança-e-restauro) no guia principal.
+
+---
+
+## Atualizar o Sistema Operativo do LXC
+
+```bash
+# No interior do contentor
+apt update && apt full-upgrade -y
+
+# Atualizações de kernel exigem reiniciar o contentor a partir do Proxmox:
+# No anfitrião PVE:
+pct reboot $CTID
+```
+
+---
+
+## Resolução de Problemas com Docker em LXC
+
+**`Cannot connect to the Docker daemon`** após iniciar:
+
+```bash
+systemctl status docker
+# Se estiver parado:
+systemctl start docker
+systemctl enable docker
+```
+
+**`overlay: opaque flag on upper: invalid argument`** (erro no driver overlay2):
+
+Acontece quando o kernel do anfitrião não expõe as opções cgroups corretas. Verifique se o ficheiro conf do LXC tem as três linhas indicadas no passo 3 e reinicie:
+
+```bash
+# No anfitrião PVE
+grep "apparmor\|cgroup\|cap.drop" /etc/pve/lxc/${CTID}.conf
+pct stop $CTID && pct start $CTID
+```
+
+**Falha ao obter imagens do Docker (erro de DNS):**
+
+```bash
+# No interior do LXC
+cat /etc/resolv.conf
+# Se estiver vazio, adicione o seu servidor DNS:
+echo "nameserver 1.1.1.1" >> /etc/resolv.conf
+```
