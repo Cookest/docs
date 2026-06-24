@@ -1,150 +1,132 @@
 import type { DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
-import { BookOpen, Cpu, Server, Smartphone, Wrench, RefreshCw, Layers, Library, Bot, HelpCircle } from 'lucide-react';
+import { BookOpen, Cpu, Wrench } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/language-switcher';
-import { type Locale, defaultLocale, localePrefix, t } from '@/lib/i18n';
-import { SidebarTabsDropdown } from 'fumadocs-ui/components/sidebar/tabs/dropdown';
+import { type Locale, defaultLocale, localePrefix } from '@/lib/i18n';
+import * as PageTree from 'fumadocs-core/page-tree';
+
+function getFolderSegment(node: PageTree.Folder): string {
+  let url = node.index?.url;
+  if (!url) {
+    const findFirstPageUrl = (nodes: PageTree.Node[]): string | undefined => {
+      for (const n of nodes) {
+        if (n.type === 'page') return n.url;
+        if (n.type === 'folder') {
+          const childUrl = findFirstPageUrl(n.children);
+          if (childUrl) return childUrl;
+        }
+      }
+      return undefined;
+    };
+    url = findFirstPageUrl(node.children);
+  }
+  
+  if (!url) return '';
+  const segments = url.split('/').filter(Boolean);
+  const ignored = ['docs', 'pt', 'es', 'fr', 'de'];
+  const folderSegments = segments.filter(seg => !ignored.includes(seg));
+  return folderSegments[0] || '';
+}
+
+export function groupPageTree(tree: PageTree.Root, locale: Locale = defaultLocale): PageTree.Root {
+  const children = tree.children;
+  
+  const introNodes: PageTree.Node[] = [];
+  const devNodes: PageTree.Node[] = [];
+  const hostNodes: PageTree.Node[] = [];
+  
+  let introIndexPage: PageTree.Item | undefined;
+  
+  const introFolders = ['user-guide', 'contributing'];
+  const devFolders = ['architecture', 'backend', 'mobile', 'ui-components', 'etl', 'cucl', 'ai'];
+  const hostFolders = ['self-hosting'];
+  
+  for (const node of children) {
+    if (node.type === 'page') {
+      introNodes.push(node);
+      const isRootDocsPage = node.url === `/docs` || node.url === `/docs/pt` || node.url === `/docs/de` || node.url === `/docs/es` || node.url === `/docs/fr`;
+      if (isRootDocsPage) {
+        introIndexPage = node;
+      }
+    } else if (node.type === 'folder') {
+      const segment = getFolderSegment(node);
+      node.root = false; // Disable individual folder level root tab
+      
+      if (introFolders.includes(segment)) {
+        introNodes.push(node);
+      } else if (devFolders.includes(segment)) {
+        devNodes.push(node);
+      } else if (hostFolders.includes(segment)) {
+        hostNodes.push(node);
+      } else {
+        introNodes.push(node);
+      }
+    } else {
+      introNodes.push(node);
+    }
+  }
+  
+  if (!introIndexPage) {
+    introIndexPage = introNodes.find(n => n.type === 'page') as PageTree.Item | undefined;
+  }
+  
+  const virtualIntroFolder = {
+    type: 'folder',
+    name: locale === 'pt' ? 'Introdução / Quickstart' : 'Introduction & Guides',
+    root: true,
+    index: introIndexPage,
+    children: introNodes.filter(n => n !== introIndexPage),
+    icon: <BookOpen size={16} />,
+    description: locale === 'pt' ? 'Aprenda sobre o Cookest e como usá-lo' : 'Learn about Cookest and how to use it',
+  } as unknown as PageTree.Folder;
+  
+  const selfHostingFolderNode = hostNodes.find(n => n.type === 'folder') as PageTree.Folder | undefined;
+  const virtualHostFolder = {
+    type: 'folder',
+    name: locale === 'pt' ? 'Auto-Alojamento' : 'Self-Hosting',
+    root: true,
+    index: selfHostingFolderNode?.index,
+    children: selfHostingFolderNode ? selfHostingFolderNode.children : hostNodes,
+    icon: <Wrench size={16} />,
+    description: locale === 'pt' ? 'Aloje o Cookest no seu próprio servidor' : 'Deploy Cookest on your own server',
+  } as unknown as PageTree.Folder;
+  
+  const devFolderNode = devNodes.find(n => n.type === 'folder') as PageTree.Folder | undefined;
+  const virtualDevFolder = {
+    type: 'folder',
+    name: locale === 'pt' ? 'Arquitetura e Código' : 'Architecture & Code',
+    root: true,
+    index: devFolderNode?.index,
+    children: devNodes,
+    icon: <Cpu size={16} />,
+    description: locale === 'pt' ? 'Design do sistema e referência do código' : 'System design and codebase reference',
+  } as unknown as PageTree.Folder;
+  
+  // Only include folders that actually have children or index
+  const finalChildren: PageTree.Node[] = [];
+  
+  if (virtualIntroFolder.children.length > 0 || virtualIntroFolder.index) {
+    finalChildren.push(virtualIntroFolder);
+  }
+  if (virtualDevFolder.children.length > 0) {
+    finalChildren.push(virtualDevFolder);
+  }
+  if (virtualHostFolder.children.length > 0) {
+    finalChildren.push(virtualHostFolder);
+  }
+  
+  return {
+    name: tree.name,
+    children: finalChildren,
+  };
+}
 
 export function baseOptions(locale: Locale = defaultLocale): Omit<DocsLayoutProps, 'tree'> {
-  const prefix = localePrefix(locale);
-  
-  const toggleOptions = locale === 'pt' ? [
-    {
-      title: 'Guia do Utilizador',
-      description: 'Como usar o Cookest como utilizador final',
-      url: `/docs/pt/user-guide/overview`,
-      icon: <BookOpen size={16} />,
-    },
-    {
-      title: 'Arquitetura do Sistema',
-      description: 'Tecnologias e relações entre componentes',
-      url: `/docs/pt/architecture/overview`,
-      icon: <Cpu size={16} />,
-    },
-    {
-      title: 'API do Backend',
-      description: 'Endpoints em Rust Actix-Web e BD',
-      url: `/docs/pt/backend/getting-started`,
-      icon: <Server size={16} />,
-    },
-    {
-      title: 'Aplicação Móvel',
-      description: 'Cliente móvel em Flutter',
-      url: `/docs/pt/mobile/overview`,
-      icon: <Smartphone size={16} />,
-    },
-    {
-      title: 'Auto-Alojamento',
-      description: 'Implemente o Cookest no seu próprio servidor',
-      url: `/docs/pt/self-hosting`,
-      icon: <Wrench size={16} />,
-    },
-    {
-      title: 'Pipeline ETL',
-      description: 'Scraper de promoções em Python',
-      url: `/docs/pt/etl/overview`,
-      icon: <RefreshCw size={16} />,
-    },
-    {
-      title: 'Biblioteca CUCL',
-      description: 'Componentes partilhados React + Tailwind 4',
-      url: `/docs/pt/cucl/overview`,
-      icon: <Layers size={16} />,
-    },
-    {
-      title: 'Componentes UI',
-      description: 'Estilos partilhados Flutter e React',
-      url: `/docs/ui-components/overview`,
-      icon: <Library size={16} />,
-    },
-    {
-      title: 'IA e Automação',
-      description: 'LLMs locais, servidor MCP e agentes',
-      url: `/docs/pt/ai/overview`,
-      icon: <Bot size={16} />,
-    },
-    {
-      title: 'Contribuição',
-      description: 'Regras de documentação e tradução',
-      url: `/docs/pt/contributing/guide`,
-      icon: <HelpCircle size={16} />,
-    },
-  ] : [
-    {
-      title: 'User Guide',
-      description: 'How to use Cookest as an end-user',
-      url: `/docs${prefix}/user-guide/overview`,
-      icon: <BookOpen size={16} />,
-    },
-    {
-      title: 'System Architecture',
-      description: 'Tech stack and system relationships',
-      url: `/docs${prefix}/architecture/overview`,
-      icon: <Cpu size={16} />,
-    },
-    {
-      title: 'Backend API',
-      description: 'Rust Actix-Web API & DB schemas',
-      url: `/docs${prefix}/backend/getting-started`,
-      icon: <Server size={16} />,
-    },
-    {
-      title: 'Mobile App',
-      description: 'Flutter mobile application client',
-      url: `/docs${prefix}/mobile/overview`,
-      icon: <Smartphone size={16} />,
-    },
-    {
-      title: 'Self-Hosting',
-      description: 'Deploy Cookest on your own server',
-      url: `/docs${prefix}/self-hosting`,
-      icon: <Wrench size={16} />,
-    },
-    {
-      title: 'ETL Pipeline',
-      description: 'Supermarket promotions scraper',
-      url: `/docs${prefix}/etl/overview`,
-      icon: <RefreshCw size={16} />,
-    },
-    {
-      title: 'CUCL Component Library',
-      description: 'Shared React + Tailwind 4 components',
-      url: `/docs${prefix}/cucl/overview`,
-      icon: <Layers size={16} />,
-    },
-    {
-      title: 'UI Components',
-      description: 'Shared Flutter & React styles',
-      url: `/docs/ui-components/overview`,
-      icon: <Library size={16} />,
-    },
-    {
-      title: 'AI & Automation',
-      description: 'Local LLMs, MCP server, and agents',
-      url: `/docs${prefix}/ai/overview`,
-      icon: <Bot size={16} />,
-    },
-    {
-      title: 'Contributing',
-      description: 'Documentation guidelines and i18n',
-      url: `/docs${prefix}/contributing/guide`,
-      icon: <HelpCircle size={16} />,
-    },
-  ];
-
   return {
     nav: {
       title: (
         <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: '#1C3A2A', fontSize: '1.1rem' }}>
           Cookest
         </span>
-      ),
-    },
-    tabs: false,
-    sidebar: {
-      banner: (
-        <SidebarTabsDropdown
-          options={toggleOptions}
-        />
       ),
     },
     links: [
