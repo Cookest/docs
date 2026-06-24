@@ -1,4 +1,4 @@
 {
   "title": "Cookest Docs",
-  "pages": ["index", "roadmap", "user-guide", "architecture", "backend", "mobile", "etl", "cucl", "contributing", "self-hosting", "self-hosting-proxmox-lxc", "self-hosting-cli", "admin-panel"]
+  "pages": ["index", "user-guide", "architecture", "backend", "mobile", "etl", "cucl", "contributing", "self-hosting", "admin-panel"]
 }
