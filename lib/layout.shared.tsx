@@ -6,7 +6,7 @@ export function baseOptions(locale: Locale = defaultLocale): BaseLayoutProps {
   return {
     nav: {
       title: (
-        <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: '#1C3A2A', fontSize: '1.1rem' }}>
+        <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: '#FFFFFF', fontSize: '1.4rem' }}>
           Cookest
         </span>
       ),
