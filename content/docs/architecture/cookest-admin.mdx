@@ -1,0 +1,67 @@
+---
+title: Admin Dashboard (cookest-admin)
+description: Detailed setup and development guide for the Next.js Cookest Admin Dashboard.
+---
+
+The `cookest-admin` application is a Next.js admin dashboard that allows system operators and administrators to manage users, inspect server health, analyze app usage/subscriptions, and seed the food and recipe databases.
+
+---
+
+## Technology Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Styling**: TailwindCSS v4.0
+- **Tables & Components**: Headless UI + Custom components
+- **Authentication**: JWT token-based session persistence in HTTP cookies.
+
+---
+
+## Features
+
+1. **Dashboard Analytics**: Real-time charts of user registrations, active plans (Stripe), and meal plans created.
+2. **User Management**: Table with full CRUD operations, pagination, search, status toggles, and direct subscription adjustments.
+3. **Database Seeding Controls**: UI trigger to start ingestion jobs, importing recipes from external CSV/JSON datasets.
+4. **API Settings**: Configurable endpoints to communicate with both `app-api` and `food-api`.
+
+---
+
+## Directory Structure
+
+```
+cookest-admin/
+  ├── app/                # App Router pages (auth, dashboard, users, logs)
+  │    ├── (dashboard)/   # Main dashboard layout & analytics
+  │    ├── auth/          # Login and session setup
+  │    └── users/         # User management tables
+  ├── components/         # Dashboard widgets, stats charts, modals
+  ├── lib/                # API fetch helpers and JWT decoders
+  └── package.json
+```
+
+---
+
+## Local Development & Setup
+
+### Environment Variables
+
+Create a `.env.local` file in the root of `cookest-admin/`:
+
+```properties
+# URL accessed by the browser for client-side API requests
+NEXT_PUBLIC_APP_API_URL=http://localhost:8080
+
+# URL accessed by the NextJS server for server-side fetches (ssr)
+APP_API_INTERNAL_URL=http://localhost:8080
+```
+
+### Installation Steps
+
+1. Install dependencies:
+   ```bash
+   bun install
+   ```
+2. Start the local development server:
+   ```bash
+   bun run dev
+   ```
+3. Open `http://localhost:3002` in your browser.

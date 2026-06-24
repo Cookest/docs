@@ -1,0 +1,67 @@
+---
+title: Página Inicial (cookest-web)
+description: Explore a arquitetura da página inicial, a divisão de componentes, as animações com Framer Motion e o processo de configuração.
+---
+
+O componente `cookest-web` é a página inicial pública e o site de marketing da plataforma Cookest. Ele funciona como o funil de aquisição de novos utilizadores, detalhando as funcionalidades da aplicação, os planos de subscrição (Gratuito, Pro, Familiar) e fornecendo links diretos para registo ou para descarregar a aplicação móvel.
+
+---
+
+## Stack Tecnológica
+
+A página inicial foi desenhada focando na velocidade, aspeto visual moderno e animações fluídas:
+
+- **Framework**: Next.js 16 (App Router, Turbopack)
+- **Estilização**: TailwindCSS v4.0 (para alta performance de CSS)
+- **Animações**: Framer Motion (para transições suaves ao fazer scroll e revelações de elementos)
+- **Ícones**: Lucide React
+- **Integração de Pagamentos**: Stripe SDK (redirecionamentos para a finalização de compra)
+
+---
+
+## Principais Funcionalidades
+
+1. **Apresentação de Recursos**: Grelha interativa sobre planeamento de refeições, gestão da despensa e sincronização de listas de compras.
+2. **Preçários Dinâmicos**: Botões de ação direta para iniciar sessões de checkout do Stripe geridas pela App API.
+3. **Design Responsivo**: Adaptado a todos os ecrãs usando os breakpoints nativos do Tailwind.
+4. **Animações Dinâmicas**: Efeitos de fade-in e transições suaves ao deslizar a página.
+
+---
+
+## Estrutura de Pastas
+
+```
+cookest-web/
+  ├── app/                # Next.js App Router (páginas & layouts)
+  │    ├── layout.tsx     # Layout global (fontes, provedores)
+  │    ├── page.tsx       # Ponto de entrada da página
+  │    └── pricing/       # Detalhes dos planos e preçários
+  ├── components/         # Componentes reutilizáveis (Hero, Navbar, PricingCard)
+  ├── public/             # Ficheiros estáticos e imagens
+  └── package.json
+```
+
+---
+
+## Configuração e Desenvolvimento Local
+
+### Variáveis de Ambiente
+
+Crie um ficheiro `.env.local` na raiz da pasta `cookest-web/`:
+
+```properties
+# URL da App API para autenticação e sessões Stripe
+NEXT_PUBLIC_APP_API_URL=http://localhost:8080
+```
+
+### Passos de Instalação
+
+1. Instale as dependências:
+   ```bash
+   bun install
+   ```
+2. Inicie o servidor de desenvolvimento local:
+   ```bash
+   bun run dev
+   ```
+3. Abra `http://localhost:3001` no seu navegador.

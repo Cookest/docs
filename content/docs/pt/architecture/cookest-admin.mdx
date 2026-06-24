@@ -1,0 +1,67 @@
+---
+title: Painel de Administração (cookest-admin)
+description: Guia de desenvolvimento e configuração local para o Painel Administrativo em Next.js.
+---
+
+A aplicação `cookest-admin` é um painel de administração desenvolvido em Next.js que permite aos operadores e administradores do sistema gerir utilizadores, inspecionar a integridade das APIs, analisar subscrições do Stripe e alimentar a base de dados de receitas.
+
+---
+
+## Stack Tecnológica
+
+- **Framework**: Next.js 16 (App Router)
+- **Estilização**: TailwindCSS v4.0
+- **Tabelas e UI**: Headless UI e componentes customizados
+- **Autenticação**: Sessão baseada em tokens JWT persistidos através de cookies HTTP.
+
+---
+
+## Funcionalidades
+
+1. **Gráficos de Estatísticas**: Monitorização em tempo real de novos registos de utilizadores, subscrições ativas e planos criados.
+2. **Gestão de Utilizadores**: Tabela robusta com operações de CRUD, paginação, pesquisa por texto e ativação/desativação de contas.
+3. **Controlo de Importações**: Interface para executar e monitorizar scripts de ETL, importando receitas de datasets JSON/CSV externos.
+4. **Configuração de Endpoints**: Gestão flexível de comunicação com a `app-api` e a `food-api`.
+
+---
+
+## Estrutura de Pastas
+
+```
+cookest-admin/
+  ├── app/                # Rotas do Next.js (auth, dashboard, users)
+  │    ├── (dashboard)/   # Layout principal do painel administrativo
+  │    ├── auth/          # Ecrãs de início de sessão
+  │    └── users/         # Tabela de gestão de utilizadores
+  ├── components/         # Modais, tabelas e gráficos
+  ├── lib/                # Funções utilitárias e chamadas de API
+  └── package.json
+```
+
+---
+
+## Configuração e Desenvolvimento Local
+
+### Variáveis de Ambiente
+
+Crie um ficheiro `.env.local` na raiz de `cookest-admin/`:
+
+```properties
+# URL acedido pelo browser para pedidos do lado do cliente
+NEXT_PUBLIC_APP_API_URL=http://localhost:8080
+
+# URL usado pelo servidor Next.js para pedidos do lado do servidor (SSR)
+APP_API_INTERNAL_URL=http://localhost:8080
+```
+
+### Passos de Instalação
+
+1. Instale as dependências:
+   ```bash
+   bun install
+   ```
+2. Inicie o servidor local:
+   ```bash
+   bun run dev
+   ```
+3. Abra `http://localhost:3002` no seu navegador.

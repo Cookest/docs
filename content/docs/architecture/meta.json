@@ -1,5 +1,5 @@
 {
   "title": "Architecture",
   "root": true,
-  "pages": ["overview", "repositories"]
+  "pages": ["overview", "repositories", "cookest-web", "cookest-admin"]
 }

@@ -1,0 +1,61 @@
+---
+title: Self-Hosting Anleitung
+description: Installieren Sie Cookest auf Ihrem eigenen Server mittels Docker Compose und lokalen KI-Tools.
+---
+
+Cookest ist so konzipiert, dass es vollständig selbst gehostet werden kann. Durch den Betrieb auf Ihrer eigenen Hardware behalten Sie die volle Kontrolle über Ihre Daten und schalten alle Pro-Funktionen frei.
+
+---
+
+## Voraussetzungen
+
+- Linux (Ubuntu 22.04+ empfohlen) oder macOS.
+- Docker Engine 24.0+ und Docker Compose v2.20+.
+- `openssl` auf Ihrem System installiert.
+
+---
+
+## Bereitstellung mit Docker Compose
+
+### 1. Verzeichnisstruktur erstellen
+
+```bash
+mkdir -p cookest/{app-db,food-db,pdfs,imports,ollama}
+cd cookest
+```
+
+### 2. Geheimnisse generieren
+
+Erzeugen Sie einen sicheren JWT-Schlüssel mit dem folgenden Befehl:
+
+```bash
+openssl rand -hex 32
+```
+
+### 3. `.env`-Datei anlegen
+
+Erstellen Sie eine `.env`-Datei im Hauptverzeichnis des Ordners `cookest/`:
+
+```ini
+SELF_HOSTED=true
+JWT_SECRET=<generierten_schluessel_hier_einfügen>
+APP_API_PORT=8080
+FOOD_API_PORT=8081
+ADMIN_PORT=3000
+```
+
+### 4. Container starten
+
+Erstellen Sie Ihre `docker-compose.yml` und führen Sie den Startbefehl aus:
+
+```bash
+docker compose up -d
+```
+
+---
+
+## Admin-Dashboard
+
+Nach erfolgreichem Start ist das Cookest Admin-Panel über Port `3000` erreichbar:
+- **URL**: `http://<server-ip>:3000`
+- Ermöglicht die Verwaltung von Benutzern, die Überwachung von API-Statistiken und den Import externer CSV/JSON-Rezeptdaten.

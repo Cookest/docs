@@ -1,0 +1,61 @@
+---
+title: Guía de Auto-Hospedaje
+description: Despliegue y ejecute Cookest completamente en su propio servidor utilizando Docker Compose, CLI y herramientas locales de IA.
+---
+
+Cookest está diseñado para ser totalmente auto-hospedable. Al ejecutarlo en su propio servidor, mantiene la propiedad completa de sus datos y desbloquea todas las funciones Pro.
+
+---
+
+## Requisitos Previos
+
+- Linux (Ubuntu 22.04+ recomendado) o macOS.
+- Docker Engine 24.0+ y Docker Compose v2.20+.
+- `openssl` instalado en su sistema.
+
+---
+
+## Despliegue con Docker Compose
+
+### 1. Estructura de Directorios
+
+```bash
+mkdir -p cookest/{app-db,food-db,pdfs,imports,ollama}
+cd cookest
+```
+
+### 2. Generación de Claves Secretas
+
+Ejecute el siguiente comando para generar una clave segura de firma JWT:
+
+```bash
+openssl rand -hex 32
+```
+
+### 3. Fichero `.env`
+
+Cree un archivo `.env` en la raíz de su carpeta `cookest/`:
+
+```ini
+SELF_HOSTED=true
+JWT_SECRET=<pegar_aqui_la_clave_de_32_bytes>
+APP_API_PORT=8080
+FOOD_API_PORT=8081
+ADMIN_PORT=3000
+```
+
+### 4. Desplegar los Contenedores
+
+Cree un archivo `docker-compose.yml` y ejecute:
+
+```bash
+docker compose up -d
+```
+
+---
+
+## Panel de Administración
+
+Una vez completado el despliegue, el panel de administración de Cookest estará disponible en el puerto `3000`:
+- **URL**: `http://<ip-de-tu-servidor>:3000`
+- Permite gestionar usuarios, revisar estadísticas de planes y activar la importación automática de recetas.

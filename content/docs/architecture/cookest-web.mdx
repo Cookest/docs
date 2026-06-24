@@ -1,0 +1,70 @@
+---
+title: Landing Page (cookest-web)
+description: Explore the landing page architecture, component breakdown, Framer Motion animations, and setup steps.
+---
+
+The `cookest-web` component is the landing page and public marketing site of the Cookest platform. It acts as the acquisition funnel for new users, detailing app features, pricing plans (Free, Pro, Family), and providing direct links to register or download the mobile app.
+
+---
+
+## Technology Stack
+
+The landing page is designed for speed, visual appeal, and modern animations:
+
+- **Framework**: Next.js 16 (App Router, Turbopack)
+- **Styling**: TailwindCSS v4.0 (for modern utility-first CSS utility and performance)
+- **Animations**: Framer Motion (for smooth scroll-linked animations, card reveals, and transitions)
+- **Icons**: Lucide React
+- **Payments Integration**: Stripe SDK (redirect buttons for Pro/Family checkout)
+
+---
+
+## Key Features
+
+1. **Feature Showcase**: Interactive grid explaining meal planning, pantry management, and grocery list synchronization.
+2. **Dynamic Pricing Page**: Features direct links to subscribe to Stripe checkout sessions handled by the App API.
+3. **Responsive Design**: Mobile-first layouts using custom Tailwind breakpoints.
+4. **Framer Motion Reveals**: Smooth scroll triggers that fade and slide elements into view as the user scrolls.
+
+---
+
+## Directory Structure
+
+```
+cookest-web/
+  ├── app/                # Next.js App Router (pages & layouts)
+  │    ├── layout.tsx     # Global layout (providers, fonts)
+  │    ├── page.tsx       # Landing page entry point
+  │    └── pricing/       # Pricing tier details
+  ├── components/         # Reusable UI elements (Hero, Navbar, PricingCard)
+  │    ├── hero.tsx
+  │    ├── navbar.tsx
+  │    └── ui/            # Basic layout primitives (buttons, cards)
+  ├── public/             # Static assets (images, logos)
+  └── package.json
+```
+
+---
+
+## Local Development & Setup
+
+### Environment Variables
+
+Create a `.env.local` file in the root of `cookest-web/`:
+
+```properties
+# URL of the App API for user authentication and Stripe sessions
+NEXT_PUBLIC_APP_API_URL=http://localhost:8080
+```
+
+### Installation Steps
+
+1. Install dependencies:
+   ```bash
+   bun install
+   ```
+2. Start the local development server:
+   ```bash
+   bun run dev
+   ```
+3. Open `http://localhost:3001` in your browser.
