@@ -6,7 +6,8 @@ export function baseOptions(locale: Locale = defaultLocale): BaseLayoutProps {
   return {
     nav: {
       title: (
-        <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: '#FFFFFF', fontSize: '1.4rem' }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: "'Playfair Display', serif", fontWeight: 700, color: '#FFFFFF', fontSize: '1.4rem' }}>
+          <img src="/transparent-icon.svg" alt="Cookest Logo" style={{ width: '28px', height: '28px' }} />
           Cookest
         </span>
       ),
