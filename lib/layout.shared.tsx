@@ -74,7 +74,7 @@ export function groupPageTree(tree: PageTree.Root, locale: Locale = defaultLocal
     name: locale === 'pt' ? 'Introdução / Quickstart' : 'Introduction & Guides',
     root: true,
     index: introIndexPage,
-    children: introNodes.filter(n => n !== introIndexPage),
+    children: introIndexPage ? [introIndexPage, ...introNodes.filter(n => n !== introIndexPage)] : introNodes,
     icon: <BookOpen size={16} />,
     description: locale === 'pt' ? 'Aprenda sobre o Cookest e como usá-lo' : 'Learn about Cookest and how to use it',
   } as unknown as PageTree.Folder;
