@@ -1,4 +1,4 @@
 {
   "title": "Auto-Alojamento",
-  "pages": ["index", "cli", "proxmox-lxc"]
+  "pages": ["index", "cli", "proxmox-lxc", "admin-panel"]
 }
