@@ -1,5 +1,4 @@
 {
   "title": "Mobile App",
-  "root": true,
   "pages": ["overview", "architecture", "screens", "theme", "state-management", "api-integration"]
 }

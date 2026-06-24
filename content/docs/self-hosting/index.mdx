@@ -17,28 +17,7 @@ Looking for Proxmox VE / LXC instructions? See the dedicated **[Proxmox LXC Guid
 
 ---
 
-## Architecture Overview
-
-```
-┌──────────────────────────────────────────────────────────┐
-│                      Your Network                        │
-│                                                          │
-│   Flutter App / Web  ──► Nginx / Caddy (reverse proxy)  │
-│   Cookest Admin      ──►  :80 / :443                    │
-│                              │                           │
-│                    ┌─────────┴─────────┐                 │
-│                    │                   │                 │
-│               app-api :8080    admin :3000               │
-│                    │                                     │
-│               food-api :8081                             │
-│                    │                                     │
-│         ┌──────────┴──────────┐                          │
-│         │                     │                          │
-│  app-db (pgvector:16)  food-db (postgres:16)             │
-│         │                                                │
-│    Ollama :11434 (optional, can be on host)              │
-└──────────────────────────────────────────────────────────┘
-```
+## Services
 
 | Service | Port | Purpose |
 |---------|------|---------|
