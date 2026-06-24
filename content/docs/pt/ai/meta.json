@@ -1,5 +1,5 @@
 {
-  "title": "AI & Automation",
+  "title": "IA e Automação",
   "root": true,
   "pages": ["quick-setup", "overview", "skills", "instructions", "mcp-server", "auto-docs"]
 }

@@ -1,5 +1,6 @@
 {
   "title": "Contributing",
+  "root": true,
   "pages": [
     "guide",
     "best-practices",

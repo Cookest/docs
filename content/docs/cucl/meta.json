@@ -1,4 +1,5 @@
 {
   "title": "UI Components",
+  "root": true,
   "pages": ["overview", "design-tokens", "components", "best-practices", "contributing"]
 }

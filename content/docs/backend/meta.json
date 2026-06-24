@@ -1,4 +1,5 @@
 {
   "title": "Backend APIs",
+  "root": true,
   "pages": ["getting-started", "environment", "authentication", "food-api", "endpoints", "database", "pdf-pipeline"]
 }

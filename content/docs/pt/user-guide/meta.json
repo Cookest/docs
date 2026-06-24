@@ -1,4 +1,5 @@
 {
   "title": "Guia do Utilizador",
+  "root": true,
   "pages": ["overview", "registration", "meal-planning", "pantry", "shopping", "cooking-mode"]
 }

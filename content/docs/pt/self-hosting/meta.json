@@ -1,4 +1,5 @@
 {
   "title": "Auto-Alojamento",
+  "root": true,
   "pages": ["index", "cli", "proxmox-lxc", "admin-panel"]
 }

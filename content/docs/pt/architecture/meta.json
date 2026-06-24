@@ -1,4 +1,5 @@
 {
   "title": "Arquitetura",
+  "root": true,
   "pages": ["overview"]
 }
