@@ -1,0 +1,93 @@
+---
+title: Seeding the Database
+description: How the ingredient catalog is populated and how to bulk-import ingredient lists
+---
+
+# Seeding the Database
+
+Ingredients are a **preset catalog** owned by the **food-api** service (the `cookest_food`
+database). It is the single source of truth: the pantry, recipes, and the AI can only *reference*
+catalog ingredients — they never create free-text entries. The app-api database keeps a
+same-id mirror of any ingredient it touches.
+
+This page covers the ways to populate that catalog.
+
+## 1. Base seed (automatic)
+
+On startup, if the `ingredients` table is **empty**, food-api loads a small curated set of common
+ingredients (~140) bundled in the binary at `crates/food-api/seed/ingredients.csv`. This gives a
+fresh install a usable catalog out of the box. It only runs when the table is empty, so it never
+overwrites an existing catalog.
+
+## 2. Import an ingredient list from a folder
+
+For larger or custom lists, drop CSV files into a folder the food-api process can read and import
+them from the admin dashboard.
+
+With Docker Compose the host folder **`cookest-backend/data/imports/`** is mounted into the
+container at **`/data/imports`**:
+
+```yaml
+# docker-compose.yml (food-api service)
+volumes:
+  - ./data/imports:/data/imports
+```
+
+### CSV format
+
+A header row is required. Columns (extra columns are ignored; numeric cells are optional):
+
+```csv
+name,category,calories,protein_g,carbs_g,fat_g
+Greek yogurt,dairy,59,10,3.6,0.4
+Quinoa,grain,120,4.4,21,1.9
+Kale,vegetable,49,4.3,9,0.9
+```
+
+Macros are **per 100 g**. Rows are **upserted by name**, so re-running an import updates existing
+ingredients instead of duplicating them. A ready-to-edit template lives at
+`cookest-backend/data/imports/example-ingredients.csv`.
+
+### From the admin dashboard
+
+1. Put your `.csv` files in `cookest-backend/data/imports/` on the host.
+2. Open the admin dashboard → **Ingredients** → **Import**.
+3. Keep the folder as `/data/imports` (or point it at another server folder), click **Scan**.
+4. Click **Import** next to the file. The result (rows imported) is shown and the list refreshes.
+
+### From the API
+
+The dashboard calls these admin endpoints (JWT + admin required):
+
+```http
+GET  /admin/ingredients/import/scan?folder=/data/imports
+POST /admin/ingredients/import/execute      { "folder": "/data/imports", "filename": "my-list.csv" }
+```
+
+## 3. Add ingredients individually
+
+Admin dashboard → **Ingredients** → **Add Ingredient** lets you create or edit a single ingredient
+(name, category, optional per-100g macros). Deleting an ingredient that is used by a recipe is
+blocked (returns `409`).
+
+## 4. Bulk import from Open Food Facts
+
+food-api also understands Open Food Facts exports for large catalogs with barcodes and nutrition.
+Place a tab-separated OFF file whose name contains `products` or `openfoodfacts` (e.g. the repo's
+`en.openfoodfacts.org.products.csv.gz`) in the import folder and import it from the admin
+**Database** page. Up to 100,000 rows are imported per run.
+
+## 5. Resetting the app-db mirror (development)
+
+The app database (`cookest_app`) mirrors catalog ingredients using the **same ids** as the master.
+If it still contains legacy free-text rows from before the preset-catalog change, those can collide
+with mirror inserts on the unique name constraint. To clear them in development:
+
+```bash
+psql "$APP_DATABASE_URL" -f cookest-backend/scripts/reset_app_ingredient_mirror.sql
+# e.g. APP_DATABASE_URL=postgresql://postgres:postgres@localhost:5433/cookest_app
+```
+
+This truncates the app-db `ingredients` table and its dependents (pantry, recipe links, shopping
+lists); they repopulate automatically from the master catalog as users reference ingredients. The
+master catalog in `cookest_food` is **not** affected.
